@@ -1,4 +1,4 @@
-# $${\color{lightblue}⭐DormBuddy}$$
+# $${\color{lightblue}DormBuddy}$$
 
 DormBuddy is a comprehensive, multi-functional platform designed to enhance the college dormitory experience by integrating peer-to-peer lending, task management, and expense-splitting functionalities. This project aims to simplify the daily financial and organizational tasks that students encounter, providing a seamless and user-friendly interface to manage dorm life efficiently.
 
