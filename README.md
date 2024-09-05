@@ -3,13 +3,13 @@
 DormBuddy is a comprehensive, multi-functional platform designed to enhance the college dormitory experience by integrating peer-to-peer lending, task management, and expense-splitting functionalities. This project aims to simplify the daily financial and organizational tasks that students encounter, providing a seamless and user-friendly interface to manage dorm life efficiently.
 
 ## 📑 Table of Contents
-- [Project Overview](#project-overview)
-- [Key Features](#key-features)
-- [Technologies Used](#technologies-used)
-- [Setup and Installation](#setup-and-installation)
-- [Usage](#usage)
-- [Contributing](#contributing)
-- [License](#license)
+- [Project Overview](#-project-overview)
+- [Key Features](#-key-features)
+- [Technologies Used](#-technologies-used)
+- [Setup and Installation](#-setup-and-installation)
+- [Usage](#-usage)
+- [Contributing](#-contributing)
+- [License](#-license)
 
 ## 📝 Project Overview
 DormBuddy is designed to simplify the lives of students living in dormitories by providing a centralized platform for financial and task management. The platform includes peer-to-peer lending, expense tracking, and task completion features, fostering a collaborative and stress-free environment for students.
