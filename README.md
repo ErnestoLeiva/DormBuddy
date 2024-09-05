@@ -9,6 +9,7 @@ DormBuddy is a comprehensive, multi-functional platform designed to enhance the 
 - [Setup and Installation](#%EF%B8%8F-setup-and-installation)
 - [Usage](#-usage)
 - [Contributing](#-contributing)
+- [Contributor Setup Guide](SETUP.md)
 - [License](#-license)
 
 ## 📝 Project Overview
