@@ -18,6 +18,7 @@ Before you begin, make sure you have the following installed on your machine:
 3. Navigate into the project folder:
    ```bash
    cd C:/path/to/projectFolder/DormBuddy
+[![How to clone repo in Visual Studio Code](https://img.youtube.com/vi/Qn-C4zrXCCQ.jpg)](https://www.youtube.com/watch?v=Qn-C4zrXCCQ)
 
 ## 🖥️ Step 2: Open the Project in VS Code
 1. Launch **Visual Studio Code** and open the cloned project folder. You can do this by selecting **File > Open Folder...** and then choosing the <code>DormBuddy</code> folder.
@@ -35,7 +36,6 @@ Before you begin, make sure you have the following installed on your machine:
 2. Create a new database for the project using your preferred method (MySQL Workbench, command line, etc.).
    ```sql
    CREATE DATABASE dormbuddy_db;
-
 3. Update the project’s database connection settings in the configuration file (e.g., <code>appsettings.json</code> or wherever the connection string is stored).
    ```json
    "ConnectionStrings": {
