@@ -39,7 +39,7 @@ $${\color{red}Instructions \space on \space how \space to \space use \space the 
 
 ## 🤝 Contributing
 - If you would like to contribute to DormBuddy, please fork the repository and create a pull request with your changes. For major changes, please open an issue first to discuss what you would like to improve.
-- If you are a collaborator, use these instructions to get started for the first time: [Contributor Setup Guide](SETUP.md) 
+- **If you are a collaborator**, use these instructions to get started for the first time: [Contributor Setup Guide](SETUP.md) 
 
 ## 📜 License
 This project is licensed under the **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)** License.
