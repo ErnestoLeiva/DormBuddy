@@ -33,7 +33,11 @@ DormBuddy is designed to simplify the lives of students living in dormitories by
 1. Clone the repository:
    ```bash
    git clone https://github.com/ErnestoLeiva/DormBuddy.git
-[![How to clone repo in Visual Studio Code](https://img.youtube.com/vi/Qn-C4zrXCCQ/0.jpg)](https://www.youtube.com/watch?v=Qn-C4zrXCCQ)
+<div align="center"><h3>🎥 Video showing how to clone repo</h3>
+  <a href="https://www.youtube.com/watch?v=Qn-C4zrXCCQ" target="_blank">
+    <img src="https://img.youtube.com/vi/Qn-C4zrXCCQ/0.jpg" alt="How to clone repo in Visual Studio Code" />
+  </a>
+</div>
 
 ## 🚀 Usage
 $${\color{red}Instructions \space on \space how \space to \space use \space the \space platform \space will \space go \space here. \space This \space section \space can \space include \space screenshots \space and \space descriptions \space of \space key \space functionalities.}$$
