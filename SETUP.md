@@ -23,8 +23,12 @@ Before you begin, make sure you have the following installed on your machine:
 1. Launch **Visual Studio Code** and open the cloned project folder. You can do this by selecting **File > Open Folder...** and then choosing the <code>DormBuddy</code> folder.
 2. Once the folder is open, VS Code will load all project files. You should now see the full project structure on the left sidebar.
 
-## 🎥 Video showing step 1 and 2
-<div align="center"> <a href="https://www.youtube.com/watch?v=Qn-C4zrXCCQ" target="_blank"> <img src="https://img.youtube.com/vi/Qn-C4zrXCCQ/0.jpg" alt="How to clone repo in Visual Studio Code" /> </a> </div>
+<div align="center">
+  <h3>🎥 <ins>Video showing step 1 and 2</ins></h3>
+  <a href="https://www.youtube.com/watch?v=Qn-C4zrXCCQ" target="_blank">
+    <img src="https://img.youtube.com/vi/Qn-C4zrXCCQ/0.jpg" alt="How to clone repo in Visual Studio Code" />
+  </a>
+</div>
 
 ## 🔧 Step 3: Install Extensions in VS Code
 1. Ensure you have the following VS Code extensions installed:
