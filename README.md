@@ -47,13 +47,12 @@ $${\color{red}Instructions \space on \space how \space to \space use \space the 
 - **If you are a collaborator**, use these instructions to get started for the first time: [Contributor Setup Guide](SETUP.md) 
 
 ## 📜 License
-This project is licensed under the **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)** License.
 
-### You are free to:
-- **Share**— copy and redistribute the material in any medium or format
-- **Adapt**— remix, transform, and build upon the material
+This project is currently **proprietary** and is not licensed for public use, modification, or distribution.
 
-### Under the following terms:
-- **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made.
-- **NonCommercial** — You may not use the material for commercial purposes.
-- **ShareAlike** — If you remix, transform, or build upon the material, you must distribute your contributions under the same license as the original.
+### You are **not** allowed to:
+- **Share** — You may not copy, distribute, or disclose any part of this project without explicit permission from the project owner.
+- **Modify** — You may not modify, merge, adapt, or create derivative works from the code without permission.
+
+### Future Licensing:
+- The project owner reserves the right to change the licensing terms in the future. For any inquiries regarding usage, please contact the project owner.
