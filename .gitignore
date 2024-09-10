@@ -1,0 +1,22 @@
+# Ignore Visual Studio Code settings
+.vscode/
+
+# Ignore build outputs and compiled binaries
+bin/
+obj/
+*.exe
+*.dll
+
+# Ignore user-specific files
+*.user
+*.suo
+
+# Ignore MSBuild specific files
+*.AssemblyInfo.cs
+*.csproj.FileListAbsolute.txt
+*.csproj.CoreCompileInputs.cache
+
+# Ignore logs and temporary files
+*.log
+*.tmp
+*.bak
