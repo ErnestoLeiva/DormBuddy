@@ -1,23 +1,22 @@
-# Ignore build outputs and auto-generated files
+# Ignore Visual Studio Code settings
+.vscode/
+
+# Ignore build outputs and compiled binaries
 bin/
 obj/
-.vscode/
-*.dll
 *.exe
-*.log
-*.tmp
+*.dll
 
-# Ignore user-specific settings
+# Ignore user-specific files
 *.user
-*.rsuser
 *.suo
 
 # Ignore MSBuild specific files
 *.AssemblyInfo.cs
 *.csproj.FileListAbsolute.txt
 *.csproj.CoreCompileInputs.cache
-project.nuget.cache
-*.nuget.dgspec.json
-*.nuget.g.props
-*.nuget.targets
-project.assets.json
+
+# Ignore logs and temporary files
+*.log
+*.tmp
+*.bak
