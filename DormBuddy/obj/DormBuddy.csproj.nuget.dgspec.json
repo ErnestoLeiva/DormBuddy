@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/Users/pam/Documents/GitHub/Untitled/DormBuddy/DormBuddy/DormBuddy.csproj": {}
+    "c:\\Users\\Scott\\Desktop\\DormBuddy\\DormBuddy\\DormBuddy\\DormBuddy.csproj": {}
   },
   "projects": {
-    "/Users/pam/Documents/GitHub/Untitled/DormBuddy/DormBuddy/DormBuddy.csproj": {
+    "c:\\Users\\Scott\\Desktop\\DormBuddy\\DormBuddy\\DormBuddy\\DormBuddy.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/pam/Documents/GitHub/Untitled/DormBuddy/DormBuddy/DormBuddy.csproj",
+        "projectUniqueName": "c:\\Users\\Scott\\Desktop\\DormBuddy\\DormBuddy\\DormBuddy\\DormBuddy.csproj",
         "projectName": "DormBuddy",
-        "projectPath": "/Users/pam/Documents/GitHub/Untitled/DormBuddy/DormBuddy/DormBuddy.csproj",
-        "packagesPath": "/Users/pam/.nuget/packages/",
-        "outputPath": "/Users/pam/Documents/GitHub/Untitled/DormBuddy/DormBuddy/obj/",
+        "projectPath": "c:\\Users\\Scott\\Desktop\\DormBuddy\\DormBuddy\\DormBuddy\\DormBuddy.csproj",
+        "packagesPath": "C:\\Users\\Scott\\.nuget\\packages\\",
+        "outputPath": "c:\\Users\\Scott\\Desktop\\DormBuddy\\DormBuddy\\DormBuddy\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/pam/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\Scott\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -42,6 +42,16 @@
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
+          "dependencies": {
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[8.0.8, )"
+            },
+            "Pomelo.EntityFrameworkCore.MySql": {
+              "target": "Package",
+              "version": "[8.0.2, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",
@@ -61,7 +71,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.401/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.401/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

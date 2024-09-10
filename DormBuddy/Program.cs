@@ -1,7 +1,14 @@
+using Microsoft.EntityFrameworkCore;
+using DormBuddy.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddDbContext<DBContext>(options => 
+options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"), 
+new MySqlServerVersion(new Version(8, 0, 2))));
 
 var app = builder.Build();
 
@@ -22,6 +29,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Test}/{action=Index}/{id?}");
 
 app.Run();
