@@ -6,11 +6,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-<<<<<<< HEAD
 builder.Services.AddDbContext<DBContext>(options => 
 options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"), 
 new MySqlServerVersion(new Version(8, 0, 2))));
-=======
 // Add session services
 builder.Services.AddSession(options =>
 {
@@ -18,7 +16,6 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;  // Make the session cookie HTTP-only for security
     options.Cookie.IsEssential = true;  // Ensure the session cookie is essential (GDPR compliance)
 });
->>>>>>> main
 
 var app = builder.Build();
 
@@ -42,6 +39,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Test}/{action=Index}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();

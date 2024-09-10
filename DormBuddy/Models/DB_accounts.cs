@@ -6,11 +6,11 @@ namespace DormBuddy.Models
     {
         [Key]
         public int user_id { get; set; }
-        public string email { get; set; }
-        public string username { get; set; }
-        public string password { get; set; }
-        public string firstname { get; set; }
-        public string lastname { get; set; }
-        public int balance { get; set; }
+        public required string email { get; set; }
+        public required string username { get; set; }
+        public required string password { get; set; }
+        public required string firstname { get; set; }
+        public required string lastname { get; set; }
+        public required int balance { get; set; }
     }
 }
