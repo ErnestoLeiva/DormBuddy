@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DormBuddy")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+524fce880562cb7a836abcd25b52b95f40f2a8a0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7845a6d0c9a6b1328fce528ff58b38b85f08667e")]
 [assembly: System.Reflection.AssemblyProductAttribute("DormBuddy")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DormBuddy")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
