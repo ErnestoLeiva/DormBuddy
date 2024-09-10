@@ -1,35 +1,23 @@
-# Ignore build results
+# Ignore build outputs and auto-generated files
 bin/
 obj/
+.vscode/
+*.dll
+*.exe
+*.log
+*.tmp
 
-# Ignore user-specific files
+# Ignore user-specific settings
 *.user
 *.rsuser
 *.suo
 
-# Ignore logs and temporary files
-*.log
-*.tmp
-
-# Ignore Visual Studio Code settings
-.vscode/
-
-# Ignore compiled binaries
-*.dll
-*.exe
-
-# Ignore MSBuild-specific files
+# Ignore MSBuild specific files
 *.AssemblyInfo.cs
 *.csproj.FileListAbsolute.txt
 *.csproj.CoreCompileInputs.cache
-
-# NuGet files
-*.nupkg
-project.assets.json
 project.nuget.cache
 *.nuget.dgspec.json
 *.nuget.g.props
 *.nuget.targets
-
-# Rider project files (if you're using JetBrains Rider)
-.idea/
+project.assets.json
