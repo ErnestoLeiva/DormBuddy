@@ -6,15 +6,21 @@ bin/
 obj/
 *.exe
 *.dll
+*.pdb
 
 # Ignore user-specific files
 *.user
+*.rsuser
 *.suo
 
 # Ignore MSBuild specific files
 *.AssemblyInfo.cs
 *.csproj.FileListAbsolute.txt
 *.csproj.CoreCompileInputs.cache
+*.nuget.dgspec.json
+*.nuget.g.props
+project.nuget.cache
+project.assets.json
 
 # Ignore logs and temporary files
 *.log
