@@ -19,6 +19,14 @@ public class AccountController : Controller
 
     public IActionResult Login()
     {
+
+        // Check if the user is logged in by checking the session
+        var username = HttpContext.Session.GetString("Username");
+        if (username != null)
+        {
+            return RedirectToAction("Dashboard", "Account");
+        }
+
         return View();
     }
 
@@ -45,6 +53,14 @@ public class AccountController : Controller
     }
 
     public IActionResult Signup() {
+
+        // Check if the user is logged in by checking the session
+        var username = HttpContext.Session.GetString("Username");
+        if (username != null)
+        {
+            return RedirectToAction("Dashboard", "Account");
+        }
+
         return View();
     }
 
@@ -125,6 +141,14 @@ public class AccountController : Controller
     }
 
     public IActionResult SignOutAccount() {
+
+        // Check if the user is logged in by checking the session
+        var username = HttpContext.Session.GetString("Username");
+        if (username == null)
+        {
+            return RedirectToAction("Dashboard", "Account");
+        }
+
         HttpContext.Session.Remove("Username");
         return RedirectToAction("HomeLogin", "Home");
     }
