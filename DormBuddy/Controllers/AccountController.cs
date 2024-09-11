@@ -40,9 +40,11 @@ public class AccountController : Controller
         }
         else
         {
-            // Failed login - return the view with an error message
-            ViewBag.ErrorMessage = "Invalid login credentials";
-            return View();
+            // Set the error message in TempData so it's available after redirect
+            TempData["ErrorMessage"] = "Invalid login credentials";
+
+            // Redirect back to the HomeLogin page in HomeController
+            return RedirectToAction("HomeLogin", "Home");
         }
         */
 
