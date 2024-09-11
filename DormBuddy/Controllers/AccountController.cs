@@ -86,4 +86,9 @@ public class AccountController : Controller
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
+
+    public IActionResult SignOutAccount() {
+        HttpContext.Session.Remove("Username");
+        return RedirectToAction("HomeLogin", "Home");
+    }
 }
