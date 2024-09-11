@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using DormBuddy.Models;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace DormBuddy.Controllers;
@@ -8,10 +9,12 @@ namespace DormBuddy.Controllers;
 public class AccountController : Controller
 {
     private readonly ILogger<AccountController> _logger;
+    private readonly DBContext _context;
 
-    public AccountController(ILogger<AccountController> logger)
+    public AccountController(ILogger<AccountController> logger, DBContext context)
     {
         _logger = logger;
+        _context = context;
     }
 
     public IActionResult Login()
@@ -22,8 +25,10 @@ public class AccountController : Controller
     #region LOGIN HANDLING
     // POST: /Account/Login -- (This handles a user clicking the "login" button on the login page)
     [HttpPost]
-    public IActionResult Login(string username, string password)
+    public async Task<IActionResult> Login(string username, string password)
     {
+
+        /*
         // temp hardcode checks before we implement any real authentication methods
         if (username == "admin" && password == "password")  // Dummy check
         {
@@ -39,6 +44,21 @@ public class AccountController : Controller
             ViewBag.ErrorMessage = "Invalid login credentials";
             return View();
         }
+        */
+
+        var acc = await _context.accounts.FirstOrDefaultAsync(u => u.username == username);
+
+        if (acc != null) {
+
+            if (password == acc.password) {
+                HttpContext.Session.SetString("Username", acc.username);
+                return RedirectToAction("Dashboard", "Account");
+            }
+
+        }
+
+        ViewBag.ErrorMessage = "Invalid credentials, try again!";
+        return View();
     }
 
     // GET: /Account/Dashboard
