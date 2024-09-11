@@ -27,32 +27,13 @@ public class AccountController : Controller
     [HttpPost]
     public async Task<IActionResult> Login(string username, string password)
     {
-
-        /*
-        // temp hardcode checks before we implement any real authentication methods
-        if (username == "admin" && password == "password")  // Dummy check
-        {
-            // Store the username in Session to access it in the dashboard
-            HttpContext.Session.SetString("Username", username);
-
-            // Successful login - redirect to dashboard page
-            return RedirectToAction("Dashboard", "Account");
-        }
-        else
-        {
-            // Set the error message in TempData so it's available after redirect
-            TempData["ErrorMessage"] = "Invalid login credentials";
-
-            // Redirect back to the HomeLogin page in HomeController
-            return RedirectToAction("HomeLogin", "Home");
-        }
-        */
-
-        var acc = await _context.accounts.FirstOrDefaultAsync(u => u.username == username);
+        var acc = await _context.accounts.FirstOrDefaultAsync(u => u.username == username || u.email == username);
 
         if (acc != null) {
+            
+            var hashCheck = BCrypt.Net.BCrypt.Verify(password, acc.password);
 
-            if (password == acc.password) {
+            if (hashCheck) {
                 HttpContext.Session.SetString("Username", acc.username);
                 return RedirectToAction("Dashboard", "Account");
             }
@@ -61,6 +42,62 @@ public class AccountController : Controller
 
         ViewBag.ErrorMessage = "Invalid credentials, try again!";
         return View();
+    }
+
+    public IActionResult Signup() {
+        return View();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Signup(string email, string username, string password, string reenterpassword, string firstname, string lastname) {
+
+        if (ModelState.IsValid)
+        {
+
+            var accFromUsername = await _context.accounts.FirstOrDefaultAsync(u => u.username == username);
+
+            if (accFromUsername != null) { // Account already exists as checked from username
+                ViewBag.ErrorMessage = "An account with that username already exists!";
+                return View();
+            }
+
+            var accFromEmail = await _context.accounts.FirstOrDefaultAsync(u => u.email == email);
+
+            if (accFromEmail != null) { // Account already exists as checked from username
+                ViewBag.ErrorMessage = "An account with that email already exists!";
+                return View();
+            }
+
+            if (password != reenterpassword) {
+                ViewBag.ErrorMessage = "Passwords do not match!";
+                return View();
+            }
+
+            string hash = BCrypt.Net.BCrypt.HashPassword(password);
+
+            var newAccount = new DB_accounts {
+
+                email = email,
+                username = username,
+                password = hash,
+                firstname = firstname,
+                lastname = lastname,
+                balance = 0
+
+            };
+
+            if (accFromUsername == null && accFromEmail == null) 
+            {
+                _context.accounts.Add(newAccount);
+                await _context.SaveChangesAsync();
+
+                HttpContext.Session.SetString("Username", username);
+                return RedirectToAction("Dashboard", "Account");
+            }
+        }
+
+        return View();
+
     }
 
     // GET: /Account/Dashboard
