@@ -1,0 +1,75 @@
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<!-- Link to the specific homeLogin.css file -->
+<link rel="stylesheet" href="~/css/homeLogin.css" asp-append-version="true" />
+
+<section class="home">
+    <div class="content">
+        <h2>DormBuddy: Dorming Made Easy</h2>
+        <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. 
+            Quas mollitia cupiditate totam vero cumque cum facilis tempora 
+            nostrum aspernatur ipsa optio maxime in at omnis, quasi pariatur 
+            itaque dolorem. Quasi.</p>
+        <a href="#">Get Started</a>
+    </div>
+
+    <div class="wrapper-login">
+        <h2>User Login</h2>
+
+        <!-- Error message display using TempData -->
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger" role="alert">
+                @TempData["ErrorMessage"]
+            </div>
+        }
+
+        <form asp-controller="Account" asp-action="Login">
+            <div class="input-box">
+                <span class="icon"><ion-icon name="person"></ion-icon></span>
+                <input type="text" placeholder="Username/Email" name="username" required />
+            </div>
+            <div class="input-box position-relative">
+                <span class="icon"><ion-icon name="lock-closed"></ion-icon></span>
+                <input type="password" class="form-control" id="password" placeholder="Enter your password" name="password" required />
+                <span class="position-absolute" id="togglePassword" style="right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;">
+                    <i class="fa fa-eye"></i>
+                </span>
+            </div>
+            <div class="remember-forgot">
+                <label><input type="checkbox" /> Remember me</label>
+                <a asp-controller="Account" asp-action="ForgotPassword">Forgot password?</a>
+            </div>
+            <button type="submit" class="btn">Login</button>
+            <div class="register-link">
+                <p>Not a user? <a asp-controller="Account" asp-action="Register">Sign up</a></p>
+            </div>
+        </form>
+    </div>
+</section>
+
+@section Scripts { 
+    <script>
+        // Handle clicking the password-toggle eye icon
+        const passwordInput = document.getElementById('password');
+        const togglePassword = document.getElementById('togglePassword');
+
+        togglePassword.addEventListener('click', function () {
+            // Toggle the type attribute (makes it either visible or hidden)
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            // Toggle the eye / eye-slash icon
+            const icon = this.querySelector('i');
+            icon.classList.toggle('fa-eye-slash');
+            icon.classList.toggle('fa-eye');
+        });
+    </script>
+}
+
+
+<!-- Ionicons for icons -->
+<script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
