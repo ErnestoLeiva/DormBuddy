@@ -14,23 +14,30 @@ namespace DormBuddy.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
 
-        public HomeController(
-            ILogger<HomeController> logger,
-            UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager)
-        {
-            _logger = logger;
-            _userManager = userManager;
-            _signInManager = signInManager;
-        }
+    public HomeController(ILogger<HomeController> logger)
+    {
+        _logger = logger;
+    }
 
-        public IActionResult HomeLogin()
+    public IActionResult Index()
+    {
+        var username = HttpContext.Session.GetString("Username");
+        if (username != null)
         {
-            if (User?.Identity?.IsAuthenticated == true)
-                return RedirectToAction("Dashboard", "Account");
-                
-            return View();
+            return RedirectToAction("Dashboard", "Account");
         }
+        return View();
+    }
+
+    public IActionResult HomeLogin()
+    {
+        var username = HttpContext.Session.GetString("Username");
+        if (username != null)
+        {
+            return RedirectToAction("Dashboard", "Account");
+        }
+        return View();
+    }
 
         public IActionResult Privacy()
         {
