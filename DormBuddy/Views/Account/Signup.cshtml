@@ -38,7 +38,7 @@
             <label for="reenterpassword">Re-Enter Password</label>
             <input type="password" class="form-control" id="reenterpassword" name="reenterpassword" placeholder="Re-Enter password" required>
             <span class="position-absolute" style="right: 10px; top: 50%; transform: translateY(20%); cursor: pointer;">
-                <i class="fa fa-eye" id="togglePassword"></i>
+                <i class="fa fa-eye" id="toggleReEnterPassword"></i>
             </span>
         </div>
 
@@ -61,11 +61,22 @@
         // Handle clicking the password-toggle eye icon
         const passwordInput = document.getElementById('password');
         const togglePassword = document.getElementById('togglePassword');
+        const reEnterPasswordInput = document.getElementById('reenterpassword');
+        const togglereEnterPassword = document.getElementById('toggleReEnterPassword');
 
         togglePassword.addEventListener('click', function () {
             // Toggle the type attribute (makes it either visible or hidden)
             const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
             passwordInput.setAttribute('type', type);
+            
+            // Toggle the eye / eye-slash icon
+            this.classList.toggle('fa-eye-slash');
+        });
+
+        togglereEnterPassword.addEventListener('click', function () {
+            // Toggle the type attribute (makes it either visible or hidden)
+            const type = reEnterPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            reEnterPasswordInput.setAttribute('type', type);
             
             // Toggle the eye / eye-slash icon
             this.classList.toggle('fa-eye-slash');
