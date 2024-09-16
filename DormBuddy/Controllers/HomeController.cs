@@ -14,30 +14,35 @@ namespace DormBuddy.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
 
-    public HomeController(ILogger<HomeController> logger)
-    {
-        _logger = logger;
-    }
-
-    public IActionResult Index()
-    {
-        var username = HttpContext.Session.GetString("Username");
-        if (username != null)
+        public HomeController(
+            ILogger<HomeController> logger,
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager)
         {
-            return RedirectToAction("Dashboard", "Account");
+            _logger = logger;
+            _userManager = userManager;
+            _signInManager = signInManager;
         }
-        return View();
-    }
 
-    public IActionResult HomeLogin()
-    {
-        var username = HttpContext.Session.GetString("Username");
-        if (username != null)
+        public async Task<IActionResult> Index()
         {
-            return RedirectToAction("Dashboard", "Account");
+            var user = await _userManager.GetUserAsync(User);
+            if (user != null)
+            {
+                return RedirectToAction("Dashboard", "Account");
+            }
+            return View();
         }
-        return View();
-    }
+
+        public async Task<IActionResult> HomeLogin()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user != null)
+            {
+                return RedirectToAction("Dashboard", "Account");
+            }
+            return View();
+        }
 
         public IActionResult Privacy()
         {
