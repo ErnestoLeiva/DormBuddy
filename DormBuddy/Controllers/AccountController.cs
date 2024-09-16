@@ -52,7 +52,8 @@ namespace DormBuddy.Controllers
                     }
                 }
 
-                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                ModelState.AddModelError(string.Empty, "Invalid Username/Email entered: User does not exist.");
+                ViewBag.ErrorMessage = "Invalid Username/Email entered: User does not exist.";
             }
             return View();
         }
