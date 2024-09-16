@@ -17,6 +17,11 @@ public class AccountController : Controller
         _context = context;
     }
 
+    public IActionResult AccountForms()
+    {
+    return View();
+    }
+
     public IActionResult Login()
     {
 
@@ -49,7 +54,7 @@ public class AccountController : Controller
         }
 
         ViewBag.ErrorMessage = "Invalid credentials, try again!";
-        return View();
+        return View("AccountForms");
     }
 
     public IActionResult Signup() {
@@ -86,7 +91,7 @@ public class AccountController : Controller
 
             if (password != reenterpassword) {
                 ViewBag.ErrorMessage = "Passwords do not match!";
-                return View();
+                return View("AccountForms");
             }
 
             string hash = BCrypt.Net.BCrypt.HashPassword(password);
@@ -112,7 +117,7 @@ public class AccountController : Controller
             }
         }
 
-        return View();
+        return View("AccountForms");
 
     }
 
