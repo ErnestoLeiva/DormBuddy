@@ -1,5 +1,5 @@
 // Get references to DOM elements
-const container = document.querySelector('.account-forms-container');
+const container = document.getElementById('container');
 const registerBtn = document.getElementById('register');
 const loginBtn = document.getElementById('login');
 const mobileToggleBtns = document.querySelectorAll('#mobileToggle');
