@@ -1,13 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using DormBuddy.Models;
 using Microsoft.AspNetCore.Identity;
-using FirebaseAdmin;
-using Google.Apis.Auth.OAuth2;
-using Microsoft.AspNetCore.Localization;
-using System.Globalization;
-using Microsoft.Extensions.Options;
-using Microsoft.AspNetCore.Mvc.Razor;
-using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -90,8 +83,20 @@ FirebaseApp.Create(new AppOptions()
 #region DATABASE CONFIGURATION
 builder.Services.AddDbContext<DBContext>(options =>
     options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
-                     ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))));
+    new MySqlServerVersion(new Version(8, 0, 2)))); 
 
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<DBContext>().AddDefaultTokenProviders();
+
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    // Password settings
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireNonAlphanumeric = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequiredLength = 6;
+    options.Password.RequiredUniqueChars = 1;
+});
 
 #endregion
 

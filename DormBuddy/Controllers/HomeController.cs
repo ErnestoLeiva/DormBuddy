@@ -24,8 +24,23 @@ namespace DormBuddy.Controllers
             _signInManager = signInManager;
         }
 
-        public IActionResult HomeLogin()
+        public async Task<IActionResult> Index()
         {
+            var user = await _userManager.GetUserAsync(User);
+            if (user != null)
+            {
+                return RedirectToAction("Dashboard", "Account");
+            }
+            return View();
+        }
+
+        public async Task<IActionResult> HomeLogin()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user != null)
+            {
+                return RedirectToAction("Dashboard", "Account");
+            }
             return View();
         }
 
@@ -34,16 +49,11 @@ namespace DormBuddy.Controllers
             return View();
         }
 
-        public IActionResult ContactUs()
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
         {
-            return View();
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
-
-        public IActionResult Community()
-        {
-            return View();
-        }
-
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
