@@ -15,8 +15,10 @@ public class TestController : Controller
         _context = context;
     }
 
-    public async Task<IActionResult> Index()
+    //public Task<IActionResult> Index()
+    public IActionResult Index()
     {
+        /*
         try
         {
             var data = await _context.accounts.ToListAsync();
@@ -27,6 +29,8 @@ public class TestController : Controller
             // Log the exception or handle it as needed
             return StatusCode(500, "Internal server error: " + ex.Message);
         }
+        */
+        return View();
     }
 
 }
