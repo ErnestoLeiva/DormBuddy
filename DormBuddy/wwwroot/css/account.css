@@ -1,0 +1,271 @@
+/* Container for the entire login/signup form */
+.account-forms-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 160px);
+    padding: 20px 0;
+}
+
+/* Main container styling */
+.account-forms-container .container {
+    background-color: #fff;
+    border-radius: 30px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
+    position: relative;
+    overflow: hidden;
+    width: 1000px;
+    max-width: 95%;
+    min-height: 600px;
+}
+
+/* Styles for form containers */
+.form-container {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    transition: all 0.6s ease-in-out;
+}
+
+/* Positioning for sign-in form */
+.sign-in {
+    left: 0;
+    width: 50%;
+    z-index: 2;
+}
+
+/* Positioning for sign-up form */
+.sign-up {
+    left: 0;
+    width: 50%;
+    opacity: 0;
+    z-index: 1;
+}
+
+/* Animation for switching to sign-up form */
+.container.active .sign-in {
+    transform: translateX(100%);
+}
+
+.container.active .sign-up {
+    transform: translateX(100%);
+    opacity: 1;
+    z-index: 5;
+    animation: move 0.6s;
+}
+
+/* Keyframe animation for form transition */
+@keyframes move {
+    0%, 49.99% {
+        opacity: 0;
+        z-index: 1;
+    }
+    50%, 100% {
+        opacity: 1;
+        z-index: 5;
+    }
+}
+
+/* Styles for the toggle container (desktop view) */
+.toggle-container {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 50%;
+    height: 100%;
+    overflow: hidden;
+    transition: all 0.6s ease-in-out;
+    z-index: 1000;
+}
+
+.container.active .toggle-container {
+    transform: translateX(-100%);
+}
+
+/* Styles for the toggle panel */
+.toggle {
+    background-color: #4e95d1;
+    background: linear-gradient(to right, #68a8e0, #4e95d1);
+    color: #fff;
+    position: relative;
+    left: -100%;
+    height: 100%;
+    width: 200%;
+    transform: translateX(0);
+    transition: all 0.6s ease-in-out;
+}
+
+.container.active .toggle {
+    transform: translateX(50%);
+}
+
+.toggle-panel {
+    position: absolute;
+    width: 50%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 0 30px;
+    text-align: center;
+    top: 0;
+    transform: translateX(0);
+    transition: all 0.6s ease-in-out;
+}
+
+.toggle-left {
+    transform: translateX(-200%);
+}
+
+.container.active .toggle-left {
+    transform: translateX(0);
+}
+
+.toggle-right {
+    right: 0;
+    transform: translateX(0);
+}
+
+.container.active .toggle-right {
+    transform: translateX(200%);
+}
+
+/* Styles for form elements */
+.container form {
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 0 80px;
+    height: 100%;
+    text-align: center;
+}
+
+.container input {
+    background-color: #eee;
+    border: none;
+    padding: 12px 15px;
+    margin: 12px 0;
+    width: 100%;
+    font-size: 13px;
+    border-radius: 8px;
+    outline: none;
+}
+
+.container input:focus {
+    border: 2px solid #4e95d1;
+}
+
+.container button {
+    border-radius: 20px;
+    border: 1px solid #4e95d1;
+    background-color: #4e95d1;
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 12px 45px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: transform 80ms ease-in;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.container button:hover {
+    background-color: #68a8e0;
+}
+
+.container button.hidden {
+    background-color: transparent;
+    border-color: #fff;
+}
+
+.container a {
+    color: #4e95d1;
+    font-size: 13px;
+    text-decoration: none;
+    margin: 15px 0 10px;
+}
+
+.container h1 {
+    margin-bottom: 20px;
+}
+
+.toggle-panel h1 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+.toggle-panel p {
+    font-size: 0.9rem;
+    padding: 10px 0;
+}
+
+/* Mobile toggle link styles */
+.mobile-toggle-link {
+    display: none;
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+}
+
+.mobile-toggle-link span {
+    color: #333;
+}
+
+.mobile-toggle-link a {
+    color: #4e95d1;
+    text-decoration: none;
+    font-weight: bold;
+    margin-left: 5px;
+}
+
+.mobile-toggle-link a:hover {
+    text-decoration: underline;
+}
+
+/* Media query for mobile responsiveness */
+@media (max-width: 768px) {
+    .account-forms-container .container {
+        width: 100%;
+        max-width: 400px;
+        min-height: auto;
+        padding: 20px;
+    }
+
+    /* Adjustments for mobile view */
+    .form-container {
+        position: relative;
+        width: 100%;
+        height: auto;
+        transition: none;
+    }
+
+    .sign-up {
+        display: none;
+    }
+
+    .container.active .sign-in {
+        display: none;
+    }
+
+    .container.active .sign-up {
+        display: block;
+        opacity: 1;
+        transform: none;
+    }
+
+    .toggle-container {
+        display: none;
+    }
+
+    .mobile-toggle-link {
+        display: block;
+    }
+
+    .container form {
+        padding: 0;
+    }
+}

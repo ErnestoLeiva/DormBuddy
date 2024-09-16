@@ -56,6 +56,11 @@ app.UseSession();
 app.UseAuthorization();
 
 app.MapControllerRoute(
+    name: "account",
+    pattern: "Account/{action=AccountForms}/{id?}",
+    defaults: new { controller = "Account" });
+
+app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=HomeLogin}/{id?}");
 
