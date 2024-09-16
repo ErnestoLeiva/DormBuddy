@@ -128,8 +128,11 @@ public class AccountController : Controller
         }
         else
         {
+            ViewBag.Username = "TEMP - DELETE (Line 131: AccountController.cs)";
+            return View();
+
             // Redirect to login if the session does not contain the username
-            return RedirectToAction("Login");
+            //return RedirectToAction("Login");
         }
     }
     #endregion
