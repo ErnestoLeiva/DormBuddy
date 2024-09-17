@@ -2,47 +2,8 @@
     ViewData["Title"] = "Database Display";
 }
 
-@model IEnumerable<DormBuddy.Models.DB_accounts>
-
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="utf-8" />
-    <title>Test Data</title>
-    <style>
-        th, td {
-            padding: 15px;
-        }
-    </style>
-</head>
-<body>
-    <h1>Data from Database</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>user_id</th>
-                <th>email</th>
-                <th>username</th>
-                <th>password</th>
-                <th>first_name</th>
-                <th>last_name</th>
-                <th>balance</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td>@item.user_id</td>
-                    <td>@item.email</td>
-                    <td>@item.username</td>
-                    <td>@item.password</td>
-                    <td>@item.firstname</td>
-                    <td>@item.lastname</td>
-                    <td>@item.balance</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</body>
+    <head></head>
+    <body></body>
 </html>
