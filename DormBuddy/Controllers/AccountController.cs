@@ -23,6 +23,7 @@ namespace DormBuddy.Controllers
             _signInManager = signInManager;
         }
 
+        #region LOGIN HANDLING
         public IActionResult Login()
         {
             if (User?.Identity != null && User.Identity.IsAuthenticated)
@@ -32,7 +33,6 @@ namespace DormBuddy.Controllers
             return View();
         }
 
-        #region LOGIN HANDLING
         [HttpPost]
         public async Task<IActionResult> Login(string username, string password)
         {
@@ -60,6 +60,7 @@ namespace DormBuddy.Controllers
 
         #endregion
         
+        #region SIGN UP/LOG OUT HANDLING
         public IActionResult Signup()
         {
             if (User?.Identity != null && User.Identity.IsAuthenticated)
@@ -69,7 +70,6 @@ namespace DormBuddy.Controllers
             return View();
         }
 
-        #region SIGN UP
         [HttpPost]
         public async Task<IActionResult> Signup(string email, string username, string password, string reenterpassword, string firstname, string lastname)
         {
@@ -144,10 +144,18 @@ namespace DormBuddy.Controllers
             return View();
         }
 
-
+        public async Task<IActionResult> Logout()
+        {
+            if (User?.Identity != null && User.Identity.IsAuthenticated)
+            {
+                await _signInManager.SignOutAsync();
+            }
+            return RedirectToAction("Login");
+        }
 
         #endregion
 
+        #region DASHBOARD HANDLING
         // GET: /Account/Dashboard
         public IActionResult Dashboard()
         {
@@ -159,12 +167,52 @@ namespace DormBuddy.Controllers
             return RedirectToAction("Login");
         }
 
-        #region LOGOUT
-        public async Task<IActionResult> Logout()
+        // GET: /Account/Dashboard/Tasks
+        public IActionResult Tasks()
         {
             if (User?.Identity != null && User.Identity.IsAuthenticated)
             {
-                await _signInManager.SignOutAsync();
+                return View("~/Views/Account/Dashboard/Tasks.cshtml");
+            }
+            return RedirectToAction("Login");
+        }
+
+        // GET: /Account/Dashboard/Expenses
+        public IActionResult Expenses()
+        {
+            if (User?.Identity != null && User.Identity.IsAuthenticated)
+            {
+                return View("~/Views/Account/Dashboard/Expenses.cshtml");
+            }
+            return RedirectToAction("Login");
+        }
+
+        // GET: /Account/Dashboard/Lending
+        public IActionResult Lending()
+        {
+            if (User?.Identity != null && User.Identity.IsAuthenticated)
+            {
+                return View("~/Views/Account/Dashboard/Lending.cshtml");
+            }
+            return RedirectToAction("Login");
+        }
+
+        // GET: /Account/Dashboard/Notifications
+        public IActionResult Notifications()
+        {
+            if (User?.Identity != null && User.Identity.IsAuthenticated)
+            {
+                return View("~/Views/Account/Dashboard/Notifications.cshtml");
+            }
+            return RedirectToAction("Login");
+        }
+
+        // GET: /Account/Dashboard/Settings
+        public IActionResult Settings()
+        {
+            if (User?.Identity != null && User.Identity.IsAuthenticated)
+            {
+                return View("~/Views/Account/Dashboard/Settings.cshtml");
             }
             return RedirectToAction("Login");
         }
