@@ -1,0 +1,14 @@
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Admin Dashboard</h1>
+    <p>Welcome Admin @ViewBag.Username! Manage your site and users from here.</p>
+
+    <!-- Add links or buttons to manage users, view reports, etc. -->
+    <div>
+        <a class="btn btn-primary" href="/Admin/ManageUsers">Manage Users</a>
+        <a class="btn btn-secondary" href="/Admin/Reports">View Reports</a>
+    </div>
+</div>

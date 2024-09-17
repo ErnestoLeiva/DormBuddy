@@ -152,4 +152,30 @@ public class AccountController : Controller
         HttpContext.Session.Remove("Username");
         return RedirectToAction("HomeLogin", "Home");
     }
+
+
+    public IActionResult AdminDashboard() {
+        // Check if the user is logged in and has admin privileges
+    var username = HttpContext.Session.GetString("Username");
+    if (username != null)
+    {
+        // Assuming you have an admin role in your DB_accounts table
+        var user = _context.accounts.FirstOrDefault(u => u.username == username);
+        if (user != null && user.IsAdmin) // Assuming you have an IsAdmin flag in the database
+        {
+            ViewBag.Username = username;
+            return View();
+        }
+        else
+        {
+            // Redirect non-admin users to their regular dashboard
+            return RedirectToAction("Dashboard");
+        }
+    }
+    else
+    {
+        // Redirect to login if the session does not contain the username
+        return RedirectToAction("Login");
+    }
+    }
 }

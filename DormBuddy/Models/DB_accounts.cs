@@ -12,5 +12,6 @@ namespace DormBuddy.Models
         public required string firstname { get; set; }
         public required string lastname { get; set; }
         public required int balance { get; set; }
+        public bool IsAdmin { get; set; }  // New property for admin check
     }
 }
