@@ -1,5 +1,3 @@
-@model Tuple<List<DormBuddy.Models.ExpenseModel>, DormBuddy.Models.ExpenseModel>
-
 @{
     ViewData["Title"] = "Expense Splitting";
     var expenses = Model?.Item1 ?? new List<DormBuddy.Models.ExpenseModel>(); // Initialize as empty list if null
