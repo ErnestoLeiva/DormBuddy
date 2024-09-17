@@ -10,11 +10,7 @@ namespace DormBuddy.Models
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public bool RememberMe { get; set; }
-        public int TotalLogins { get; set; }  // Tracks the number of logins
-        public DateTime? LastLoginDate { get; set; }  // Tracks the last login time
 
-        // Navigation property for many-to-many relationship with GroupModel
-        public ICollection<GroupModel>? Groups { get; set; }
     }
 
     public class DBContext : IdentityDbContext<ApplicationUser, IdentityRole, string>
@@ -24,20 +20,23 @@ namespace DormBuddy.Models
         {
         }
 
-        // DBSet for persistent features
+        // DBSet for persistent tasks feature - Ernesto Leiva 10/04/2024
         public DbSet<TaskModel> Tasks { get; set; }
+        
+        // DBSet for persistent expenses feature - Ernesto Leiva 10/27/2024
         public DbSet<ExpenseModel> Expenses { get; set; }
-        public DbSet<PeerLendingModel> PeerLendings { get; set; }
-        public DbSet<ApplicationUser> ApplicationUsers { get; set; }
 
+        // DBSet for persistent peer-lending feature - Ernesto Leiva 11/04/2024
+        public DbSet<PeerLendingModel> PeerLendings {get; set; }
+
+        public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<UserProfile> UserProfiles { get; set; }
 
         public DbSet<UserLastUpdate> UserLastUpdate { get; set; } // saves the last time the user updated the browser to find online status
-        public DbSet<GroupModel> Groups { get; set; }
 
         public DbSet<DashboardChatModel> DashboardChatModel { get; set; }
-
         public DbSet<FriendsModel> FriendsModel { get; set; }
+        public DbSet<DB_accounts> Accounts { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -45,19 +44,14 @@ namespace DormBuddy.Models
                 optionsBuilder.UseMySql("Server=shportfolio.net;Database=myportfolio_dormbuddy;User=myportfolio;Password=65eyqYcPHv;", 
                     new MySqlServerVersion(new Version(8, 0, 2)));
             }
+                
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
-            // Many-to-Many Relationship: ApplicationUser <-> GroupModel
-            builder.Entity<GroupModel>()
-                .HasMany(g => g.Members)
-                .WithMany(u => u.Groups)
-                .UsingEntity(j => j.ToTable("UserGroups"));
-
-            // Configure default string lengths and other properties
+            // Ensure the maximum length is set for all string properties
             foreach (var entity in builder.Model.GetEntityTypes())
             {
                 foreach (var property in entity.GetProperties())
@@ -69,7 +63,7 @@ namespace DormBuddy.Models
                 }
             }
 
-            // Configure Identity tables
+            // Apply specific maximum length configurations for Identity tables
             builder.Entity<ApplicationUser>(entity =>
             {
                 entity.Property(m => m.Email).HasMaxLength(160);
@@ -78,6 +72,7 @@ namespace DormBuddy.Models
                 entity.Property(m => m.NormalizedUserName).HasMaxLength(160);
                 entity.Property(m => m.FirstName).HasMaxLength(160);
                 entity.Property(m => m.LastName).HasMaxLength(160);
+
             });
 
             builder.Entity<IdentityRole>(entity =>
@@ -86,7 +81,7 @@ namespace DormBuddy.Models
                 entity.Property(m => m.NormalizedName).HasMaxLength(160);
             });
 
-            // Configure IdentityUserLogin
+            // Specific configuration for IdentityUserLogin
             builder.Entity<IdentityUserLogin<string>>(entity =>
             {
                 entity.Property(e => e.LoginProvider).HasMaxLength(160);
@@ -94,7 +89,7 @@ namespace DormBuddy.Models
                 entity.Property(e => e.ProviderDisplayName).HasMaxLength(160);
             });
 
-            // Task configuration
+            // Tasks configuratiobns for the requirments of string lengths
             builder.Entity<TaskModel>(entity =>
             {
                 entity.Property(t => t.TaskName).HasMaxLength(160).IsRequired();
