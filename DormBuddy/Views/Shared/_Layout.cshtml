@@ -32,6 +32,9 @@
                         </li>
                         @if (User?.Identity != null && User.Identity.IsAuthenticated) {
                         <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Dashboard">Dashboard</a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Logout">Sign Out</a>
                         </li>
                         } else {

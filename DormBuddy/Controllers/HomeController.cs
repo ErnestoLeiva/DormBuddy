@@ -24,23 +24,13 @@ namespace DormBuddy.Controllers
             _signInManager = signInManager;
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user != null)
-            {
-                return RedirectToAction("Dashboard", "Account");
-            }
             return View();
         }
 
-        public async Task<IActionResult> HomeLogin()
+        public IActionResult HomeLogin()
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user != null)
-            {
-                return RedirectToAction("Dashboard", "Account");
-            }
             return View();
         }
 
