@@ -41,22 +41,9 @@ namespace DormBuddy.Controllers
             _logger = logger;
             _userManager = userManager;
             _signInManager = signInManager;
-            _emailSender = emailSender;
-            _timeZoneService = timeZoneService;
-            _configuration = configuration;
-            _context = context;
-            _memoryCache = memoryCache;
         }
 
-        #region ACCOUNT FORMS
-
-        public IActionResult AccountForms()
-        {
-            if (User?.Identity?.IsAuthenticated == true)
-                return RedirectToAction("Dashboard");
-
-            return View();
-        }
+        #region LOGIN HANDLING
         public IActionResult Login()
         {
             if (User?.Identity != null && User.Identity.IsAuthenticated)
@@ -66,7 +53,6 @@ namespace DormBuddy.Controllers
             return View();
         }
 
-        #region LOGIN HANDLING
         [HttpPost]
         public async Task<IActionResult> Login(string username, string password)
         {
@@ -93,6 +79,7 @@ namespace DormBuddy.Controllers
 
         #endregion
         
+        #region SIGN UP/LOG OUT HANDLING
         public IActionResult Signup()
         {
             if (User?.Identity != null && User.Identity.IsAuthenticated)
@@ -183,107 +170,41 @@ namespace DormBuddy.Controllers
 
             var result = await _userManager.CreateAsync(user, password);
 
-            if (result.Succeeded)
-            {
-                await _userManager.AddToRoleAsync(user, "User");
-                var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                var confirmationLink = Url.Action("Activation", "Account", new { userId = user.Id, token }, Request.Scheme);
-
-                if (!string.IsNullOrEmpty(confirmationLink))
-                    await _emailSender.SendActivationEmail(user, confirmationLink);
-                else
-                    Console.WriteLine("Confirmation link is null! Activation email not sent to user!");
-
-                TempData["message"] = "Email verification has been sent!";
-                return View("AccountForms");
-            }
-
-            foreach (var error in result.Errors)
-            {
-                Console.WriteLine($"Error Code: {error.Code}, Description: {error.Description}");
-                ModelState.AddModelError(string.Empty, error.Description);
-            }
-
-            return View("AccountForms");
-        }
-
-        #endregion
-
-        #region ACCOUNT CONFIRMATION
-
-        [HttpGet]
-        public async Task<IActionResult> Activation(string userId, string token)
-        {
-            if (userId == null || token == null)
-            {
-                ViewBag.ErrorMessage = "Invalid email confirmation!";
-                return RedirectToAction("AccountForms");
-            }
-
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-            {
-                Console.WriteLine($"User not found with id {userId}");
-                ViewBag.ErrorMessage = "User not found";
-                return RedirectToAction("AccountForms");
-            }
-
-            var result = await _userManager.ConfirmEmailAsync(user, token);
-            if (result.Succeeded)
-            {
-                TempData["message"] = "Email confirmation is successful!";
-                await _signInManager.SignInAsync(user, isPersistent: false);
-                return RedirectToAction("Dashboard");
-            }
-
-            ViewBag.ErrorMessage = "Email confirmation failure!";
-            return RedirectToAction("AccountForms");
-        }
-
-        #endregion
-
-        #region FORGOT PASSWORD
-
-        [HttpGet]
-        public IActionResult ForgotPassword() {
-            if (User?.Identity?.IsAuthenticated == true)
-                return RedirectToAction("Dashboard");
-
-            return View("~/Views/Account/Password/ForgotPassword.cshtml");
-        }
-
-        [HttpPost]
-        [AutoValidateAntiforgeryToken]
-        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model) {
-            
-            if (ModelState.IsValid) {
-                
-                var user = await _userManager.FindByEmailAsync(model.Email ?? "");
-
-                if (user == null || !user.EmailConfirmed) {
-                    return RedirectToAction("ForgotPassword");
+                if (result.Succeeded)
+                {
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    return RedirectToAction("Dashboard", "Account");
                 }
-
-                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                var url = Url.Action(nameof(ResetPassword), "Account", new { userId = user.Id, token }, Request.Scheme);
-
-                var email = await _emailSender.SendPasswordResetEmail(user, url ?? "null");
-
-                TempData["message"] = "Reset link has been sent! Check your email!";
-                return View("AccountForms");
-
+                else
+                {
+                    // Log detailed error information
+                    foreach (var error in result.Errors)
+                    {
+                        Console.WriteLine($"Error Code: {error.Code}, Description: {error.Description}");
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+                }
             }
-            return View("~/Views/Account/Password/ForgotPassword.cshtml", model);
 
+            return View();
         }
 
-        [HttpGet]
-        public ActionResult ResetPassword(string userId, string token)
+        public async Task<IActionResult> Logout()
         {
-            if (User?.Identity?.IsAuthenticated == true)
-                return RedirectToAction("Dashboard");
+            if (User?.Identity != null && User.Identity.IsAuthenticated)
+            {
+                await _signInManager.SignOutAsync();
+            }
+            return RedirectToAction("Login");
+        }
 
-            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
+        #endregion
+
+        #region DASHBOARD HANDLING
+        // GET: /Account/Dashboard
+        public IActionResult Dashboard()
+        {
+            if (User?.Identity != null && User.Identity.IsAuthenticated)
             {
                 return RedirectToAction("ForgotPassword");
             }
@@ -351,40 +272,54 @@ namespace DormBuddy.Controllers
 
         #endregion
 
-        #region LOGOUT
-
-        public async Task<IActionResult> Logout()
+        // GET: /Account/Dashboard/Tasks
+        public IActionResult Tasks()
         {
-            if (User?.Identity?.IsAuthenticated == true)
-                await _signInManager.SignOutAsync();
-
-            return RedirectToAction("AccountForms");
+            if (User?.Identity != null && User.Identity.IsAuthenticated)
+            {
+                return View("~/Views/Account/Dashboard/Tasks.cshtml");
+            }
+            return RedirectToAction("Login");
         }
 
-        #endregion
-
-        #region DASHBOARD
-
-        public async Task<IActionResult> Dashboard()
+        // GET: /Account/Dashboard/Expenses
+        public IActionResult Expenses()
         {
-            if (User?.Identity?.IsAuthenticated == true)
+            if (User?.Identity != null && User.Identity.IsAuthenticated)
             {
-                var user = await _userManager.GetUserAsync(User);
-                if (user != null)
-                {
-                    ViewBag.Username = $"{user.FirstName} {user.LastName}";
-                    ViewBag.UserRoles = string.Join(", ", await _userManager.GetRolesAsync(user));
-
-                    var currentCulture = CultureInfo.CurrentCulture.Name;
-                    var currentUICulture = CultureInfo.CurrentUICulture.Name;
-
-                    ViewBag.CultureInfo = $"Current Culture: {currentCulture}, UI Culture: {currentUICulture}";
-                }
-
-                return View();
+                return View("~/Views/Account/Dashboard/Expenses.cshtml");
             }
+            return RedirectToAction("Login");
+        }
 
-            return RedirectToAction("AccountForms");
+        // GET: /Account/Dashboard/Lending
+        public IActionResult Lending()
+        {
+            if (User?.Identity != null && User.Identity.IsAuthenticated)
+            {
+                return View("~/Views/Account/Dashboard/Lending.cshtml");
+            }
+            return RedirectToAction("Login");
+        }
+
+        // GET: /Account/Dashboard/Notifications
+        public IActionResult Notifications()
+        {
+            if (User?.Identity != null && User.Identity.IsAuthenticated)
+            {
+                return View("~/Views/Account/Dashboard/Notifications.cshtml");
+            }
+            return RedirectToAction("Login");
+        }
+
+        // GET: /Account/Dashboard/Settings
+        public IActionResult Settings()
+        {
+            if (User?.Identity != null && User.Identity.IsAuthenticated)
+            {
+                return View("~/Views/Account/Dashboard/Settings.cshtml");
+            }
+            return RedirectToAction("Login");
         }
 
         #endregion
