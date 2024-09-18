@@ -16,6 +16,7 @@ namespace DormBuddy.Controllers
 {
     public class AccountController : BaseController
     {
+
         private readonly ILogger<AccountController> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
@@ -27,7 +28,7 @@ namespace DormBuddy.Controllers
 
         private readonly DBContext _context;
         private readonly IMemoryCache _memoryCache;
-
+        private readonly DBContext _context;
         public AccountController(
             ILogger<AccountController> logger,
             UserManager<ApplicationUser> userManager,
@@ -41,6 +42,7 @@ namespace DormBuddy.Controllers
             _logger = logger;
             _userManager = userManager;
             _signInManager = signInManager;
+            _context = _context;
         }
 
         #region LOGIN HANDLING
@@ -49,7 +51,7 @@ namespace DormBuddy.Controllers
             if (User?.Identity != null && User.Identity.IsAuthenticated)
             {
                 return RedirectToAction("Dashboard", "Account");
-            }
+            } ///comment
             return View();
         }
 
@@ -559,5 +561,33 @@ public IActionResult Settings()
         // Redirect to login if the session does not contain the username
         return RedirectToAction("Login");
     }
+
+        //admin dashboard
+        public IActionResult AdminDashboard()
+        {
+        // Check if the user is logged in and has admin privileges
+        var username = HttpContext.Session.GetString("Username");
+        if (username != null)
+        {
+            // Assuming you have an admin role in your DB_accounts table
+            var user = _context.accounts.FirstOrDefault(u => u.username == username);
+            if (user != null && user.IsAdmin) // Assuming you have an IsAdmin flag in the database
+            {
+                ViewBag.Username = username;
+                return View();
+            }
+            else
+            {
+                // Redirect non-admin users to their regular dashboard
+                return RedirectToAction("Dashboard");
+            }
+        }
+        else
+        {
+            // Redirect to login if the session does not contain the username
+            return RedirectToAction("Login");
+        }
+    }
+
     }
 }

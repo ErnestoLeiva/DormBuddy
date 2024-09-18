@@ -26,7 +26,7 @@ namespace DormBuddy.Models
         {
         }
 
-        public DbSet<ApplicationUser> ApplicationUsers { get; set; }
+       // public DbSet<ApplicationUser> ApplicationUsers { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
