@@ -23,6 +23,14 @@ namespace DormBuddy.Controllers
             _signInManager = signInManager;
         }
 
+        public IActionResult AccountForms()
+        {
+            if (User?.Identity != null && User.Identity.IsAuthenticated)
+            {
+            return RedirectToAction("Dashboard", "Account");
+            }
+            return View();
+        }
         #region LOGIN HANDLING
         public IActionResult Login()
         {
@@ -30,7 +38,7 @@ namespace DormBuddy.Controllers
             {
                 return RedirectToAction("Dashboard", "Account");
             }
-            return View();
+            return View("AccountForms");
         }
 
         [HttpPost]
@@ -48,7 +56,7 @@ namespace DormBuddy.Controllers
                         return RedirectToAction("Dashboard", "Account");
                     } else {
                         ViewBag.ErrorMessage = "Invalid credentials, try again!";
-                        return View();
+                        return View("AccountForms");
                     }
                 }
 
@@ -67,7 +75,7 @@ namespace DormBuddy.Controllers
             {
                 return RedirectToAction("Dashboard", "Account");
             }
-            return View();
+            return View("AccountForms");
         }
 
         [HttpPost]
