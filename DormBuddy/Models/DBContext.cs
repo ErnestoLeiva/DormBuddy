@@ -10,6 +10,7 @@ namespace DormBuddy.Models
         public int Credits { get; set; }
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
+        public bool IsAdmin { get; set; }
     }
 
     public class DBContext : IdentityDbContext<ApplicationUser, IdentityRole, string>
@@ -19,7 +20,7 @@ namespace DormBuddy.Models
         {
         }
 
-        public DbSet<ApplicationUser> ApplicationUsers { get; set; }
+       // public DbSet<ApplicationUser> ApplicationUsers { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
