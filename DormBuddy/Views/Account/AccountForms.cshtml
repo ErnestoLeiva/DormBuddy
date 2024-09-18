@@ -1,4 +1,4 @@
-@model DormBuddy.Models.DB_accounts
+@model DormBuddy.Models.ApplicationUser
 @{
     ViewData["Title"] = "Login/Sign Up";
 }
@@ -7,57 +7,55 @@
     <link rel="stylesheet" href="~/css/account.css" asp-append-version="true" />
 }
 
-<div class="account-forms-container">
-    <div class="container" id="container">
-        <!-- Sign Up Form -->
-        <div class="form-container sign-up">
-            <form asp-action="Signup" method="post">
-                <h1>Create Account</h1>
-                <!-- Input fields for user registration -->
-                <input asp-for="firstname" type="text" placeholder="First Name" required>
-                <input asp-for="lastname" type="text" placeholder="Last Name" required>
-                <input asp-for="username" type="text" placeholder="Username" required>
-                <input asp-for="email" type="email" placeholder="Email" required>
-                <input asp-for="password" type="password" placeholder="Password" required>
-                <input name="reenterpassword" type="password" placeholder="Re-enter Password" required>
-                <button type="submit">Sign Up</button>
-                <!-- Mobile toggle link to switch to Sign In -->
-                <div class="mobile-toggle-link">
-                    <span>Already have an account?</span>
-                    <a href="#" id="mobileToggle">Sign in here</a>
-                </div>
-            </form>
-        </div>
+<div class="account-forms-wrapper">
+    <div class="account-forms-container">
+        <div class="container" id="container">
+            <!-- Sign Up Form -->
+            <div class="form-container sign-up">
+                <form asp-action="Signup" method="post">
+                    <h1>Create Account</h1>
+                    <input asp-for="FirstName" type="text" placeholder="First Name" required>
+                    <input asp-for="LastName" type="text" placeholder="Last Name" required>
+                    <input asp-for="UserName" type="text" placeholder="Username" required>
+                    <input asp-for="Email" type="email" placeholder="Email" required>
+                    <input name="password" type="password" placeholder="Password" required>
+                    <input name="reenterpassword" type="password" placeholder="Re-enter Password" required>
+                    <button type="submit">Sign Up</button>
+                    <div class="mobile-toggle-link">
+                        <span>Already have an account?</span>
+                        <a href="#" id="mobileToggle">Sign in here</a>
+                    </div>
+                </form>
+            </div>
 
-        <!-- Sign In Form -->
-        <div class="form-container sign-in">
-            <form asp-action="Login" method="post">
-                <h1>Sign In</h1>
-                <!-- Input fields for user login -->
-                <input name="username" type="text" placeholder="Username or Email" required>
-                <input name="password" type="password" placeholder="Password" required>
-                <a href="#">Forgot Your Password?</a>
-                <button type="submit">Sign In</button>
-                <!-- Mobile toggle link to switch to Sign Up -->
-                <div class="mobile-toggle-link">
-                    <span>Don't have an account?</span>
-                    <a href="#" id="mobileToggle">Sign up here</a>
-                </div>
-            </form>
-        </div>
+            <!-- Sign In Form -->
+            <div class="form-container sign-in">
+                <form asp-action="Login" method="post">
+                    <h1>Sign In</h1>
+                    <input name="username" type="text" placeholder="Username or Email" required>
+                    <input name="password" type="password" placeholder="Password" required>
+                    <a href="#">Forgot Your Password?</a>
+                    <button type="submit">Sign In</button>
+                    <div class="mobile-toggle-link">
+                        <span>Don't have an account?</span>
+                        <a href="#" id="mobileToggle">Sign up here</a>
+                    </div>
+                </form>
+            </div>
 
-        <!-- Toggle Container for desktop view -->
-        <div class="toggle-container">
-            <div class="toggle">
-                <div class="toggle-panel toggle-left">
-                    <h1>Welcome Back!</h1>
-                    <p>Log in to access your account and all our features</p>
-                    <button class="hidden" id="login">Sign In</button>
-                </div>
-                <div class="toggle-panel toggle-right">
-                    <h1>Hello, Friend!</h1>
-                    <p>Join us today and start your journey with DormBuddy</p>
-                    <button class="hidden" id="register">Sign Up</button>
+            <!-- Toggle Container for desktop view -->
+            <div class="toggle-container">
+                <div class="toggle">
+                    <div class="toggle-panel toggle-left">
+                        <h1>Welcome Back!</h1>
+                        <p>Log in to access your account and all our features</p>
+                        <button class="hidden" id="login">Sign In</button>
+                    </div>
+                    <div class="toggle-panel toggle-right">
+                        <h1>Hello, Friend!</h1>
+                        <p>Join us today and start your journey with DormBuddy</p>
+                        <button class="hidden" id="register">Sign Up</button>
+                    </div>
                 </div>
             </div>
         </div>
