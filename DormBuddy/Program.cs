@@ -82,11 +82,14 @@ FirebaseApp.Create(new AppOptions()
 
 #region DATABASE CONFIGURATION
 builder.Services.AddDbContext<DBContext>(options =>
-    options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
-    new MySqlServerVersion(new Version(8, 0, 2)))); 
+        options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
+        new MySqlServerVersion(new Version(8, 0, 2)))); 
 
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<DBContext>().AddDefaultTokenProviders();
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+    .AddEntityFrameworkStores<DBContext>()
+    .AddDefaultTokenProviders();
 
+#region PASSWORD REQ.
 builder.Services.Configure<IdentityOptions>(options =>
 {
     // Password settings
@@ -98,10 +101,8 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequiredUniqueChars = 1;
 });
 
-#endregion
-
-#region IDENTITY CONFIGURATION
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => 
+// Add session services
+builder.Services.AddSession(options =>
 {
     options.SignIn.RequireConfirmedEmail = true;
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(60);
@@ -200,6 +201,10 @@ app.MapControllerRoute(
 #endregion
 
 // Call InitializeRolesAndAdminUser to create roles and the default admin user
+await InitializeRolesAndAdminUser(app);
+
+await InitializeRolesAndAdminUser(app);
+
 await InitializeRolesAndAdminUser(app);
 
 app.Run();
