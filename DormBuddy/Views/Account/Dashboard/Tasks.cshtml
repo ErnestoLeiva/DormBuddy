@@ -76,8 +76,35 @@
     </div>
 </div>
 
+<!-- Bootstrap Modal for Confirming Task Deletion -->
+<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteConfirmationModalLabel">Confirm Deletion</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this task?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
+        window.onload = function() {
+            setDateTimeToNow(); // Set current date and time when the page loads
+        }
+
+        let taskToDelete = null; // Store the row to delete later when confirmed
+
         document.getElementById('addTaskForm').addEventListener('submit', function (e) {
             e.preventDefault(); // Prevent form from submitting and reloading page
 
@@ -118,11 +145,12 @@
             // Add buttons for actions (Mark as Completed, Delete)
             actionsCell.innerHTML = `
                 <button class="btn btn-success btn-sm" onclick="toggleTaskStatus(this)">Mark as Completed</button>
-                <button class="btn btn-danger btn-sm" onclick="deleteTask(this)">Delete</button>
+                <button class="btn btn-danger btn-sm" onclick="confirmDeleteTask(this)">Delete</button>
             `;
 
-            // Clear the form inputs after task is added
+            // Clear the form inputs and reset to the current date/time
             document.getElementById('addTaskForm').reset();
+            setDateTimeToNow(); // Set the time back to the current date/time after clearing the form
         });
 
         // Function to format the date and time as mm/dd/yyyy hh:mm AM/PM
@@ -150,21 +178,64 @@
             }
         }
 
-        // Function to delete a task
-        function deleteTask(button) {
-            const row = button.closest('tr');
-            row.remove(); // Remove the row from the table
+        // Function to confirm task deletion
+        function confirmDeleteTask(button) {
+            // Store the row to delete
+            taskToDelete = button.closest('tr');
+            // Show the confirmation modal
+            $('#deleteConfirmationModal').modal('show');
+        }
 
-            // If no tasks are left, show "No remaining tasks..." message
-            const tableBody = document.getElementById('taskTableBody');
-            if (tableBody.rows.length === 0) {
-                const noTasksRow = tableBody.insertRow();
-                noTasksRow.id = "noTasksMessage";
-                const noTasksCell = noTasksRow.insertCell(0);
-                noTasksCell.colSpan = 5;
-                noTasksCell.classList.add('text-center');
-                noTasksCell.innerText = "No remaining tasks...";
+        // Event listener for confirming deletion from the modal
+        document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
+            if (taskToDelete) {
+                taskToDelete.remove(); // Remove the row from the table
+                taskToDelete = null; // Reset the taskToDelete variable
+
+                // Check if there are any remaining tasks
+                const tableBody = document.getElementById('taskTableBody');
+                if (tableBody.rows.length === 0) {
+                    const noTasksRow = tableBody.insertRow();
+                    noTasksRow.id = "noTasksMessage";
+                    const noTasksCell = noTasksRow.insertCell(0);
+                    noTasksCell.colSpan = 5;
+                    noTasksCell.classList.add('text-center');
+                    noTasksCell.innerText = "No remaining tasks...";
+                }
             }
+            // Hide the modal after deletion
+            $('#deleteConfirmationModal').modal('hide');
+        });
+
+        // Function to set the current date and time, rounded to the nearest 5-minute increment
+        function setDateTimeToNow() {
+            const now = new Date();
+
+            // Set current date in the format YYYY-MM-DD
+            const year = now.getFullYear();
+            const month = (now.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-based
+            const day = now.getDate().toString().padStart(2, '0');
+            const currentDate = `${year}-${month}-${day}`;
+            document.getElementById('dueDate').value = currentDate;
+
+            // Calculate current time and round minutes to the nearest 5
+            let hour = now.getHours();
+            let minute = Math.ceil(now.getMinutes() / 5) * 5; // Round to the nearest 5 minutes
+
+            // Adjust for cases where rounding minutes goes beyond 60
+            if (minute === 60) {
+                minute = 0;
+                hour += 1;
+            }
+
+            // Convert 24-hour format to 12-hour format with AM/PM
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            hour = hour % 12 || 12; // Convert 0 or 24 to 12 for 12-hour format
+
+            // Set the default values for hour, minute, and AM/PM
+            document.getElementById('hour').value = hour;
+            document.getElementById('minute').value = minute.toString().padStart(2, '0');
+            document.getElementById('ampm').value = ampm;
         }
     </script>
 }
