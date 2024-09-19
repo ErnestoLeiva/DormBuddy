@@ -36,7 +36,33 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;  // Ensure the session cookie is essential (GDPR compliance)
 });
 
+#region ACCESS DENIED HANDLING
+// Add Authentication/Authorization Middleware and configure access denied handling
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
+    options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
+})
+.AddCookie(options =>
+{
+    options.LoginPath = "/Account/Login";
+    options.AccessDeniedPath = "/Account/AccessDenied"; // Redirect to this path if access is denied
+});
+
+builder.Services.AddAuthorization(options =>
+{
+    // Allow access to Admin for everything
+    options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
+
+    // Moderator policy - can access certain resources
+    options.AddPolicy("ModeratorPolicy", policy => policy.RequireRole("Moderator", "Admin"));
+
+    // User policy - can access some resources
+    options.AddPolicy("UserPolicy", policy => policy.RequireRole("User", "Moderator", "Admin"));
+});
+
 var app = builder.Build();
+#endregion
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -53,6 +79,8 @@ app.UseRouting();
 // Enable session handling
 app.UseSession();
 
+// Authentication and Authorization middleware
+app.UseAuthentication(); // Make sure to add this line
 app.UseAuthorization();
 
 app.MapControllerRoute(
