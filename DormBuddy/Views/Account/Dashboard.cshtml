@@ -20,12 +20,12 @@
 
             var roleColor = role switch
             {
-                "Admin" => "color: #4dff00; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;", //neon-green
-                "Moderator" => "color: #ffff00; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;", //bright yellow
-                "User" => "color: #0073ff; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;", //dark blue
+                "Admin" => "color: #B026FF; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;",     //neon-purple #B026FF
+                "Moderator" => "color: #39FF14; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;", //neon-green #39FF14
+                "User" => "color: #1F51FF; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;",      //neon-blue #1F51FF
                 _ => "color: black;" //dfefault color
             };
-            if (i >= roles.Length - 1) //dont add comma for last role
+            if (i == roles.Length - 1) //dont add comma for last role
             {
                 conditionalComma = null; 
             }
