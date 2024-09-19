@@ -1,4 +1,8 @@
 using System.Diagnostics;
+using System.Threading.Tasks;
+using DormBuddy.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using DormBuddy.Models;
 using Microsoft.EntityFrameworkCore;
@@ -69,23 +73,95 @@ public class AccountController : Controller
         return View();
     }
 
-    [HttpPost]
-    public async Task<IActionResult> Signup(string email, string username, string password, string reenterpassword, string firstname, string lastname) {
+                // Check if a user with the same username already exists
+                var existingUserByName = await _userManager.FindByNameAsync(username);
+                if (existingUserByName != null)
+                {
+                    ModelState.AddModelError(string.Empty, "Username is already taken.");
+                    ViewBag.ErrorMessage = "Username is already taken!";
+                    return View();
+                }
 
-        if (ModelState.IsValid)
-        {
+                // Check if a user with the same email already exists
+                var existingUserByEmail = await _userManager.FindByEmailAsync(email);
+                if (existingUserByEmail != null)
+                {
+                    ModelState.AddModelError(string.Empty, "Email is already registered.");
+                    ViewBag.ErrorMessage = "Email is already registered!";
+                    return View();
+                }
 
-            var accFromUsername = await _context.accounts.FirstOrDefaultAsync(u => u.username == username);
+                // Validate password
+                var passwordValidator = new PasswordValidator<ApplicationUser>();
+                var passwordValidationResult = await passwordValidator.ValidateAsync(_userManager, null, password);
+                if (!passwordValidationResult.Succeeded)
+                {
+                    foreach (var error in passwordValidationResult.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+                    ViewBag.ErrorMessage = "Password does not meet the requirements!";
+                    return View();
+                }
 
-            if (accFromUsername != null) { // Account already exists as checked from username
-                ViewBag.ErrorMessage = "An account with that username already exists!";
-                return View();
+                var user = new ApplicationUser 
+                { 
+                    UserName = username,
+                    Email = email,
+                    FirstName = firstname,
+                    LastName = lastname,
+                    Credits = 0
+                };
+
+                var result = await _userManager.CreateAsync(user, password);
+
+                if (result.Succeeded)
+                {   
+                    // Assign the default role to the user
+                    await _userManager.AddToRoleAsync(user, "User");
+
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    return RedirectToAction("Dashboard", "Account");
+                }
+                else
+                {
+                    // Log detailed error information
+                    foreach (var error in result.Errors)
+                    {
+                        Console.WriteLine($"Error Code: {error.Code}, Description: {error.Description}");
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+                }
             }
 
-            var accFromEmail = await _context.accounts.FirstOrDefaultAsync(u => u.email == email);
+            return View();
+        }
 
-            if (accFromEmail != null) { // Account already exists as checked from username
-                ViewBag.ErrorMessage = "An account with that email already exists!";
+        public async Task<IActionResult> Logout()
+        {
+            if (User?.Identity != null && User.Identity.IsAuthenticated)
+            {
+                await _signInManager.SignOutAsync();
+            }
+            return RedirectToAction("Login");
+        }
+
+        #endregion
+
+        #region DASHBOARD HANDLING
+        // GET: /Account/Dashboard
+        public async Task<IActionResult> Dashboard()
+        {
+            if (User?.Identity != null && User.Identity.IsAuthenticated)
+            {
+                var user = await _userManager.GetUserAsync(User);
+                
+                if (user != null)
+                {
+                    var roles = await _userManager.GetRolesAsync(user);
+                    ViewBag.Username = $"{user.FirstName} {user.LastName}";
+                    ViewBag.UserRoles = string.Join(", ", roles);
+                }
                 return View();
             }
 
@@ -136,8 +212,16 @@ public class AccountController : Controller
             // Redirect to login if the session does not contain the username
             return RedirectToAction("Login");
         }
-    }
-    #endregion
+
+        #endregion
+
+        #region ACCESS DENIED HANDLING
+        [AllowAnonymous]
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
+        #endregion
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()

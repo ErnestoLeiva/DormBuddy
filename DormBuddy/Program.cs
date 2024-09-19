@@ -84,6 +84,12 @@ FirebaseApp.Create(new AppOptions()
 builder.Services.AddDbContext<DBContext>(options =>
         options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
         new MySqlServerVersion(new Version(8, 0, 2)))); 
+// Add services to the container.
+builder.Services.AddControllersWithViews();
+
+builder.Services.AddDbContext<DBContext>(options => 
+    options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"), 
+    new MySqlServerVersion(new Version(8, 0, 2))));
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<DBContext>()
@@ -100,36 +106,18 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequiredLength = 6;
     options.Password.RequiredUniqueChars = 1;
 });
+#endregion
 
 // Add session services
 builder.Services.AddSession(options =>
 {
-    options.SignIn.RequireConfirmedEmail = true;
-    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(60);
-    options.Lockout.MaxFailedAccessAttempts = 5;
-    options.Lockout.AllowedForNewUsers = true;
-})
-.AddEntityFrameworkStores<DBContext>()
-.AddDefaultTokenProviders();
-#endregion
-
-#region EMAIL SENDER
-builder.Services.AddTransient<DormBuddy.Models.IEmailSender, Smtp>();
-#endregion
-
-#region PASSWORD REQUIREMENTS
-builder.Services.Configure<IdentityOptions>(options =>
-{
-    options.Password.RequireDigit = true;
-    options.Password.RequireLowercase = true;
-    options.Password.RequireNonAlphanumeric = true;
-    options.Password.RequireUppercase = true;
-    options.Password.RequiredLength = 6;
-    options.Password.RequiredUniqueChars = 1;
+    options.IdleTimeout = TimeSpan.FromMinutes(30);  // Set session timeout (e.g., 30 minutes)
+    options.Cookie.HttpOnly = true;  // Make the session cookie HTTP-only for security
+    options.Cookie.IsEssential = true;  // Ensure the session cookie is essential (GDPR compliance)
 });
-#endregion
 
-#region AUTHENTICATION AND AUTHORIZATION
+#region ACCESS DENIED HANDLING
+// Add Authentication/Authorization Middleware and configure access denied handling
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
@@ -138,56 +126,41 @@ builder.Services.AddAuthentication(options =>
 .AddCookie(options =>
 {
     options.LoginPath = "/Account/Login";
-    options.AccessDeniedPath = "/Account/AccessDenied";
+    options.AccessDeniedPath = "/Account/AccessDenied"; // Redirect to this path if access is denied
 });
 
 builder.Services.AddAuthorization(options =>
 {
+    // Allow access to Admin for everything
     options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
+
+    // Moderator policy - can access certain resources
     options.AddPolicy("ModeratorPolicy", policy => policy.RequireRole("Moderator", "Admin"));
+
+    // User policy - can access some resources
     options.AddPolicy("UserPolicy", policy => policy.RequireRole("User", "Moderator", "Admin"));
 });
-#endregion
-
-#endregion
 
 var app = builder.Build();
+#endregion
 
-#region MIDDLEWARE CONFIGURATION
+// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
-} 
-else 
-{
-    Console.WriteLine("Development mode: Active");
 }
-
-app.UseCookiePolicy();
-
-var localizationOptions = app.Services.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value;
-app.UseRequestLocalization(localizationOptions);
-
-app.Use(async (context, next) =>
-{
-    var cookieValue = context.Request.Cookies["Culture"];
-    if (!string.IsNullOrEmpty(cookieValue))
-    {
-        var culture = new CultureInfo(cookieValue);
-        CultureInfo.CurrentCulture = culture;
-        CultureInfo.CurrentUICulture = culture;
-    }
-
-    await next.Invoke();
-});
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
 app.UseRouting();
 
-app.UseSession(); // UseSession must be before Authentication and Authorization
-app.UseAuthentication();
+// Enable session handling
+app.UseSession();
+
+// Authentication and Authorization middleware
+app.UseAuthentication(); // Make sure to add this line
 app.UseAuthorization();
 
 app.MapControllerRoute(
@@ -198,67 +171,61 @@ app.MapControllerRoute(
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=HomeLogin}/{id?}");
-#endregion
-
-// Call InitializeRolesAndAdminUser to create roles and the default admin user
-await InitializeRolesAndAdminUser(app);
-
-await InitializeRolesAndAdminUser(app);
 
 await InitializeRolesAndAdminUser(app);
 
 app.Run();
 
-#region ROLE AND ADMIN INITIALIZATION
+#region ROLES
+
 static async Task InitializeRolesAndAdminUser(WebApplication app)
 {
     using (var scope = app.Services.CreateScope())
     {
-        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
-        // Define roles
         string[] roles = { Roles.Admin, Roles.Moderator, Roles.User };
 
-        // Create roles if they don't exist
         foreach (var role in roles)
         {
-            if (!await roleManager.RoleExistsAsync(role))
+            var roleExist = await roleManager.RoleExistsAsync(role);
+            if (!roleExist)
             {
                 await roleManager.CreateAsync(new IdentityRole(role));
             }
         }
 
-        // Create the default admin user if it doesn't exist
-        var defaultAdminEmail = "admin@dormbuddy.com"; // Use a real email
-        var defaultAdminUsername = "admin";
-        var defaultAdminPassword = "Adminpass123!"; // Use a secure password
-
-        var adminUser = await userManager.FindByEmailAsync(defaultAdminEmail);
-
-        if (adminUser == null)
+        // Create a default admin account
+        var adminUser = new ApplicationUser
         {
-            adminUser = new ApplicationUser
-            {
-                UserName = defaultAdminUsername,
-                Email = defaultAdminEmail
-            };
+            UserName = "admin",
+            Email = "admin@dormbuddy.com",
+            FirstName = "Admin",
+            LastName = "",
+            Credits = 0
+        };
 
-            var createUserResult = await userManager.CreateAsync(adminUser, defaultAdminPassword);
+        string password = "Adminpass123!";
 
+        var user = await userManager.FindByEmailAsync(adminUser.Email);
+
+        if (user == null)
+        {
+            var createUserResult = await userManager.CreateAsync(adminUser, password);
             if (createUserResult.Succeeded)
             {
-                // Assign the Admin role to the user
                 await userManager.AddToRoleAsync(adminUser, Roles.Admin);
+                Console.WriteLine("Admin account created successfully!");
             }
             else
             {
-                // Log any errors or handle them as needed
-                foreach (var error in createUserResult.Errors)
-                {
-                    Console.WriteLine($"Error creating admin user: {error.Description}");
-                }
+                Console.WriteLine("Error creating admin account!");
             }
+        }
+        else
+        {
+            Console.WriteLine("Admin account already exists!");
         }
     }
 }
