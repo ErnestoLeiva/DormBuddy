@@ -7,6 +7,7 @@
     var roles = ViewBag.UserRoles.Split(',');
 }
 
+<!-- DASHBOARD HEADER -->
 <div class="text-center mb-4">
     <h1 class="display-4">User Dashboard</h1>
     <p>Welcome <b>@ViewBag.Username</b>!<br />
@@ -19,9 +20,9 @@
 
             var roleColor = role switch
             {
-                "Admin" => "color: #4dff00; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;",
-                "Moderator" => "color: #ffff00; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;",
-                "User" => "color: #0073ff; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;",
+                "Admin" => "color: #4dff00; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;", //neon-green
+                "Moderator" => "color: #ffff00; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;", //bright yellow
+                "User" => "color: #0073ff; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;", //dark blue
                 _ => "color: black;" //dfefault color
             };
             if (i >= roles.Length - 1) //dont add comma for last role
@@ -36,6 +37,7 @@
     This is your user dashboard to control actions regarding your account.</p>
 </div>
 
+<!-- DASHBOARD PANEL CARDS -->
 <div class="container">
     <div class="row">
         <!-- Task Management Card -->
