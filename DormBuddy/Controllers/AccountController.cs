@@ -9,21 +9,21 @@ namespace DormBuddy.Controllers
 {
     public class AccountController : Controller
     {
-
+        private readonly DBContext _context;
         private readonly ILogger<AccountController> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly DBContext _context;
+
         public AccountController(
             ILogger<AccountController> logger,
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            DBContext context)
+            DBContext context) // Injected DBContext
         {
             _logger = logger;
             _userManager = userManager;
             _signInManager = signInManager;
-            _context = _context;
+            _context = context; // Correctly assign the context
         }
 
         #region LOGIN HANDLING
@@ -32,7 +32,7 @@ namespace DormBuddy.Controllers
             if (User?.Identity != null && User.Identity.IsAuthenticated)
             {
                 return RedirectToAction("Dashboard", "Account");
-            } ///comment
+            }
             return View();
         }
 
@@ -49,7 +49,9 @@ namespace DormBuddy.Controllers
                     if (result.Succeeded)
                     {
                         return RedirectToAction("Dashboard", "Account");
-                    } else {
+                    }
+                    else
+                    {
                         ViewBag.ErrorMessage = "Invalid credentials, try again!";
                         return View();
                     }
@@ -60,9 +62,8 @@ namespace DormBuddy.Controllers
             }
             return View();
         }
-
         #endregion
-        
+
         #region SIGN UP/LOG OUT HANDLING
         public IActionResult Signup()
         {
@@ -78,7 +79,6 @@ namespace DormBuddy.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Check if the passwords match
                 if (password != reenterpassword)
                 {
                     ModelState.AddModelError(string.Empty, "Passwords do not match.");
@@ -86,7 +86,6 @@ namespace DormBuddy.Controllers
                     return View();
                 }
 
-                // Check if a user with the same username already exists
                 var existingUserByName = await _userManager.FindByNameAsync(username);
                 if (existingUserByName != null)
                 {
@@ -95,7 +94,6 @@ namespace DormBuddy.Controllers
                     return View();
                 }
 
-                // Check if a user with the same email already exists
                 var existingUserByEmail = await _userManager.FindByEmailAsync(email);
                 if (existingUserByEmail != null)
                 {
@@ -104,7 +102,6 @@ namespace DormBuddy.Controllers
                     return View();
                 }
 
-                // Validate password
                 var passwordValidator = new PasswordValidator<ApplicationUser>();
                 var passwordValidationResult = await passwordValidator.ValidateAsync(_userManager, null, password);
                 if (!passwordValidationResult.Succeeded)
@@ -135,7 +132,6 @@ namespace DormBuddy.Controllers
                 }
                 else
                 {
-                    // Log detailed error information
                     foreach (var error in result.Errors)
                     {
                         Console.WriteLine($"Error Code: {error.Code}, Description: {error.Description}");
@@ -155,11 +151,9 @@ namespace DormBuddy.Controllers
             }
             return RedirectToAction("Login");
         }
-
         #endregion
 
         #region DASHBOARD HANDLING
-        // GET: /Account/Dashboard
         public IActionResult Dashboard()
         {
             if (User?.Identity != null && User.Identity.IsAuthenticated)
@@ -170,7 +164,6 @@ namespace DormBuddy.Controllers
             return RedirectToAction("Login");
         }
 
-        // GET: /Account/Dashboard/Tasks
         public IActionResult Tasks()
         {
             if (User?.Identity != null && User.Identity.IsAuthenticated)
@@ -180,7 +173,6 @@ namespace DormBuddy.Controllers
             return RedirectToAction("Login");
         }
 
-        // GET: /Account/Dashboard/Expenses
         public IActionResult Expenses()
         {
             if (User?.Identity != null && User.Identity.IsAuthenticated)
@@ -190,7 +182,6 @@ namespace DormBuddy.Controllers
             return RedirectToAction("Login");
         }
 
-        // GET: /Account/Dashboard/Lending
         public IActionResult Lending()
         {
             if (User?.Identity != null && User.Identity.IsAuthenticated)
@@ -200,7 +191,6 @@ namespace DormBuddy.Controllers
             return RedirectToAction("Login");
         }
 
-        // GET: /Account/Dashboard/Notifications
         public IActionResult Notifications()
         {
             if (User?.Identity != null && User.Identity.IsAuthenticated)
@@ -210,7 +200,6 @@ namespace DormBuddy.Controllers
             return RedirectToAction("Login");
         }
 
-        // GET: /Account/Dashboard/Settings
         public IActionResult Settings()
         {
             if (User?.Identity != null && User.Identity.IsAuthenticated)
@@ -219,7 +208,6 @@ namespace DormBuddy.Controllers
             }
             return RedirectToAction("Login");
         }
-
         #endregion
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
@@ -228,32 +216,26 @@ namespace DormBuddy.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
-        //admin dashboard
         public IActionResult AdminDashboard()
         {
-        // Check if the user is logged in and has admin privileges
-        var username = HttpContext.Session.GetString("Username");
-        if (username != null)
-        {
-            // Assuming you have an admin role in your DB_accounts table
-            var user = _context.accounts.FirstOrDefault(u => u.username == username);
-            if (user != null && user.IsAdmin) // Assuming you have an IsAdmin flag in the database
+            var username = HttpContext.Session.GetString("Username");
+            if (username != null)
             {
-                ViewBag.Username = username;
-                return View();
+                var user = _context.Users.FirstOrDefault(u => u.UserName == username);
+                if (user != null && user.IsAdmin)
+                {
+                    ViewBag.Username = username;
+                    return View();
+                }
+                else
+                {
+                    return RedirectToAction("Dashboard");
+                }
             }
             else
             {
-                // Redirect non-admin users to their regular dashboard
-                return RedirectToAction("Dashboard");
+                return RedirectToAction("Login");
             }
         }
-        else
-        {
-            // Redirect to login if the session does not contain the username
-            return RedirectToAction("Login");
-        }
-    }
-
     }
 }
