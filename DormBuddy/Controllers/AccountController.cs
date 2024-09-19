@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Threading.Tasks;
 using DormBuddy.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -134,7 +135,10 @@ namespace DormBuddy.Controllers
                 var result = await _userManager.CreateAsync(user, password);
 
                 if (result.Succeeded)
-                {
+                {   
+                    // Assign the default role to the user
+                    await _userManager.AddToRoleAsync(user, "User");
+
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     return RedirectToAction("Dashboard", "Account");
                 }
@@ -170,9 +174,12 @@ namespace DormBuddy.Controllers
             if (User?.Identity != null && User.Identity.IsAuthenticated)
             {
                 var user = await _userManager.GetUserAsync(User);
+                
                 if (user != null)
                 {
+                    var roles = await _userManager.GetRolesAsync(user);
                     ViewBag.Username = $"{user.FirstName} {user.LastName}";
+                    ViewBag.UserRoles = string.Join(", ", roles);
                 }
                 return View();
             }
@@ -229,6 +236,14 @@ namespace DormBuddy.Controllers
             return RedirectToAction("Login");
         }
 
+        #endregion
+
+        #region ACCESS DENIED HANDLING
+        [AllowAnonymous]
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
         #endregion
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
