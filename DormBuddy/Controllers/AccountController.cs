@@ -2,7 +2,6 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using DormBuddy.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -25,16 +24,19 @@ namespace DormBuddy.Controllers
             _signInManager = signInManager;
         }
 
-        #region LOGIN HANDLING
+        #region LOGIN
+
+        // GET: /Account/Login
         public IActionResult Login()
         {
             if (User?.Identity != null && User.Identity.IsAuthenticated)
             {
-                return RedirectToAction("Dashboard", "Account");
+                return RedirectToAction("Dashboard");
             }
             return View();
         }
 
+        // POST: /Account/Login
         [HttpPost]
         public async Task<IActionResult> Login(string username, string password)
         {
@@ -47,11 +49,11 @@ namespace DormBuddy.Controllers
 
                     if (result.Succeeded)
                     {
-                        return RedirectToAction("Dashboard", "Account");
-                    } else {
-                        ViewBag.ErrorMessage = "Invalid credentials, try again!";
-                        return View();
+                        return RedirectToAction("Dashboard");
                     }
+
+                    ViewBag.ErrorMessage = "Invalid credentials, try again!";
+                    return View();
                 }
 
                 ModelState.AddModelError(string.Empty, "Invalid Username/Email entered: User does not exist.");
@@ -61,23 +63,26 @@ namespace DormBuddy.Controllers
         }
 
         #endregion
-        
-        #region SIGN UP/LOG OUT HANDLING
+
+        #region SIGN UP
+
+        // GET: /Account/Signup
         public IActionResult Signup()
         {
             if (User?.Identity != null && User.Identity.IsAuthenticated)
             {
-                return RedirectToAction("Dashboard", "Account");
+                return RedirectToAction("Dashboard");
             }
             return View();
         }
 
+        // POST: /Account/Signup
         [HttpPost]
         public async Task<IActionResult> Signup(string email, string username, string password, string reenterpassword, string firstname, string lastname)
         {
             if (ModelState.IsValid)
             {
-                // Check if the passwords match
+                // Check if passwords match
                 if (password != reenterpassword)
                 {
                     ModelState.AddModelError(string.Empty, "Passwords do not match.");
@@ -85,7 +90,7 @@ namespace DormBuddy.Controllers
                     return View();
                 }
 
-                // Check if a user with the same username already exists
+                // Check if username exists
                 var existingUserByName = await _userManager.FindByNameAsync(username);
                 if (existingUserByName != null)
                 {
@@ -94,7 +99,7 @@ namespace DormBuddy.Controllers
                     return View();
                 }
 
-                // Check if a user with the same email already exists
+                // Check if email exists
                 var existingUserByEmail = await _userManager.FindByEmailAsync(email);
                 if (existingUserByEmail != null)
                 {
@@ -116,8 +121,9 @@ namespace DormBuddy.Controllers
                     return View();
                 }
 
-                var user = new ApplicationUser 
-                { 
+                // Create user
+                var user = new ApplicationUser
+                {
                     UserName = username,
                     Email = email,
                     FirstName = firstname,
@@ -128,27 +134,29 @@ namespace DormBuddy.Controllers
                 var result = await _userManager.CreateAsync(user, password);
 
                 if (result.Succeeded)
-                {   
-                    // Assign the default role to the user
-                    await _userManager.AddToRoleAsync(user, "User");
-
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    return RedirectToAction("Dashboard", "Account");
-                }
-                else
                 {
-                    // Log detailed error information
-                    foreach (var error in result.Errors)
-                    {
-                        Console.WriteLine($"Error Code: {error.Code}, Description: {error.Description}");
-                        ModelState.AddModelError(string.Empty, error.Description);
-                    }
+                    // Assign "User" role to the new account
+                    await _userManager.AddToRoleAsync(user, "User");
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    return RedirectToAction("Dashboard");
+                }
+
+                // Log errors if user creation failed
+                foreach (var error in result.Errors)
+                {
+                    Console.WriteLine($"Error Code: {error.Code}, Description: {error.Description}");
+                    ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
 
             return View();
         }
 
+        #endregion
+
+        #region LOGOUT
+
+        // GET: /Account/Logout
         public async Task<IActionResult> Logout()
         {
             if (User?.Identity != null && User.Identity.IsAuthenticated)
@@ -160,18 +168,21 @@ namespace DormBuddy.Controllers
 
         #endregion
 
-        #region DASHBOARD HANDLING
+        #region DASHBOARD
+
         // GET: /Account/Dashboard
         public async Task<IActionResult> Dashboard()
         {
             if (User?.Identity != null && User.Identity.IsAuthenticated)
             {
                 var user = await _userManager.GetUserAsync(User);
-                
+
                 if (user != null)
                 {
                     //await _userManager.AddToRoleAsync(user, "Admin");
+                    //await _userManager.AddToRoleAsync(user, "Moderator");
                     //await _userManager.RemoveFromRoleAsync(user, "Admin");
+                    //await _userManager.RemoveFromRoleAsync(user, "Moderator");
                     var roles = await _userManager.GetRolesAsync(user);
                     ViewBag.Username = $"{user.FirstName} {user.LastName}";
                     ViewBag.UserRoles = string.Join(", ", roles);
@@ -180,6 +191,10 @@ namespace DormBuddy.Controllers
             }
             return RedirectToAction("Login");
         }
+
+        #endregion
+
+        #region DASHBOARD SECTIONS
 
         // GET: /Account/Dashboard/Tasks
         public IActionResult Tasks()
@@ -233,18 +248,24 @@ namespace DormBuddy.Controllers
 
         #endregion
 
-        #region ACCESS DENIED HANDLING
+        #region ACCESS DENIED
+
         [AllowAnonymous]
         public IActionResult AccessDenied()
         {
             return View();
         }
+
         #endregion
+
+        #region ERROR HANDLING
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+        #endregion
     }
 }
