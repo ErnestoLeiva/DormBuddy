@@ -87,7 +87,7 @@
         <div class="col-md-4">
             <div class="card text-center mb-4">
                 <div class="card-header bg-dark text-white">
-                    <i class="fas fa-cog fa-lg"></i> <!-- Gear Icon -->
+                    <i class="fas fa-cog fa-lg"></i>
                     Help & Support
                 </div>
                 <div class="card-body">
@@ -96,5 +96,37 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- ADMIN PANEL CARD -->
+    <div class="row">
+        @if (ViewBag.UserRoles.Contains("Admin")) {
+            <div class="col-md-4 offset-md-4">
+                <div class="card text-center mb-4">
+                    <div class="card-header bg-purple text-white">
+                        <i class="fas fa-shield-alt fa-lg"></i>
+                        Admin Panel
+                    </div>
+                    <div class="card-body">
+                        <p>Manage site-wide settings and users.</p>
+                        <a href="#" class="btn btn-purple">Go to Admin Panel</a>
+                    </div>
+                </div>
+            </div>
+        }
+        else if (!ViewBag.UserRoles.Contains("Admin") && ViewBag.UserRoles.Contains("Moderator")){
+            <div class="col-md-4 offset-md-4">
+                <div class="card text-center mb-4">
+                    <div class="card-header bg-purple text-white">
+                        <i class="fas fa-shield-alt fa-lg"></i>
+                        Moderator Panel
+                    </div>
+                    <div class="card-body">
+                        <p>Manage site-wide settings and users.</p>
+                        <a href="#" class="btn btn-purple">Go to Moderator Panel</a>
+                    </div>
+                </div>
+            </div>
+        }
     </div>
 </div>

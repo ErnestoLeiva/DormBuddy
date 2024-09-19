@@ -169,6 +169,8 @@ namespace DormBuddy.Controllers
                 
                 if (user != null)
                 {
+                    //await _userManager.AddToRoleAsync(user, "Moderator");
+                    //await _userManager.RemoveFromRoleAsync(user, "Moderator");
                     var roles = await _userManager.GetRolesAsync(user);
                     ViewBag.Username = $"{user.FirstName} {user.LastName}";
                     ViewBag.UserRoles = string.Join(", ", roles);
