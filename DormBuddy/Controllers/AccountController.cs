@@ -157,11 +157,15 @@ namespace DormBuddy.Controllers
 
         #region DASHBOARD HANDLING
         // GET: /Account/Dashboard
-        public IActionResult Dashboard()
+        public async Task<IActionResult> Dashboard()
         {
             if (User?.Identity != null && User.Identity.IsAuthenticated)
             {
-                ViewBag.Username = User.Identity.Name;
+                var user = await _userManager.GetUserAsync(User);
+                if (user != null)
+                {
+                    ViewBag.Username = $"{user.FirstName} {user.LastName}";
+                }
                 return View();
             }
             return RedirectToAction("Login");
