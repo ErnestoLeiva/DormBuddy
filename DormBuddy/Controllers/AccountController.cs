@@ -24,6 +24,20 @@ namespace DormBuddy.Controllers
             _signInManager = signInManager;
         }
 
+        #region ACCOUNT FORMS
+
+        // GET: /Account/AccountForms
+        public IActionResult AccountForms()
+        {
+            if (User?.Identity != null && User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Dashboard");
+            }
+            return View();
+        }
+
+        #endregion
+
         #region LOGIN
 
         // GET: /Account/Login
@@ -53,13 +67,13 @@ namespace DormBuddy.Controllers
                     }
 
                     ViewBag.ErrorMessage = "Invalid credentials, try again!";
-                    return View();
+                    return View("AccountForms");
                 }
 
                 ModelState.AddModelError(string.Empty, "Invalid Username/Email entered: User does not exist.");
                 ViewBag.ErrorMessage = "Invalid Username/Email entered: User does not exist.";
             }
-            return View();
+            return View("AccountForms");
         }
 
         #endregion
@@ -87,7 +101,7 @@ namespace DormBuddy.Controllers
                 {
                     ModelState.AddModelError(string.Empty, "Passwords do not match.");
                     ViewBag.ErrorMessage = "Passwords do not match!";
-                    return View();
+                    return View("AccountForms");
                 }
 
                 // Check if username exists
@@ -96,7 +110,7 @@ namespace DormBuddy.Controllers
                 {
                     ModelState.AddModelError(string.Empty, "Username is already taken.");
                     ViewBag.ErrorMessage = "Username is already taken!";
-                    return View();
+                    return View("AccountForms");
                 }
 
                 // Check if email exists
@@ -105,7 +119,7 @@ namespace DormBuddy.Controllers
                 {
                     ModelState.AddModelError(string.Empty, "Email is already registered.");
                     ViewBag.ErrorMessage = "Email is already registered!";
-                    return View();
+                    return View("AccountForms");
                 }
 
                 // Validate password
@@ -118,7 +132,7 @@ namespace DormBuddy.Controllers
                         ModelState.AddModelError(string.Empty, error.Description);
                     }
                     ViewBag.ErrorMessage = "Password does not meet the requirements!";
-                    return View();
+                    return View("AccountForms");
                 }
 
                 // Create user
@@ -149,7 +163,7 @@ namespace DormBuddy.Controllers
                 }
             }
 
-            return View();
+            return View("AccountForms");
         }
 
         #endregion
@@ -179,10 +193,6 @@ namespace DormBuddy.Controllers
 
                 if (user != null)
                 {
-                    //await _userManager.AddToRoleAsync(user, "Admin");
-                    //await _userManager.AddToRoleAsync(user, "Moderator");
-                    //await _userManager.RemoveFromRoleAsync(user, "Admin");
-                    //await _userManager.RemoveFromRoleAsync(user, "Moderator");
                     var roles = await _userManager.GetRolesAsync(user);
                     ViewBag.Username = $"{user.FirstName} {user.LastName}";
                     ViewBag.UserRoles = string.Join(", ", roles);
