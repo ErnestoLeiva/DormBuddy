@@ -4,21 +4,28 @@ using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
+#region SERVICES CONFIGURATION
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddDbContext<DBContext>(options => 
-    options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"), 
+#region DATABASE CONFIGURATION
+// Database configuration using MySQL
+builder.Services.AddDbContext<DBContext>(options =>
+    options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
     new MySqlServerVersion(new Version(8, 0, 2))));
+#endregion
 
+#region IDENTITY CONFIGURATION
+// Identity configuration for user management
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<DBContext>()
     .AddDefaultTokenProviders();
+#endregion
 
-#region PASSWORD REQ.
+#region PASSWORD REQUIREMENTS
+// Configure password requirements for users
 builder.Services.Configure<IdentityOptions>(options =>
 {
-    // Password settings
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
     options.Password.RequireNonAlphanumeric = true;
@@ -28,16 +35,18 @@ builder.Services.Configure<IdentityOptions>(options =>
 });
 #endregion
 
-// Add session services
+#region SESSION CONFIGURATION
+// Session configuration
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30);  // Set session timeout (e.g., 30 minutes)
-    options.Cookie.HttpOnly = true;  // Make the session cookie HTTP-only for security
-    options.Cookie.IsEssential = true;  // Ensure the session cookie is essential (GDPR compliance)
+    options.IdleTimeout = TimeSpan.FromMinutes(30);  // Set session timeout to 30 minutes
+    options.Cookie.HttpOnly = true;  // Secure cookie
+    options.Cookie.IsEssential = true;  // GDPR compliance
 });
+#endregion
 
-#region ACCESS DENIED HANDLING
-// Add Authentication/Authorization Middleware and configure access denied handling
+#region AUTHENTICATION AND AUTHORIZATION
+// Authentication/Authorization configuration
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
@@ -46,25 +55,24 @@ builder.Services.AddAuthentication(options =>
 .AddCookie(options =>
 {
     options.LoginPath = "/Account/Login";
-    options.AccessDeniedPath = "/Account/AccessDenied"; // Redirect to this path if access is denied
+    options.AccessDeniedPath = "/Account/AccessDenied"; // Redirect on access denied
 });
 
+// Role-based authorization policies
 builder.Services.AddAuthorization(options =>
 {
-    // Allow access to Admin for everything
     options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
-
-    // Moderator policy - can access certain resources
     options.AddPolicy("ModeratorPolicy", policy => policy.RequireRole("Moderator", "Admin"));
-
-    // User policy - can access some resources
     options.AddPolicy("UserPolicy", policy => policy.RequireRole("User", "Moderator", "Admin"));
 });
-
-var app = builder.Build();
 #endregion
 
-// Configure the HTTP request pipeline.
+#endregion
+
+var app = builder.Build();
+
+#region MIDDLEWARE CONFIGURATION
+// Configure middleware for HTTP request pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -73,74 +81,41 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
 
 // Enable session handling
 app.UseSession();
 
-// Authentication and Authorization middleware
-app.UseAuthentication(); // Make sure to add this line
+// Enable authentication and authorization
+app.UseAuthentication();
 app.UseAuthorization();
 
+// Map default routes
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=HomeLogin}/{id?}");
+#endregion
 
 await InitializeRolesAndAdminUser(app);
 
 app.Run();
 
-#region ROLES
-
+#region ROLE INITIALIZATION
+// Initialize default roles without creating an admin user
 static async Task InitializeRolesAndAdminUser(WebApplication app)
 {
     using (var scope = app.Services.CreateScope())
     {
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
         string[] roles = { Roles.Admin, Roles.Moderator, Roles.User };
 
         foreach (var role in roles)
         {
-            var roleExist = await roleManager.RoleExistsAsync(role);
-            if (!roleExist)
+            if (!await roleManager.RoleExistsAsync(role))
             {
                 await roleManager.CreateAsync(new IdentityRole(role));
             }
-        }
-
-        // Create a default admin account
-        var adminUser = new ApplicationUser
-        {
-            UserName = "admin",
-            Email = "admin@dormbuddy.com",
-            FirstName = "Admin",
-            LastName = "",
-            Credits = 0
-        };
-
-        string password = "Adminpass123!";
-
-        var user = await userManager.FindByEmailAsync(adminUser.Email);
-
-        if (user == null)
-        {
-            var createUserResult = await userManager.CreateAsync(adminUser, password);
-            if (createUserResult.Succeeded)
-            {
-                await userManager.AddToRoleAsync(adminUser, Roles.Admin);
-                Console.WriteLine("Admin account created successfully!");
-            }
-            else
-            {
-                Console.WriteLine("Error creating admin account!");
-            }
-        }
-        else
-        {
-            Console.WriteLine("Admin account already exists!");
         }
     }
 }
