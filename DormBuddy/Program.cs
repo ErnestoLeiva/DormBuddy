@@ -106,7 +106,7 @@ await InitializeRolesAndAdminUser(app);
 app.Run();
 
 #region ROLE INITIALIZATION
-// Initialize default roles without creating an admin user
+// Initialize default roles
 static async Task InitializeRolesAndAdminUser(WebApplication app)
 {
     using (var scope = app.Services.CreateScope())
