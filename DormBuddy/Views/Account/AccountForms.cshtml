@@ -7,44 +7,64 @@
     <link rel="stylesheet" href="~/css/account.css" asp-append-version="true" />
 }
 
-<div class="account-forms-container">
-    <div class="container" id="container">
-        <!-- Sign Up Form -->
-        <div class="form-container sign-up">
-            <form asp-action="Signup" method="post">
-                <h1>Create Account</h1>
-                <!-- Input fields for user registration -->
-                <input asp-for="firstname" type="text" placeholder="First Name" required>
-                <input asp-for="lastname" type="text" placeholder="Last Name" required>
-                <input asp-for="username" type="text" placeholder="Username" required>
-                <input asp-for="email" type="email" placeholder="Email" required>
-                <input asp-for="password" type="password" placeholder="Password" required>
-                <input name="reenterpassword" type="password" placeholder="Re-enter Password" required>
-                <button type="submit">Sign Up</button>
-                <!-- Mobile toggle link to switch to Sign In -->
-                <div class="mobile-toggle-link">
-                    <span>Already have an account?</span>
-                    <a href="#" id="mobileToggle">Sign in here</a>
-                </div>
-            </form>
-        </div>
+<div class="account-forms-wrapper">
+    <div class="account-forms-container">
+        <div class="container" id="container">
+            <!-- Sign Up Form -->
+            <div class="form-container sign-up">
+                <form asp-action="Signup" method="post">
+                    <h1>Create Account</h1>
+                    <input asp-for="FirstName" type="text" placeholder="First Name" required>
+                    <input asp-for="LastName" type="text" placeholder="Last Name" required>
+                    <input asp-for="UserName" type="text" placeholder="Username" required>
+                    <input asp-for="Email" type="email" placeholder="Email" required>
+                    
+                    <!-- Password Field with Toggle for Sign Up -->
+                    <div class="password-wrapper">
+                        <input name="password" type="password" class="form-control" id="signUpPassword" placeholder="Password" required>
+                        <span class="toggle-password">
+                            <i class="fa fa-eye" id="toggleSignUpPassword"></i>
+                        </span>
+                    </div>
 
-        <!-- Sign In Form -->
-        <div class="form-container sign-in">
-            <form asp-action="Login" method="post">
-                <h1>Sign In</h1>
-                <!-- Input fields for user login -->
-                <input name="username" type="text" placeholder="Username or Email" required>
-                <input name="password" type="password" placeholder="Password" required>
-                <a href="#">Forgot Your Password?</a>
-                <button type="submit">Sign In</button>
-                <!-- Mobile toggle link to switch to Sign Up -->
-                <div class="mobile-toggle-link">
-                    <span>Don't have an account?</span>
-                    <a href="#" id="mobileToggle">Sign up here</a>
-                </div>
-            </form>
-        </div>
+                    <!-- Re-enter Password Field with Toggle for Sign Up -->
+                    <div class="password-wrapper">
+                        <input name="reenterpassword" type="password" class="form-control" id="signUpReEnterPassword" placeholder="Re-enter Password" required>
+                        <span class="toggle-password">
+                            <i class="fa fa-eye" id="toggleSignUpReEnterPassword"></i>
+                        </span>
+                    </div>
+
+                    <button type="submit">Sign Up</button>
+                    <div class="mobile-toggle-link">
+                        <span>Already have an account?</span>
+                        <a href="#" id="mobileToggle">Sign in here</a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Sign In Form -->
+            <div class="form-container sign-in">
+                <form asp-action="Login" method="post">
+                    <h1>Sign In</h1>
+                    <input name="username" type="text" placeholder="Username or Email" required>
+                    
+                    <!-- Password Field with Toggle for Sign In -->
+                    <div class="password-wrapper">
+                        <input name="password" type="password" class="form-control" id="signInPassword" placeholder="Password" required>
+                        <span class="toggle-password">
+                            <i class="fa fa-eye" id="toggleSignInPassword"></i>
+                        </span>
+                    </div>
+
+                    <a href="#">Forgot Your Password?</a>
+                    <button type="submit">Sign In</button>
+                    <div class="mobile-toggle-link">
+                        <span>Don't have an account?</span>
+                        <a href="#" id="mobileToggle">Sign up here</a>
+                    </div>
+                </form>
+            </div>
 
         <!-- Toggle Container for desktop view -->
         <div class="toggle-container">
@@ -66,4 +86,33 @@
 
 @section Scripts {
     <script src="~/js/account.js" asp-append-version="true"></script>
+    <script>
+        // Toggle for Sign-Up password field
+        const toggleSignUpPassword = document.getElementById('toggleSignUpPassword');
+        const signUpPasswordInput = document.getElementById('signUpPassword');
+        const toggleSignUpReEnterPassword = document.getElementById('toggleSignUpReEnterPassword');
+        const signUpReEnterPasswordInput = document.getElementById('signUpReEnterPassword');
+
+        toggleSignUpPassword.addEventListener('click', function () {
+            const type = signUpPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            signUpPasswordInput.setAttribute('type', type);
+            this.classList.toggle('fa-eye-slash');
+        });
+
+        toggleSignUpReEnterPassword.addEventListener('click', function () {
+            const type = signUpReEnterPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            signUpReEnterPasswordInput.setAttribute('type', type);
+            this.classList.toggle('fa-eye-slash');
+        });
+
+        // Toggle for Sign-In password field
+        const toggleSignInPassword = document.getElementById('toggleSignInPassword');
+        const signInPasswordInput = document.getElementById('signInPassword');
+
+        toggleSignInPassword.addEventListener('click', function () {
+            const type = signInPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            signInPasswordInput.setAttribute('type', type);
+            this.classList.toggle('fa-eye-slash');
+        });
+    </script>
 }

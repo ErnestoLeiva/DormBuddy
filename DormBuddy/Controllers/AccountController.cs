@@ -21,6 +21,20 @@ public class AccountController : Controller
         _context = context;
     }
 
+        #region ACCOUNT FORMS
+
+        // GET: /Account/AccountForms
+        public IActionResult AccountForms()
+        {
+            if (User?.Identity != null && User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Dashboard");
+            }
+            return View();
+        }
+
+        #endregion
+
     public IActionResult AccountForms()
     {
     return View();
@@ -57,21 +71,43 @@ public class AccountController : Controller
 
         }
 
-        ViewBag.ErrorMessage = "Invalid credentials, try again!";
-        return View("AccountForms");
-    }
+                    ViewBag.ErrorMessage = "Invalid credentials, try again!";
+                    return View("AccountForms");
+                }
 
-    public IActionResult Signup() {
-
-        // Check if the user is logged in by checking the session
-        var username = HttpContext.Session.GetString("Username");
-        if (username != null)
-        {
-            return RedirectToAction("Dashboard", "Account");
+                ModelState.AddModelError(string.Empty, "Invalid Username/Email entered: User does not exist.");
+                ViewBag.ErrorMessage = "Invalid Username/Email entered: User does not exist.";
+            }
+            return View("AccountForms");
         }
 
-        return View();
-    }
+        #endregion
+
+        #region SIGN UP
+
+        // GET: /Account/Signup
+        public IActionResult Signup()
+        {
+            if (User?.Identity != null && User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Dashboard");
+            }
+            return View();
+        }
+
+        // POST: /Account/Signup
+        [HttpPost]
+        public async Task<IActionResult> Signup(string email, string username, string password, string reenterpassword, string firstname, string lastname)
+        {
+            if (ModelState.IsValid)
+            {
+                // Check if passwords match
+                if (password != reenterpassword)
+                {
+                    ModelState.AddModelError(string.Empty, "Passwords do not match.");
+                    ViewBag.ErrorMessage = "Passwords do not match!";
+                    return View("AccountForms");
+                }
 
                 // Check if a user with the same username already exists
                 var existingUserByName = await _userManager.FindByNameAsync(username);
@@ -79,7 +115,7 @@ public class AccountController : Controller
                 {
                     ModelState.AddModelError(string.Empty, "Username is already taken.");
                     ViewBag.ErrorMessage = "Username is already taken!";
-                    return View();
+                    return View("AccountForms");
                 }
 
                 // Check if a user with the same email already exists
@@ -88,7 +124,7 @@ public class AccountController : Controller
                 {
                     ModelState.AddModelError(string.Empty, "Email is already registered.");
                     ViewBag.ErrorMessage = "Email is already registered!";
-                    return View();
+                    return View("AccountForms");
                 }
 
                 // Validate password
@@ -101,7 +137,7 @@ public class AccountController : Controller
                         ModelState.AddModelError(string.Empty, error.Description);
                     }
                     ViewBag.ErrorMessage = "Password does not meet the requirements!";
-                    return View();
+                    return View("AccountForms");
                 }
 
                 var user = new ApplicationUser 
@@ -134,7 +170,7 @@ public class AccountController : Controller
                 }
             }
 
-            return View();
+            return View("AccountForms");
         }
 
         public async Task<IActionResult> Logout()
@@ -158,8 +194,6 @@ public class AccountController : Controller
                 
                 if (user != null)
                 {
-                    //await _userManager.AddToRoleAsync(user, "Moderator");
-                    //await _userManager.RemoveFromRoleAsync(user, "Moderator");
                     var roles = await _userManager.GetRolesAsync(user);
                     ViewBag.Username = $"{user.FirstName} {user.LastName}";
                     ViewBag.UserRoles = string.Join(", ", roles);
