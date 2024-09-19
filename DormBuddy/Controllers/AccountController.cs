@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using DormBuddy.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -177,8 +178,8 @@ namespace DormBuddy.Controllers
                 
                 if (user != null)
                 {
-                    //await _userManager.AddToRoleAsync(user, "Moderator");
-                    //await _userManager.RemoveFromRoleAsync(user, "Moderator");
+                    //await _userManager.AddToRoleAsync(user, "Admin");
+                    //await _userManager.RemoveFromRoleAsync(user, "Admin");
                     var roles = await _userManager.GetRolesAsync(user);
                     ViewBag.Username = $"{user.FirstName} {user.LastName}";
                     ViewBag.UserRoles = string.Join(", ", roles);
