@@ -2,10 +2,37 @@
     ViewData["Title"] = "Dashboard";
 }
 
+@{
+    var roleLabel = ViewBag.UserRoles.Contains(",") ? "Roles" : "Role"; // ift there is more than one role add an 's'
+    var roles = ViewBag.UserRoles.Split(',');
+}
+
 <div class="text-center mb-4">
     <h1 class="display-4">User Dashboard</h1>
     <p>Welcome <b>@ViewBag.Username</b>!<br />
-    [Role: @ViewBag.UserRoles]<br />
+    [@roleLabel: 
+    @{
+        for (int i = 0; i < roles.Length; i++)
+        {
+            var role = roles[i].Trim();
+            var conditionalComma = ",";
+
+            var roleColor = role switch
+            {
+                "Admin" => "color: #4dff00; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;",
+                "Moderator" => "color: #ffff00; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;",
+                "User" => "color: #0073ff; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;",
+                _ => "color: black;" //dfefault color
+            };
+            if (i >= roles.Length - 1) //dont add comma for last role
+            {
+                conditionalComma = null; 
+            }
+
+            <span style="@roleColor">@role</span>@conditionalComma
+            //Example:    PURPLE     ADMIN        , or null
+        }
+    }]<br />
     This is your user dashboard to control actions regarding your account.</p>
 </div>
 
@@ -98,7 +125,7 @@
         </div>
     </div>
 
-    <!-- ADMIN PANEL CARD -->
+    <!-- ADMIN/MODERATOR ROW -->
     <div class="row">
         @if (ViewBag.UserRoles.Contains("Admin")) {
             <div class="col-md-4 offset-md-4">
