@@ -51,7 +51,7 @@ namespace DormBuddy.Models {
             // Replace placeholders with actual values
             template = template.Replace("{UserName}", user.UserName);
             template = template.Replace("{ActivationLink}", activationLink);
-            template = template.Replace("{Base64ImageString}", dormbuddyAssets["LogoDirectLink"]);
+            template = template.Replace("{DormBuddyLogoLink}", dormbuddyAssets["LogoDirectLink"]);
 
             return template;
         }
