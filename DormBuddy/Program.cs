@@ -94,6 +94,11 @@ builder.Services.AddDbContext<DBContext>(options =>
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<DBContext>()
     .AddDefaultTokenProviders();
+#endregion
+
+#region EMAIL SENDER
+builder.Services.AddTransient<DormBuddy.Models.IEmailSender, Smtp>();
+#endregion
 
 #region PASSWORD REQ.
 builder.Services.Configure<IdentityOptions>(options =>

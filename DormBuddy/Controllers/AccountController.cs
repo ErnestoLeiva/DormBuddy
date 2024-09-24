@@ -7,22 +7,32 @@ using Microsoft.AspNetCore.Mvc;
 using DormBuddy.Models;
 using Microsoft.EntityFrameworkCore;
 
+using Microsoft.AspNetCore.Identity.UI.Services;
 
-namespace DormBuddy.Controllers;
-
-public class AccountController : Controller
+namespace DormBuddy.Controllers
 {
-    private readonly ILogger<AccountController> _logger;
-    private readonly DBContext _context;
-
-    public AccountController(ILogger<AccountController> logger, DBContext context)
+    public class AccountController : Controller
     {
-        _logger = logger;
-        _context = context;
-    }
+        private readonly ILogger<AccountController> _logger;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly DormBuddy.Models.IEmailSender _emailSender;
+
+        public AccountController(
+            ILogger<AccountController> logger,
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
+            DormBuddy.Models.IEmailSender emailSender)
+        {
+            _logger = logger;
+            _userManager = userManager;
+            _signInManager = signInManager;
+            _emailSender = emailSender;
+        }
 
         #region ACCOUNT FORMS
 
+        // GET: /Account/AccountForms
         // GET: /Account/AccountForms
         public IActionResult AccountForms()
         {
@@ -40,51 +50,74 @@ public class AccountController : Controller
     return View();
     }
 
-    public IActionResult Login()
-    {
-
-        // Check if the user is logged in by checking the session
-        var username = HttpContext.Session.GetString("Username");
-        if (username != null)
+        // GET: /Account/Login
+        public IActionResult Login()
         {
-            return RedirectToAction("Dashboard", "Account");
-        }
-
-        return View();
-    }
-
-    #region LOGIN HANDLING
-    // POST: /Account/Login -- (This handles a user clicking the "login" button on the login page)
-    [HttpPost]
-    public async Task<IActionResult> Login(string username, string password)
-    {
-        var acc = await _context.accounts.FirstOrDefaultAsync(u => u.username == username || u.email == username);
-
-        if (acc != null) {
-            
-            var hashCheck = BCrypt.Net.BCrypt.Verify(password, acc.password);
-
-            if (hashCheck) {
-                HttpContext.Session.SetString("Username", acc.username);
-                return RedirectToAction("Dashboard", "Account");
+            if (User?.Identity != null && User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Dashboard");
             }
-
+            return View("AccountForms");
         }
 
-                    ViewBag.ErrorMessage = "Invalid credentials, try again!";
+        // POST: /Account/Login
+        [HttpPost]
+        public async Task<IActionResult> Login(string username, string password)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.FindByNameAsync(username) ?? await _userManager.FindByEmailAsync(username);
+                
+                if (user != null)
+                {
+                    var result = await _signInManager.PasswordSignInAsync(user, password, false, false);
+
+                    if (result.Succeeded)
+                    {
+                        
+                        return RedirectToAction("Dashboard");
+                    }
+
+                    if (!user.EmailConfirmed) {
+
+                        if (TempData["ResendCode"] != null) {
+                            // resend email
+                            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                            var confirmationLink = Url.Action("Activation", "Account", new { userId = user.Id, token }, Request.Scheme);
+                            if (!string.IsNullOrEmpty(confirmationLink)) {
+                                await _emailSender.SendActivationEmail(user, confirmationLink);
+                                TempData["message"] = "Email confirmation has been sent!";
+                            } else {
+                                Console.WriteLine("Confirmation link is null! Activation email not sent to user!");
+                            }
+                            TempData["ResendCode"] = null;
+                        } else {
+                            ViewBag.ErrorMessage = "Check your email for confirmation! Need it to be resent? Try Logging in again!";
+                            TempData["ResendCode"] = "true";
+                        }
+
+                        return View("AccountForms");
+                    }
+
+                    
+                } else {
+                    ModelState.AddModelError(string.Empty, "Invalid Username/Email entered: User does not exist.");
+                    ViewBag.ErrorMessage = "Invalid Username/Email entered: User does not exist.";
                     return View("AccountForms");
                 }
 
-                ModelState.AddModelError(string.Empty, "Invalid Username/Email entered: User does not exist.");
-                ViewBag.ErrorMessage = "Invalid Username/Email entered: User does not exist.";
+                
             }
+            ViewBag.ErrorMessage = "Invalid credentials, try again!";
             return View("AccountForms");
         }
 
         #endregion
 
         #region SIGN UP
+        #region SIGN UP
 
+        // GET: /Account/Signup
         // GET: /Account/Signup
         public IActionResult Signup()
         {
@@ -95,6 +128,7 @@ public class AccountController : Controller
             return View();
         }
 
+        // POST: /Account/Signup
         // POST: /Account/Signup
         [HttpPost]
         public async Task<IActionResult> Signup(string email, string username, string password, string reenterpassword, string firstname, string lastname)
@@ -108,24 +142,35 @@ public class AccountController : Controller
                     ViewBag.ErrorMessage = "Passwords do not match!";
                     return View("AccountForms");
                 }
+            if (ModelState.IsValid)
+            {
+                // Check if passwords match
+                if (password != reenterpassword)
+                {
+                    ModelState.AddModelError(string.Empty, "Passwords do not match.");
+                    ViewBag.ErrorMessage = "Passwords do not match!";
+                    return View("AccountForms");
+                }
 
                 // Check if a user with the same username already exists
+                        // Check if username exists
                 var existingUserByName = await _userManager.FindByNameAsync(username);
-                if (existingUserByName != null)
-                {
-                    ModelState.AddModelError(string.Empty, "Username is already taken.");
-                    ViewBag.ErrorMessage = "Username is already taken!";
-                    return View("AccountForms");
-                }
+                        if (existingUserByName != null)
+                        {
+                            ModelState.AddModelError(string.Empty, "Username is already taken.");
+                            ViewBag.ErrorMessage = "Username is already taken!";
+                            return View("AccountForms");
+                        }
 
                 // Check if a user with the same email already exists
+                        // Check if email exists
                 var existingUserByEmail = await _userManager.FindByEmailAsync(email);
-                if (existingUserByEmail != null)
-                {
-                    ModelState.AddModelError(string.Empty, "Email is already registered.");
-                    ViewBag.ErrorMessage = "Email is already registered!";
-                    return View("AccountForms");
-                }
+                        if (existingUserByEmail != null)
+                        {
+                            ModelState.AddModelError(string.Empty, "Email is already registered.");
+                            ViewBag.ErrorMessage = "Email is already registered!";
+                            return View("AccountForms");
+                        }
 
                 // Validate password
                 var passwordValidator = new PasswordValidator<ApplicationUser>();
@@ -139,9 +184,22 @@ public class AccountController : Controller
                     ViewBag.ErrorMessage = "Password does not meet the requirements!";
                     return View("AccountForms");
                 }
+                // Validate password
+                var passwordValidator = new PasswordValidator<ApplicationUser>();
+                var passwordValidationResult = await passwordValidator.ValidateAsync(_userManager, null, password);
+                if (!passwordValidationResult.Succeeded)
+                {
+                    foreach (var error in passwordValidationResult.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+                    ViewBag.ErrorMessage = "Password does not meet the requirements!";
+                    return View("AccountForms");
+                }
 
-                var user = new ApplicationUser 
-                { 
+                // Create user
+                var user = new ApplicationUser
+                {
                     UserName = username,
                     Email = email,
                     FirstName = firstname,
@@ -150,29 +208,67 @@ public class AccountController : Controller
                 };
 
                 var result = await _userManager.CreateAsync(user, password);
+                var result = await _userManager.CreateAsync(user, password);
 
                 if (result.Succeeded)
-                {   
-                    // Assign the default role to the user
-                    await _userManager.AddToRoleAsync(user, "User");
-
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    return RedirectToAction("Dashboard", "Account");
-                }
-                else
                 {
-                    // Log detailed error information
-                    foreach (var error in result.Errors)
-                    {
-                        Console.WriteLine($"Error Code: {error.Code}, Description: {error.Description}");
-                        ModelState.AddModelError(string.Empty, error.Description);
-                    }
+                    // Assign "User" role to the new account
+                    await _userManager.AddToRoleAsync(user, "User");
+                    var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    var confirmationLink = Url.Action("Activation", "Account", new { userId = user.Id, token }, Request.Scheme);
+                    if (!string.IsNullOrEmpty(confirmationLink))
+                        await _emailSender.SendActivationEmail(user, confirmationLink);
+                    else
+                        Console.WriteLine("Confirmation link is null! Activation email not sent to user!");
+                    TempData["message"] = "Email confirmation has been sent!";
+                    return View("AccountForms");
+                }
+
+                // Log errors if user creation failed
+                foreach (var error in result.Errors)
+                {
+                    Console.WriteLine($"Error Code: {error.Code}, Description: {error.Description}");
+                    ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
 
             return View("AccountForms");
         }
 
+        #endregion
+
+        #region ACC. CONFIRMATION
+        [HttpGet]
+        public async Task<IActionResult> Activation(string userId, string token) {
+            if (userId == null || token == null) {
+                ViewBag.message = "Invalid email confirmation!";
+                return RedirectToAction("Login");
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) {
+                Console.WriteLine("User not found with id {userId}");
+                ViewBag.message = "User not found";
+                return RedirectToAction("Login");
+            }
+
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+            if (result.Succeeded) {
+                // email confirmed successfully, set activation status and send user to dashboard
+                TempData["message"] = "Email confirmation is successful!";
+                await _signInManager.SignInAsync(user, isPersistent: false);
+                return RedirectToAction("Dashboard");
+            } else {
+                // not confirmed
+                ViewBag.message = "Email confirmation failure!";
+                return RedirectToAction("Login");
+            }
+        }
+        #endregion
+
+        #region LOGOUT
+
+        // GET: /Account/Logout
         public async Task<IActionResult> Logout()
         {
             if (User?.Identity != null && User.Identity.IsAuthenticated)
@@ -184,14 +280,15 @@ public class AccountController : Controller
 
         #endregion
 
-        #region DASHBOARD HANDLING
+        #region DASHBOARD
+        // GET: /Account/Dashboard
         // GET: /Account/Dashboard
         public async Task<IActionResult> Dashboard()
         {
             if (User?.Identity != null && User.Identity.IsAuthenticated)
             {
                 var user = await _userManager.GetUserAsync(User);
-                
+
                 if (user != null)
                 {
                     var roles = await _userManager.GetRolesAsync(user);
@@ -200,56 +297,68 @@ public class AccountController : Controller
                 }
                 return View();
             }
-
-            if (password != reenterpassword) {
-                ViewBag.ErrorMessage = "Passwords do not match!";
-                return View("AccountForms");
-            }
-
-            string hash = BCrypt.Net.BCrypt.HashPassword(password);
-
-            var newAccount = new DB_accounts {
-
-                email = email,
-                username = username,
-                password = hash,
-                firstname = firstname,
-                lastname = lastname,
-                balance = 0
-
-            };
-
-            if (accFromUsername == null && accFromEmail == null) 
-            {
-                _context.accounts.Add(newAccount);
-                await _context.SaveChangesAsync();
-
-                HttpContext.Session.SetString("Username", username);
-                return RedirectToAction("Dashboard", "Account");
-            }
-        }
-
-        return View("AccountForms");
-
-    }
-
-    // GET: /Account/Dashboard
-    public IActionResult Dashboard()
-    {
-        // Check if the user is logged in by checking the session
-        var username = HttpContext.Session.GetString("Username");
-        if (username != null)
-        {
-            ViewBag.Username = username;
-            return View();
-        }
-        else
-        {
-            // Redirect to login if the session does not contain the username
             return RedirectToAction("Login");
         }
 
         #endregion
+
+        #region DASHBOARD SECTIONS
+
+        // GET: /Account/Dashboard/Tasks
+        public IActionResult Tasks()
+        {
+            if (User?.Identity != null && User.Identity.IsAuthenticated)
+            {
+                return View("~/Views/Account/Dashboard/Tasks.cshtml");
+            }
+            return RedirectToAction("Login");
+        }
+
+        // GET: /Account/Dashboard/Expenses
+        public IActionResult Expenses()
+        {
+            if (User?.Identity != null && User.Identity.IsAuthenticated)
+            {
+                return View("~/Views/Account/Dashboard/Expenses.cshtml");
+            }
+            return RedirectToAction("Login");
+        }
+
+        // GET: /Account/Dashboard/Lending
+        public IActionResult Lending()
+        {
+            if (User?.Identity != null && User.Identity.IsAuthenticated)
+            {
+                return View("~/Views/Account/Dashboard/Lending.cshtml");
+            }
+            return RedirectToAction("Login");
+        }
+
+        // GET: /Account/Dashboard/Notifications
+        public IActionResult Notifications()
+        {
+            if (User?.Identity != null && User.Identity.IsAuthenticated)
+            {
+                return View("~/Views/Account/Dashboard/Notifications.cshtml");
+            }
+            return RedirectToAction("Login");
+        }
+
+        // GET: /Account/Dashboard/Settings
+        public IActionResult Settings()
+        {
+            if (User?.Identity != null && User.Identity.IsAuthenticated)
+            {
+                return View("~/Views/Account/Dashboard/Settings.cshtml");
+            }
+            return RedirectToAction("Login");
+        }
+
+        #endregion
+
+        #region ACCESS DENIED
+
+        #region ACCESS DENIED
 
         #region ACCESS DENIED HANDLING
         [AllowAnonymous]
@@ -257,8 +366,18 @@ public class AccountController : Controller
         {
             return View();
         }
+
         #endregion
 
+        #region ERROR HANDLING
+
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        #endregion
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {
