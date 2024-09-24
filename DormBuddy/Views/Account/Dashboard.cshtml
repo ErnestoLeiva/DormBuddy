@@ -2,12 +2,50 @@
     ViewData["Title"] = "Dashboard";
 }
 
+@{
+    var roleLabel = ViewBag.UserRoles.Contains(",") ? "Roles" : "Role"; // ift there is more than one role add an 's'
+    var roles = ViewBag.UserRoles.Split(',');
+}
+
+<!-- DASHBOARD HEADER -->
 <div class="text-center mb-4">
     <h1 class="display-4">User Dashboard</h1>
-    <p>Welcome <b>@ViewBag.Username</b>! <br />
+
+    @if (TempData["message"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["message"]
+        </div>
+    }
+
+    <p>Welcome <b>@ViewBag.Username</b>!<br />
+    [@roleLabel: 
+    @{
+        for (int i = 0; i < roles.Length; i++)
+        {
+            var role = roles[i].Trim();
+            var conditionalComma = ",";
+
+            var roleColor = role switch
+            {
+                "Admin" => "color: #B026FF; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;",     //neon-purple #B026FF
+                "Moderator" => "color: #39FF14; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;", //neon-green #39FF14
+                "User" => "color: #1F51FF; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;",      //neon-blue #1F51FF
+                _ => "color: black;" //dfefault color
+            };
+            if (i == roles.Length - 1) //dont add comma for last role
+            {
+                conditionalComma = null; 
+            }
+
+            <span style="@roleColor">@role</span>@conditionalComma
+            //Example:    PURPLE     ADMIN        , or null
+        }
+    }]<br />
     This is your user dashboard to control actions regarding your account.</p>
 </div>
 
+<!-- DASHBOARD PANEL CARDS -->
 <div class="container">
     <div class="row">
         <!-- Task Management Card -->
@@ -86,7 +124,7 @@
         <div class="col-md-4">
             <div class="card text-center mb-4">
                 <div class="card-header bg-dark text-white">
-                    <i class="fas fa-cog fa-lg"></i> <!-- Gear Icon -->
+                    <i class="fas fa-cog fa-lg"></i>
                     Help & Support
                 </div>
                 <div class="card-body">
@@ -96,4 +134,39 @@
             </div>
         </div>
     </div>
+
+    <!-- ADMIN/MODERATOR ROW -->
+    @if (ViewBag.UserRoles.Contains("Admin") || ViewBag.UserRoles.Contains("Moderator"))
+    {
+        <div class="row">
+            @if (ViewBag.UserRoles.Contains("Admin")) {
+                <div class="col-md-4 offset-md-4">
+                    <div class="card text-center mb-4">
+                        <div class="card-header bg-purple text-white">
+                            <i class="fas fa-shield-alt fa-lg"></i>
+                            Admin Panel
+                        </div>
+                        <div class="card-body">
+                            <p>Manage site-wide settings and users.</p>
+                            <a href="#" class="btn btn-purple">Go to Admin Panel</a>
+                        </div>
+                    </div>
+                </div>
+            }
+            else if (!ViewBag.UserRoles.Contains("Admin") && ViewBag.UserRoles.Contains("Moderator")){
+                <div class="col-md-4 offset-md-4">
+                    <div class="card text-center mb-4">
+                        <div class="card-header bg-purple text-white">
+                            <i class="fas fa-shield-alt fa-lg"></i>
+                            Moderator Panel
+                        </div>
+                        <div class="card-body">
+                            <p>Manage site-wide settings and users.</p>
+                            <a href="#" class="btn btn-purple">Go to Moderator Panel</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
 </div>

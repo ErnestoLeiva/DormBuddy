@@ -9,6 +9,7 @@
     </a>
 </div>
 
+<!-- Tasks Header -->
 <div class="text-center mb-4">
     <h1 class="display-4">Task Management</h1>
     <p>Manage your dorm-related tasks and track progress.</p>
@@ -87,7 +88,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                Are you sure you want to delete this task?
+                Are you sure you want to delete task "<strong id="taskToDeleteName"></strong>"?
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -182,6 +183,13 @@
         function confirmDeleteTask(button) {
             // Store the row to delete
             taskToDelete = button.closest('tr');
+
+            // Retrieve the task name from the row to display in the modal
+            const taskNameToDelete = taskToDelete.cells[0].innerText;
+
+            // Set the task name in the modal
+            document.getElementById('taskToDeleteName').innerText = taskNameToDelete;
+
             // Show the confirmation modal
             $('#deleteConfirmationModal').modal('show');
         }
