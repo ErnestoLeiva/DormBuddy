@@ -61,47 +61,46 @@ namespace DormBuddy.Controllers
             if (ModelState.IsValid)
             {
                 var user = await _userManager.FindByNameAsync(username) ?? await _userManager.FindByEmailAsync(username);
-                
+
                 if (user != null)
                 {
+                    if (!user.EmailConfirmed)
+                    {
+                        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                        var confirmationLink = Url.Action("Activation", "Account", new { userId = user.Id, token }, Request.Scheme);
+                        
+                        if (!string.IsNullOrEmpty(confirmationLink))
+                        {
+                            await _emailSender.SendActivationEmail(user, confirmationLink);
+                            TempData["message"] = "Email confirmation has been sent! Please check your inbox.";
+                        }
+                        else
+                        {
+                            Console.WriteLine("Confirmation link is null! Activation email not sent to user!");
+                        }
+
+                        ViewBag.ErrorMessage = "Your email has not been confirmed. Please check your email for confirmation. If needed, try logging in again to resend the email.";
+                        return View("AccountForms");
+                    }
+
                     var result = await _signInManager.PasswordSignInAsync(user, password, false, false);
 
                     if (result.Succeeded)
                     {
-                        
                         return RedirectToAction("Dashboard");
                     }
 
-                    if (!user.EmailConfirmed) {
-
-                        if (TempData["ResendCode"] != null) {
-                            // resend email
-                            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                            var confirmationLink = Url.Action("Activation", "Account", new { userId = user.Id, token }, Request.Scheme);
-                            if (!string.IsNullOrEmpty(confirmationLink)) {
-                                await _emailSender.SendActivationEmail(user, confirmationLink);
-                                TempData["message"] = "Email confirmation has been sent!";
-                            } else {
-                                Console.WriteLine("Confirmation link is null! Activation email not sent to user!");
-                            }
-                            TempData["ResendCode"] = null;
-                        } else {
-                            ViewBag.ErrorMessage = "Check your email for confirmation! Need it to be resent? Try Logging in again!";
-                            TempData["ResendCode"] = "true";
-                        }
-
-                        return View("AccountForms");
-                    }
-
-                    
-                } else {
+                    ViewBag.ErrorMessage = "Invalid credentials, try again!";
+                    return View("AccountForms");
+                }
+                else
+                {
                     ModelState.AddModelError(string.Empty, "Invalid Username/Email entered: User does not exist.");
                     ViewBag.ErrorMessage = "Invalid Username/Email entered: User does not exist.";
                     return View("AccountForms");
                 }
-
-                
             }
+
             ViewBag.ErrorMessage = "Invalid credentials, try again!";
             return View("AccountForms");
         }
@@ -187,7 +186,7 @@ namespace DormBuddy.Controllers
                         await _emailSender.SendActivationEmail(user, confirmationLink);
                     else
                         Console.WriteLine("Confirmation link is null! Activation email not sent to user!");
-                    TempData["message"] = "Email confirmation has been sent!";
+                    TempData["message"] = "Email verification has been sent!";
                     return View("AccountForms");
                 }
 
@@ -208,14 +207,14 @@ namespace DormBuddy.Controllers
         [HttpGet]
         public async Task<IActionResult> Activation(string userId, string token) {
             if (userId == null || token == null) {
-                ViewBag.message = "Invalid email confirmation!";
-                return RedirectToAction("Login");
+                ViewBag.ErrorMessage = "Invalid email confirmation!";
+                return RedirectToAction("AccountForms");
             }
 
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null) {
                 Console.WriteLine("User not found with id {userId}");
-                ViewBag.message = "User not found";
+                ViewBag.ErrorMessage = "User not found";
                 return RedirectToAction("Login");
             }
 
@@ -227,8 +226,8 @@ namespace DormBuddy.Controllers
                 return RedirectToAction("Dashboard");
             } else {
                 // not confirmed
-                ViewBag.message = "Email confirmation failure!";
-                return RedirectToAction("Login");
+                ViewBag.ErrorMessage = "Email confirmation failure!";
+                return RedirectToAction("AccountForms");
             }
         }
         #endregion
