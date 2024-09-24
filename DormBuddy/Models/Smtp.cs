@@ -9,13 +9,14 @@ namespace DormBuddy.Models {
     public class Smtp : IEmailSender
     {
         private readonly IConfiguration _configuration;
-
         private readonly IConfigurationSection smtpSettings;
+        private readonly IConfigurationSection dormbuddyAssets;
 
         public Smtp(IConfiguration configuration)
         {
             _configuration = configuration;
             smtpSettings = _configuration.GetSection("SmtpSettings");
+            dormbuddyAssets = _configuration.GetSection("DormBuddyAssets");
         }
 
         public async Task SendEmailAsync(string toEmail, string subject, string message)
@@ -50,6 +51,7 @@ namespace DormBuddy.Models {
             // Replace placeholders with actual values
             template = template.Replace("{UserName}", user.UserName);
             template = template.Replace("{ActivationLink}", activationLink);
+            template = template.Replace("{Base64ImageString}", dormbuddyAssets["LogoDirectLink"]);
 
             return template;
         }

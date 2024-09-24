@@ -11,10 +11,18 @@
 <div class="text-center mb-4">
     <h1 class="display-4">User Dashboard</h1>
 
+    <!-- Display success message if it exists -->
     @if (TempData["message"] != null)
     {
         <div class="alert alert-success">
             @TempData["message"]
+        </div>
+    }
+    <!-- Display error message if it exists -->
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <div class="alert alert-danger" role="alert">
+            @ViewBag.ErrorMessage
         </div>
     }
 
