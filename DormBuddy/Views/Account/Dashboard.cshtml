@@ -10,6 +10,14 @@
 <!-- DASHBOARD HEADER -->
 <div class="text-center mb-4">
     <h1 class="display-4">User Dashboard</h1>
+
+    @if (TempData["message"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["message"]
+        </div>
+    }
+
     <p>Welcome <b>@ViewBag.Username</b>!<br />
     [@roleLabel: 
     @{

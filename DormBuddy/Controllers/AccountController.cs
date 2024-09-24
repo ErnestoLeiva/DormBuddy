@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace DormBuddy.Controllers
 {
@@ -13,15 +14,18 @@ namespace DormBuddy.Controllers
         private readonly ILogger<AccountController> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly DormBuddy.Models.IEmailSender _emailSender;
 
         public AccountController(
             ILogger<AccountController> logger,
             UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager)
+            SignInManager<ApplicationUser> signInManager,
+            DormBuddy.Models.IEmailSender emailSender)
         {
             _logger = logger;
             _userManager = userManager;
             _signInManager = signInManager;
+            _emailSender = emailSender;
         }
 
         #region ACCOUNT FORMS
@@ -56,23 +60,49 @@ namespace DormBuddy.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = await _userManager.FindByNameAsync(username);
+                var user = await _userManager.FindByNameAsync(username) ?? await _userManager.FindByEmailAsync(username);
+                
                 if (user != null)
                 {
                     var result = await _signInManager.PasswordSignInAsync(user, password, false, false);
 
                     if (result.Succeeded)
                     {
+                        
                         return RedirectToAction("Dashboard");
                     }
 
-                    ViewBag.ErrorMessage = "Invalid credentials, try again!";
+                    if (!user.EmailConfirmed) {
+
+                        if (TempData["ResendCode"] != null) {
+                            // resend email
+                            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                            var confirmationLink = Url.Action("Activation", "Account", new { userId = user.Id, token }, Request.Scheme);
+                            if (!string.IsNullOrEmpty(confirmationLink)) {
+                                await _emailSender.SendActivationEmail(user, confirmationLink);
+                                TempData["message"] = "Email confirmation has been sent!";
+                            } else {
+                                Console.WriteLine("Confirmation link is null! Activation email not sent to user!");
+                            }
+                            TempData["ResendCode"] = null;
+                        } else {
+                            ViewBag.ErrorMessage = "Check your email for confirmation! Need it to be resent? Try Logging in again!";
+                            TempData["ResendCode"] = "true";
+                        }
+
+                        return View("AccountForms");
+                    }
+
+                    
+                } else {
+                    ModelState.AddModelError(string.Empty, "Invalid Username/Email entered: User does not exist.");
+                    ViewBag.ErrorMessage = "Invalid Username/Email entered: User does not exist.";
                     return View("AccountForms");
                 }
 
-                ModelState.AddModelError(string.Empty, "Invalid Username/Email entered: User does not exist.");
-                ViewBag.ErrorMessage = "Invalid Username/Email entered: User does not exist.";
+                
             }
+            ViewBag.ErrorMessage = "Invalid credentials, try again!";
             return View("AccountForms");
         }
 
@@ -151,8 +181,14 @@ namespace DormBuddy.Controllers
                 {
                     // Assign "User" role to the new account
                     await _userManager.AddToRoleAsync(user, "User");
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    return RedirectToAction("Dashboard");
+                    var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    var confirmationLink = Url.Action("Activation", "Account", new { userId = user.Id, token }, Request.Scheme);
+                    if (!string.IsNullOrEmpty(confirmationLink))
+                        await _emailSender.SendActivationEmail(user, confirmationLink);
+                    else
+                        Console.WriteLine("Confirmation link is null! Activation email not sent to user!");
+                    TempData["message"] = "Email confirmation has been sent!";
+                    return View("AccountForms");
                 }
 
                 // Log errors if user creation failed
@@ -166,6 +202,35 @@ namespace DormBuddy.Controllers
             return View("AccountForms");
         }
 
+        #endregion
+
+        #region ACC. CONFIRMATION
+        [HttpGet]
+        public async Task<IActionResult> Activation(string userId, string token) {
+            if (userId == null || token == null) {
+                ViewBag.message = "Invalid email confirmation!";
+                return RedirectToAction("Login");
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) {
+                Console.WriteLine("User not found with id {userId}");
+                ViewBag.message = "User not found";
+                return RedirectToAction("Login");
+            }
+
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+            if (result.Succeeded) {
+                // email confirmed successfully, set activation status and send user to dashboard
+                TempData["message"] = "Email confirmation is successful!";
+                await _signInManager.SignInAsync(user, isPersistent: false);
+                return RedirectToAction("Dashboard");
+            } else {
+                // not confirmed
+                ViewBag.message = "Email confirmation failure!";
+                return RedirectToAction("Login");
+            }
+        }
         #endregion
 
         #region LOGOUT

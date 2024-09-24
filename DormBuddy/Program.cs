@@ -17,9 +17,16 @@ builder.Services.AddDbContext<DBContext>(options =>
 
 #region IDENTITY CONFIGURATION
 // Identity configuration for user management
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => 
+{
+    options.SignIn.RequireConfirmedEmail = true;
+})
     .AddEntityFrameworkStores<DBContext>()
     .AddDefaultTokenProviders();
+#endregion
+
+#region EMAIL SENDER
+builder.Services.AddTransient<DormBuddy.Models.IEmailSender, Smtp>();
 #endregion
 
 #region PASSWORD REQUIREMENTS
