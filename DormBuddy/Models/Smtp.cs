@@ -42,9 +42,9 @@ namespace DormBuddy.Models {
         }
 
         // Method to generate email content
-        public string GenerateEmailContent(ApplicationUser user, string activationLink, string fileName)
+        public string GenerateEmailContent(ApplicationUser user, string activationLink)
         {
-            var templatePath = Path.Combine(Directory.GetCurrentDirectory(), fileName);
+            var templatePath = Path.Combine(Directory.GetCurrentDirectory(), "activationemail.html");
             var template = File.ReadAllText(templatePath);
 
             // Replace placeholders with actual values
@@ -59,33 +59,12 @@ namespace DormBuddy.Models {
             try
             {
                 string subject = "Account Activation";
-                string message = GenerateEmailContent(user, link, "activationemail.html");
+                string message = GenerateEmailContent(user, link);
                 if (!string.IsNullOrEmpty(user.Email))
                     await SendEmailAsync(user.Email, subject, message); // Just await, no need for a result
                 else
                     Console.WriteLine("Email is null! Not Sent!");
-                Console.WriteLine("Account activation email has been sent for " + user.Email);
-
-                return true; // Email sent successfully
-            }
-            catch (Exception)
-            {
-                // Handle the error (log it, etc.)
-                return false; // Email sending failed
-            }
-        }
-
-        public async Task<bool> SendPasswordResetEmail(ApplicationUser user, string link)
-        {
-            try
-            {
-                string subject = "Reset Password";
-                string message = GenerateEmailContent(user, link, "passwordresetemail.html");
-                if (!string.IsNullOrEmpty(user.Email))
-                    await SendEmailAsync(user.Email, subject, message); // Just await, no need for a result
-                else
-                    Console.WriteLine("Password reset email is null! Not Sent!");
-                Console.WriteLine("Password reset email has been sent for " + user.Email);
+                Console.WriteLine("email has been sent!");
 
                 return true; // Email sent successfully
             }
@@ -98,4 +77,3 @@ namespace DormBuddy.Models {
 
     }
 }
-
