@@ -273,7 +273,7 @@ namespace DormBuddy.Controllers
             if (User?.Identity?.IsAuthenticated == true)
                 return RedirectToAction("Dashboard");
 
-            return View();
+            return View("~/Views/Account/Password/ForgotPassword.cshtml");
         }
 
         [HttpPost]
@@ -297,7 +297,7 @@ namespace DormBuddy.Controllers
                 return View("AccountForms");
 
             }
-            return View(model);
+            return View("~/Views/Account/Password/ForgotPassword.cshtml", model);
 
         }
 
@@ -317,7 +317,7 @@ namespace DormBuddy.Controllers
             ViewData["UserId"] = userId;
             ViewData["Token"] = token;
 
-            return View(model);
+            return View("~/Views/Account/Password/ResetPassword.cshtml", model);
         }
 
         [HttpPost]
@@ -335,7 +335,7 @@ namespace DormBuddy.Controllers
                 if (model.Password != model.ConfirmPassword) {
                     ViewBag.ErrorMessage = "The passwords do not match!";
                     Console.WriteLine("Passwords do not match for password reset!");
-                    return View(model);
+                    return View("~/Views/Account/Password/ResetPassword.cshtml", model);
                 }
 
 
@@ -356,7 +356,7 @@ namespace DormBuddy.Controllers
                             Console.WriteLine(er.Description);
                         }
 
-                        return View(model);
+                        return View("~/Views/Account/Password/ResetPassword.cshtml", model);
                     }
 
                     
@@ -372,7 +372,7 @@ namespace DormBuddy.Controllers
                 }
             }
 
-            return View(model);
+            return View("~/Views/Account/Password/ResetPassword.cshtml", model);
         }
 
         #endregion
