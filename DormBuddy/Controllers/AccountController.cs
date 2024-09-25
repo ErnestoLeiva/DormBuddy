@@ -266,6 +266,117 @@ namespace DormBuddy.Controllers
         }
         #endregion
 
+        #region FORGOT PASSWORD
+
+        [HttpGet]
+        public IActionResult ForgotPassword() {
+            if (User?.Identity?.IsAuthenticated == true)
+                return RedirectToAction("Dashboard");
+
+            return View();
+        }
+
+        [HttpPost]
+        [AutoValidateAntiforgeryToken]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model) {
+            
+            if (ModelState.IsValid) {
+                
+                var user = await _userManager.FindByEmailAsync(model.Email ?? "");
+
+                if (user == null || !user.EmailConfirmed) {
+                    return RedirectToAction("ForgotPassword");
+                }
+
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var url = Url.Action(nameof(ResetPassword), "Account", new { userId = user.Id, token }, Request.Scheme);
+
+                var email = await _emailSender.SendPasswordResetEmail(user, url ?? "null");
+
+                TempData["message"] = "Reset link has been sent! Check your email!";
+                return View("AccountForms");
+
+            }
+            return View(model);
+
+        }
+
+        [HttpGet]
+        public ActionResult ResetPassword(string userId, string token)
+        {
+            if (User?.Identity?.IsAuthenticated == true)
+                return RedirectToAction("Dashboard");
+
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
+            {
+                return RedirectToAction("ForgotPassword");
+            }
+
+            var model = new ResetPasswordViewModel();
+
+            ViewData["UserId"] = userId;
+            ViewData["Token"] = token;
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> ResetPassword(string userId, string token, ResetPasswordViewModel model) {
+            
+            Console.WriteLine("part 1");
+            if (ModelState.IsValid) {
+                Console.WriteLine("part 2");
+                var user = await _userManager.FindByIdAsync(userId);
+
+                if (user == null) {
+                    return RedirectToAction("ForgotPassword");
+                }
+
+                if (model.Password != model.ConfirmPassword) {
+                    ViewBag.ErrorMessage = "The passwords do not match!";
+                    Console.WriteLine("Passwords do not match for password reset!");
+                    return View(model);
+                }
+
+
+                if (!string.IsNullOrEmpty(model.Password)) {
+                    var result = await _userManager.ResetPasswordAsync(user, model.Token??"null", model.Password);
+
+                    if (result.Succeeded)
+                    {
+                        TempData["message"] = "Password has been reset!";
+                        Console.WriteLine("Account password has been reset for " + user.Email);
+                        return RedirectToAction("AccountForms");
+                    } else {
+                        Console.WriteLine("Password reset has failed for " + user.Email);
+
+
+                        foreach (var er in result.Errors)
+                        {
+                            Console.WriteLine(er.Description);
+                        }
+
+                        return View(model);
+                    }
+
+                    
+                }
+
+            } else {
+                foreach (var modelState in ModelState.Values)
+                {
+                    foreach (var error in modelState.Errors)
+                    {
+                        Console.WriteLine(error.ErrorMessage);
+                    }
+                }
+            }
+
+            return View(model);
+        }
+
+        #endregion
+
         #region LOGOUT
 
         // GET: /Account/Logout
