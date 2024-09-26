@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore; 
 
 
+
 namespace DormBuddy.Controllers
 {
     [Authorize(Roles = "Admin")]
@@ -20,7 +21,28 @@ namespace DormBuddy.Controllers
             _userManager = userManager;
             _roleManager = roleManager;
         }
-        // GET: /Admin
+
+        // Admin Dashboard
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> AdminDashboard()
+        {
+            // Get the currently logged-in user
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToAction("Login", "Account"); // Redirect to login if the user is not logged in
+            }
+
+            // Set the username in ViewBag for use in the view
+            ViewBag.Username = $"{user.FirstName} {user.LastName}";
+            ViewBag.TotalUsers = _userManager.Users.Count();
+            ViewBag.TotalReports = 10;  
+            ViewBag.ActiveSessions = 5;
+
+            return View("~/Views/Account/AdminDashboard.cshtml"); // This should map to AdminDashboard.cshtml in the Views folder
+        }
+
+        // GET: /Admin/Index
         public async Task<IActionResult> Index()
         {
             var users = await _userManager.Users.ToListAsync();

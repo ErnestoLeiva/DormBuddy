@@ -119,6 +119,7 @@ static async Task InitializeRolesAndAdminUser(WebApplication app)
     using (var scope = app.Services.CreateScope())
     {
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
         string[] roles = { Roles.Admin, Roles.Moderator, Roles.User };
 
@@ -127,6 +128,30 @@ static async Task InitializeRolesAndAdminUser(WebApplication app)
             if (!await roleManager.RoleExistsAsync(role))
             {
                 await roleManager.CreateAsync(new IdentityRole(role));
+            }
+        }
+        //Ensuring theres one Admin 
+        var adminEmail = "DormbuddyTest@gmail.com"; //Test default admin email
+        var adminUser = await userManager.FindByEmailAsync(adminEmail);
+
+        if (adminUser == null)
+        {
+            var newAdmin = new ApplicationUser
+            {
+                UserName = "DormbuddyTest@gmail.com",
+                Email = adminEmail,
+                FirstName = "AdminTest",
+                LastName = "Account",
+                EmailConfirmed = true,  // Set to true if the default admin does not need email confirmation
+            };
+
+            // Create the admin user with a default password
+            var createAdminResult = await userManager.CreateAsync(newAdmin, "Admin@123");
+
+            if (createAdminResult.Succeeded)
+            {
+                // Assign the user to the Admin role
+                await userManager.AddToRoleAsync(newAdmin, Roles.Admin);
             }
         }
     }
