@@ -10,6 +10,7 @@ namespace DormBuddy.Controllers
 {
     public class AccountController : Controller
     {
+        private readonly DBContext _context;
         private readonly ILogger<AccountController> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
@@ -17,16 +18,17 @@ namespace DormBuddy.Controllers
         public AccountController(
             ILogger<AccountController> logger,
             UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager)
+            SignInManager<ApplicationUser> signInManager,
+            DBContext context)
         {
             _logger = logger;
             _userManager = userManager;
             _signInManager = signInManager;
+            _context = context;
         }
 
         #region ACCOUNT FORMS
 
-        // GET: /Account/AccountForms
         public IActionResult AccountForms()
         {
             if (User?.Identity != null && User.Identity.IsAuthenticated)
@@ -40,137 +42,126 @@ namespace DormBuddy.Controllers
 
         #region LOGIN
 
-        // GET: /Account/Login
         public IActionResult Login()
         {
             if (User?.Identity != null && User.Identity.IsAuthenticated)
             {
                 return RedirectToAction("Dashboard");
             }
-            return View();
+            return View("AccountForms");
         }
 
-        // POST: /Account/Login
         [HttpPost]
         public async Task<IActionResult> Login(string username, string password)
         {
+            bool isPersistent = false; // Default value, modify based on your logic
+
             if (ModelState.IsValid)
             {
                 var user = await _userManager.FindByNameAsync(username);
                 if (user != null)
                 {
-                    var result = await _signInManager.PasswordSignInAsync(user, password, false, false);
+                    var result = await _signInManager.PasswordSignInAsync(user, password, isPersistent, lockoutOnFailure: false);
 
                     if (result.Succeeded)
                     {
-                        return RedirectToAction("Dashboard");
+                        return RedirectToAction("Dashboard", "Account");
                     }
-
                     ViewBag.ErrorMessage = "Invalid credentials, try again!";
-                    return View("AccountForms");
                 }
-
-                ModelState.AddModelError(string.Empty, "Invalid Username/Email entered: User does not exist.");
-                ViewBag.ErrorMessage = "Invalid Username/Email entered: User does not exist.";
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Invalid Username/Email entered: User does not exist.");
+                }
             }
             return View("AccountForms");
         }
 
         #endregion
 
-        #region SIGN UP
+        #region SIGN UP/LOG OUT HANDLING
 
-        // GET: /Account/Signup
         public IActionResult Signup()
         {
             if (User?.Identity != null && User.Identity.IsAuthenticated)
             {
                 return RedirectToAction("Dashboard");
             }
-            return View();
+            return View("AccountForms");
         }
 
-        // POST: /Account/Signup
         [HttpPost]
         public async Task<IActionResult> Signup(string email, string username, string password, string reenterpassword, string firstname, string lastname)
         {
-            if (ModelState.IsValid)
-            {
-                // Check if passwords match
-                if (password != reenterpassword)
-                {
-                    ModelState.AddModelError(string.Empty, "Passwords do not match.");
-                    ViewBag.ErrorMessage = "Passwords do not match!";
-                    return View("AccountForms");
-                }
-
-                // Check if username exists
-                var existingUserByName = await _userManager.FindByNameAsync(username);
-                if (existingUserByName != null)
-                {
-                    ModelState.AddModelError(string.Empty, "Username is already taken.");
-                    ViewBag.ErrorMessage = "Username is already taken!";
-                    return View("AccountForms");
-                }
-
-                // Check if email exists
-                var existingUserByEmail = await _userManager.FindByEmailAsync(email);
-                if (existingUserByEmail != null)
-                {
-                    ModelState.AddModelError(string.Empty, "Email is already registered.");
-                    ViewBag.ErrorMessage = "Email is already registered!";
-                    return View("AccountForms");
-                }
-
-                // Validate password
-                var passwordValidator = new PasswordValidator<ApplicationUser>();
-                var passwordValidationResult = await passwordValidator.ValidateAsync(_userManager, null, password);
-                if (!passwordValidationResult.Succeeded)
-                {
-                    foreach (var error in passwordValidationResult.Errors)
-                    {
-                        ModelState.AddModelError(string.Empty, error.Description);
-                    }
-                    ViewBag.ErrorMessage = "Password does not meet the requirements!";
-                    return View("AccountForms");
-                }
-
-                // Create user
-                var user = new ApplicationUser
-                {
-                    UserName = username,
-                    Email = email,
-                    FirstName = firstname,
-                    LastName = lastname,
-                    Credits = 0
-                };
-
-                var result = await _userManager.CreateAsync(user, password);
-
-                if (result.Succeeded)
-                {
-                    // Assign "User" role to the new account
-                    await _userManager.AddToRoleAsync(user, "User");
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    return RedirectToAction("Dashboard");
-                }
-
-                // Log errors if user creation failed
-                foreach (var error in result.Errors)
-                {
-                    Console.WriteLine($"Error Code: {error.Code}, Description: {error.Description}");
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
-            }
-
+    if (ModelState.IsValid)
+    {
+        if (password != reenterpassword)
+        {
+            ModelState.AddModelError(string.Empty, "Passwords do not match.");
+            ViewBag.ErrorMessage = "Passwords do not match!";
             return View("AccountForms");
+        }
+
+        var existingUserByName = await _userManager.FindByNameAsync(username);
+        if (existingUserByName != null)
+        {
+            ModelState.AddModelError(string.Empty, "Username is already taken.");
+            ViewBag.ErrorMessage = "Username is already taken!";
+            return View("AccountForms");
+        }
+
+        var existingUserByEmail = await _userManager.FindByEmailAsync(email);
+        if (existingUserByEmail != null)
+        {
+            ModelState.AddModelError(string.Empty, "Email is already registered.");
+            ViewBag.ErrorMessage = "Email is already registered!";
+            return View("AccountForms");
+        }
+
+        var passwordValidator = new PasswordValidator<ApplicationUser>();
+        var passwordValidationResult = await passwordValidator.ValidateAsync(_userManager, null, password);
+        if (!passwordValidationResult.Succeeded)
+        {
+            foreach (var error in passwordValidationResult.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+            ViewBag.ErrorMessage = "Password does not meet the requirements!";
+            return View("AccountForms");
+        }
+
+        var user = new ApplicationUser
+        {
+            UserName = username,
+            Email = email,
+            FirstName = firstname,
+            LastName = lastname,
+            Credits = 0
+        };
+
+        var result = await _userManager.CreateAsync(user, password);
+
+        if (result.Succeeded)
+        {
+            await _userManager.AddToRoleAsync(user, "User");
+            await _signInManager.SignInAsync(user, isPersistent: false); // Corrected line
+            return RedirectToAction("Dashboard");
+        }
+        else
+        {
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+        }
+    }
+    return View("AccountForms");
         }
 
         #endregion
 
         #region LOGOUT
 
-        // GET: /Account/Logout
         public async Task<IActionResult> Logout()
         {
             if (User?.Identity != null && User.Identity.IsAuthenticated)
@@ -182,15 +173,13 @@ namespace DormBuddy.Controllers
 
         #endregion
 
-        #region DASHBOARD
+        #region DASHBOARD HANDLING
 
-        // GET: /Account/Dashboard
         public async Task<IActionResult> Dashboard()
         {
             if (User?.Identity != null && User.Identity.IsAuthenticated)
             {
                 var user = await _userManager.GetUserAsync(User);
-
                 if (user != null)
                 {
                     var roles = await _userManager.GetRolesAsync(user);
@@ -206,76 +195,31 @@ namespace DormBuddy.Controllers
 
         #region DASHBOARD SECTIONS
 
-        // GET: /Account/Dashboard/Tasks
-        public IActionResult Tasks()
-        {
-            if (User?.Identity != null && User.Identity.IsAuthenticated)
-            {
-                return View("~/Views/Account/Dashboard/Tasks.cshtml");
-            }
-            return RedirectToAction("Login");
-        }
+        public IActionResult Tasks() => CheckAuthenticationAndRedirect("~/Views/Account/Dashboard/Tasks.cshtml");
 
-        // GET: /Account/Dashboard/Expenses
-        public IActionResult Expenses()
-        {
-            if (User?.Identity != null && User.Identity.IsAuthenticated)
-            {
-                return View("~/Views/Account/Dashboard/Expenses.cshtml");
-            }
-            return RedirectToAction("Login");
-        }
+        public IActionResult Expenses() => CheckAuthenticationAndRedirect("~/Views/Account/Dashboard/Expenses.cshtml");
 
-        // GET: /Account/Dashboard/Lending
-        public IActionResult Lending()
-        {
-            if (User?.Identity != null && User.Identity.IsAuthenticated)
-            {
-                return View("~/Views/Account/Dashboard/Lending.cshtml");
-            }
-            return RedirectToAction("Login");
-        }
+        public IActionResult Lending() => CheckAuthenticationAndRedirect("~/Views/Account/Dashboard/Lending.cshtml");
 
-        // GET: /Account/Dashboard/Notifications
-        public IActionResult Notifications()
-        {
-            if (User?.Identity != null && User.Identity.IsAuthenticated)
-            {
-                return View("~/Views/Account/Dashboard/Notifications.cshtml");
-            }
-            return RedirectToAction("Login");
-        }
+        public IActionResult Notifications() => CheckAuthenticationAndRedirect("~/Views/Account/Dashboard/Notifications.cshtml");
 
-        // GET: /Account/Dashboard/Settings
-        public IActionResult Settings()
+        public IActionResult Settings() => CheckAuthenticationAndRedirect("~/Views/Account/Dashboard/Settings.cshtml");
+
+        private IActionResult CheckAuthenticationAndRedirect(string view)
         {
             if (User?.Identity != null && User.Identity.IsAuthenticated)
             {
-                return View("~/Views/Account/Dashboard/Settings.cshtml");
+                return View(view);
             }
             return RedirectToAction("Login");
         }
 
         #endregion
-
-        #region ACCESS DENIED
 
         [AllowAnonymous]
-        public IActionResult AccessDenied()
-        {
-            return View();
-        }
-
-        #endregion
-
-        #region ERROR HANDLING
+        public IActionResult AccessDenied() => View();
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
-
-        #endregion
+        public IActionResult Error() => View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }

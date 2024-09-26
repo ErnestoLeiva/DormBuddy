@@ -1,3 +1,4 @@
+using System;
 namespace DormBuddy.Models {
 
     public static class Roles {

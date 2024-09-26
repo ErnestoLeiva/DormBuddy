@@ -12,7 +12,7 @@ builder.Services.AddControllersWithViews();
 // Database configuration using MySQL
 builder.Services.AddDbContext<DBContext>(options =>
     options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
-    new MySqlServerVersion(new Version(8, 0, 2))));
+    new MySqlServerVersion(new Version(8, 0, 21))));
 #endregion
 
 #region IDENTITY CONFIGURATION
