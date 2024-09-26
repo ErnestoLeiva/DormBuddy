@@ -7,8 +7,27 @@
     <p>Welcome Admin @ViewBag.Username! Manage your site and users from here.</p>
 
     <!-- Add links or buttons to manage users, view reports, etc. -->
-    <div>
+    <div class="mt-4">
         <a class="btn btn-primary" href="/Admin/ManageUsers">Manage Users</a>
         <a class="btn btn-secondary" href="/Admin/Reports">View Reports</a>
+        <a class="btn btn-warning" href="/Admin/Settings">Site Settings</a>
+        <a class="btn btn-info" href="/Admin/Logs">View Logs</a>
     </div>
+
+    <hr class="my-4">
+    
+    <div>
+        <h3>Quick Stats</h3>
+        <ul class="list-group">
+            <li class="list-group-item">Total Users: <strong>@ViewBag.TotalUsers</strong></li>
+            <li class="list-group-item">Total Reports: <strong>@ViewBag.TotalReports</strong></li>
+            <li class="list-group-item">Active Sessions: <strong>@ViewBag.ActiveSessions</strong></li>
+        </ul>
+    </div>
+
+    <hr class="my-4">
+    
+    <footer>
+        <p>&copy; 2024 Your Company Name. All rights reserved.</p>
+    </footer>
 </div>
