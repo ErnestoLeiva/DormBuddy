@@ -87,10 +87,30 @@ namespace DormBuddy.Controllers
 
             var result = await _signInManager.PasswordSignInAsync(user, password, false, false);
 
-            if (result.Succeeded)
+            if (result.Succeeded) {
+                await _userManager.ResetAccessFailedCountAsync(user);
                 return RedirectToAction("Dashboard");
 
-            ViewBag.ErrorMessage = "Invalid credentials, try again!";
+            } else {
+                if (result.IsLockedOut) {
+                    // send message of time left and return
+                    var lockoutTime = await _userManager.GetLockoutEndDateAsync(user);
+                    var timeRemaining = lockoutTime.Value - DateTimeOffset.Now;
+                    ViewBag.ErrorMessage = "Account is locked out!\nRemaining: " + timeRemaining.Minutes + " minutes, " + timeRemaining.Seconds + " seconds.";
+                    return View("AccountForms");
+                }
+
+                await _userManager.AccessFailedAsync(user);
+
+                var failed = await _userManager.GetAccessFailedCountAsync(user);
+                var max = _userManager.Options.Lockout.MaxFailedAccessAttempts;
+
+                var remaining = max - failed;
+
+                ViewBag.ErrorMessage = "Invalid credentials, try again!\nRemaining attempts: " + remaining;
+            }
+
+            
             return View("AccountForms");
         }
 
