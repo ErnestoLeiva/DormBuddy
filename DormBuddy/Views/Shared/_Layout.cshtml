@@ -13,9 +13,9 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/DormBuddy.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/account.css" asp-append-version="true" />
-    
+    <link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true" />
+
     <!-- FontAwesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     @await RenderSectionAsync("Styles", required: false)
 </head>
@@ -43,15 +43,32 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Dashboard">Dashboard</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Logout">Sign Out</a>
-                        </li>
-                        } else {
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="AccountForms">Login/Sign Up</a>
-                        </li>
                         }
                     </ul>
+                    @if (User?.Identity != null && User.Identity.IsAuthenticated)
+                    {
+                        <div class="d-flex align-items-center">
+                            <a href="@Url.Action("Notifications", "Account")" class="mr-3 notification-btn">
+                                <i class="fas fa-bell"></i>
+                            </a>
+                            <div class="account-dropdown">
+                                <div class="dropdown">
+                                    <button class="btn btn-secondary dropdown-toggle" type="button" id="accountDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                         <i class="fas fa-user-circle"></i> @User.Identity.Name
+                                    </button>
+                                <div class="dropdown-menu dropdown-menu-right account-dropdown-menu" aria-labelledby="accountDropdown">
+                                    <a class="dropdown-item" href="@Url.Action("Settings", "Account")"><i class="fas fa-cog"></i> Account Settings</a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="@Url.Action("Logout", "Account")"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="AccountForms">Login/Sign Up</a>
+                    }
                 </div>
             </div>
         </nav>
