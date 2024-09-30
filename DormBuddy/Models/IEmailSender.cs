@@ -4,5 +4,6 @@ namespace DormBuddy.Models
     {
     Task SendEmailAsync(string toEmail, string subject, string message);
     Task<bool> SendActivationEmail(ApplicationUser user, string link);
+    Task<bool> SendPasswordResetEmail(ApplicationUser user, string link);
     }
 }

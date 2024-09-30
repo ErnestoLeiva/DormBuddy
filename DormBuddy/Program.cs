@@ -19,7 +19,13 @@ builder.Services.AddDbContext<DBContext>(options =>
 // Identity configuration for user management
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => 
 {
+    // email confirmation
     options.SignIn.RequireConfirmedEmail = true;
+
+    // lockout settings
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(60);
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.AllowedForNewUsers = true;
 })
     .AddEntityFrameworkStores<DBContext>()
     .AddDefaultTokenProviders();
