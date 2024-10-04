@@ -5,12 +5,13 @@ namespace DormBuddy.Controllers
 {
     public class AdministrationController : Controller
     {
-        // GET: /Administration/AdminPanel
+        // GET: /Administration/AdminDashboard
         [Authorize(Roles = "Admin")]
-        public IActionResult AdminPanel() => View("~/Views/Administration/AdminPanel.cshtml");
-
-        // GET: /Administration/ModeratorPanel
+        public IActionResult AdminPanel() => User?.Identity?.IsAuthenticated == true ? View("~/Views/Administration/AdminPanel.cshtml") : RedirectToAction("AccessDenied");
+        
+        // GET: /Administration/ModeratorDashboard
         [Authorize(Roles = "Admin,Moderator")]
-        public IActionResult ModeratorPanel() => View("~/Views/Administration/ModeratorPanel.cshtml");
+        public IActionResult ModeratorPanel() => User?.Identity?.IsAuthenticated == true ? View("~/Views/Administration/ModeratorPanel.cshtml") : RedirectToAction("AccessDenied");
+
     }
 }
