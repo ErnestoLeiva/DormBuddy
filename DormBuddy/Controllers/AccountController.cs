@@ -365,7 +365,6 @@ namespace DormBuddy.Controllers
             if (User?.Identity?.IsAuthenticated == true)
             {
                 var user = await _userManager.GetUserAsync(User);
-
                 if (user != null)
                 {
                     ViewBag.Username = $"{user.FirstName} {user.LastName}";
@@ -391,6 +390,18 @@ namespace DormBuddy.Controllers
         public IActionResult Notifications() => User?.Identity?.IsAuthenticated == true ? View("~/Views/Account/Dashboard/Notifications.cshtml") : RedirectToAction("AccountForms");
 
         public IActionResult Settings() => User?.Identity?.IsAuthenticated == true ? View("~/Views/Account/Dashboard/Settings.cshtml") : RedirectToAction("AccountForms");
+
+        #endregion
+
+        #region ADMIN/MODERATOR DASHBOARDS
+        
+        // GET: /Account/AdminDashboard
+        [Authorize(Roles = "Admin")]
+        public IActionResult AdminPanel() => User?.Identity?.IsAuthenticated == true ? View("~/Views/Account/Administration/AdminPanel.cshtml") : RedirectToAction("AccessDenied");
+        
+        // GET: /Account/ModeratorDashboard
+        [Authorize(Roles = "Admin,Moderator")]
+        public IActionResult ModeratorPanel() => User?.Identity?.IsAuthenticated == true ? View("~/Views/Account/Administration/ModeratorPanel.cshtml") : RedirectToAction("AccessDenied");
 
         #endregion
 
