@@ -393,18 +393,6 @@ namespace DormBuddy.Controllers
 
         #endregion
 
-        #region ADMIN/MODERATOR DASHBOARDS
-        
-        // GET: /Account/AdminDashboard
-        [Authorize(Roles = "Admin")]
-        public IActionResult AdminPanel() => User?.Identity?.IsAuthenticated == true ? View("~/Views/Account/Administration/AdminPanel.cshtml") : RedirectToAction("AccessDenied");
-        
-        // GET: /Account/ModeratorDashboard
-        [Authorize(Roles = "Admin,Moderator")]
-        public IActionResult ModeratorPanel() => User?.Identity?.IsAuthenticated == true ? View("~/Views/Account/Administration/ModeratorPanel.cshtml") : RedirectToAction("AccessDenied");
-
-        #endregion
-
         #region ACCESS DENIED
 
         [AllowAnonymous]
