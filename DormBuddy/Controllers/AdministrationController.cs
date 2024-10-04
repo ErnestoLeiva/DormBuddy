@@ -21,6 +21,8 @@ namespace DormBuddy.Controllers
             _emailSender = emailSender;
         }
         
+        #region ADMIN/MODERATOR PANEL ACTIONS
+        
         // GET: /Administration/AdminDashboard
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AdminPanel()
@@ -58,5 +60,7 @@ namespace DormBuddy.Controllers
                 return RedirectToAction("AccessDenied");
             }
         }
+        
+        #endregion
     }
 }
