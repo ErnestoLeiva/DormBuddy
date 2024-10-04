@@ -16,6 +16,7 @@ namespace DormBuddy.Controllers
         [Authorize(Roles = "Admin")]
         public IActionResult AdminPanel() => View("~/Views/Administration/AdminPanel.cshtml");
 
+        // GET: /Administration/ModeratorPanel
         [Authorize(Roles = "Admin,Moderator")]
         public IActionResult ModeratorPanel() => View("~/Views/Administration/ModeratorPanel.cshtml");
 
