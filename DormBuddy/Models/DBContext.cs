@@ -19,6 +19,8 @@ namespace DormBuddy.Models
         {
         }
 
+        // DBSet for persistent tasks feature - Ernesto Leiva 10/04/2024
+        public DbSet<TaskModel> Tasks { get; set; }
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -71,6 +73,13 @@ namespace DormBuddy.Models
                 entity.Property(e => e.LoginProvider).HasMaxLength(160);
                 entity.Property(e => e.ProviderKey).HasMaxLength(160);
                 entity.Property(e => e.ProviderDisplayName).HasMaxLength(160);
+            });
+
+            // Tasks configuratiobns for the requirments of string lenghts
+            builder.Entity<TaskModel>(entity =>
+            {
+                entity.Property(t => t.TaskName).HasMaxLength(160).IsRequired();
+                entity.Property(t => t.AssignedTo).HasMaxLength(160).IsRequired();
             });
         }
 
