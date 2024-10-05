@@ -88,7 +88,7 @@ namespace DormBuddy.Controllers
                     _dbContext.Tasks.Add(model);
                     await _dbContext.SaveChangesAsync();
 
-                    TempData["message"] = $"Task \"{model.TaskName}\" added successfully!";
+                    TempData["message"] = "Task added successfully!";
                 }
                 else
                 {
@@ -150,69 +150,40 @@ namespace DormBuddy.Controllers
 
             if (taskId <= 0)
             {
-                TempData["error"] = "Invalid Task ID.";
+                ViewBag.ErrorMessage = "Invalid Task ID.";
+                return RedirectToAction("Index");
             }
-            else
+
+            try
             {
-                try
+                var task = await _dbContext.Tasks.FindAsync(taskId);
+                if (task != null)
                 {
-                    var task = await _dbContext.Tasks.FirstOrDefaultAsync(t =>
-                        t.Id == taskId &&
-                        (t.UserId == user.Id || (t.AssignedTo != null && t.AssignedTo.Contains(user.Id))));
-
-                    if (task != null)
-                    {
-                        var taskname = task.TaskName;
-                        _dbContext.Tasks.Remove(task);
-                        await _dbContext.SaveChangesAsync();
-                        TempData["message"] = $"Task \"{taskname}\" deleted successfully!";
-                    }
-                    else
-                    {
-                        TempData["error"] = "Error: Task not found or you do not have permission to delete it.";
-                    }
+                    var taskname = task.TaskName;
+                    _dbContext.Tasks.Remove(task);
+                    await _dbContext.SaveChangesAsync();
+                    TempData["message"] = $"Task \"{taskname}\" deleted successfully!";
                 }
-                catch (Exception ex)
+                else
                 {
-                    _logger.LogError($"Error deleting task with ID {taskId}: {ex.Message}");
-                    TempData["error"] = "Error: Could not delete the task.";
+                    ViewBag.ErrorMessage = "Error: Task not found.";
                 }
             }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error deleting task with ID {taskId}: {ex.Message}");
+                ViewBag.ErrorMessage = "Error: Could not delete the task.";
+            }
 
-            // Fetch tasks for the current user
-            var tasks = await _dbContext.Tasks
-                .Where(t => t.UserId == user.Id || (t.AssignedTo != null && t.AssignedTo.Contains(user.Id)))
-                .ToListAsync();
-
-            // Fetch the current user's group ID
-            var groupId = await _dbContext.GroupMembers
-                .Where(gm => gm.UserId == user.Id)
-                .Select(gm => gm.GroupId)
-                .FirstOrDefaultAsync();
-
-            // Fetch all members of the group
-            var groupMembers = await _dbContext.GroupMembers
-                .Where(gm => gm.GroupId == groupId)
-                .ToListAsync();
-
-            // Fetch all users corresponding to the group members
-            var userIds = groupMembers.Select(gm => gm.UserId).ToList();
-            var users = await _dbContext.Users
-                .Where(u => userIds.Contains(u.Id))
-                .ToListAsync();
-
-            // Assign to ViewBag
-            ViewBag.GroupMembers = groupMembers;
-            ViewBag.Users = users;
-
-            var newTask = new TaskModel { UserId = user.Id };
-            return View("~/Views/Account/Dashboard/Tasks.cshtml", Tuple.Create(tasks, newTask));
+            return RedirectToAction("Index");
         }
 
         // POST: /Tasks/ToggleStatus
         [HttpPost]
         public async Task<IActionResult> ToggleStatus(int taskId)
         {
+            Console.WriteLine("\n\n\nREACHED ACTION\n\n\n");
+            
             if (taskId <= 0)
             {
                 return Json(new { success = false, message = "Invalid Task ID." });
@@ -234,6 +205,7 @@ namespace DormBuddy.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Exception occurred: {ex.Message}\n{ex.StackTrace}");
                 _logger.LogError($"Error toggling task status with ID {taskId}: {ex.Message}");
                 return Json(new { success = false, message = "Error: Could not update the task." });
             }
