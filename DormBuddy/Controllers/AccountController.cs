@@ -365,7 +365,6 @@ namespace DormBuddy.Controllers
             if (User?.Identity?.IsAuthenticated == true)
             {
                 var user = await _userManager.GetUserAsync(User);
-
                 if (user != null)
                 {
                     ViewBag.Username = $"{user.FirstName} {user.LastName}";
