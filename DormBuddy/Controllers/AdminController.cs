@@ -39,7 +39,7 @@ namespace DormBuddy.Controllers
             ViewBag.TotalReports = 10;  
             ViewBag.ActiveSessions = 5;
 
-            return View("~/Views/Account/AdminDashboard.cshtml"); // This should map to AdminDashboard.cshtml in the Views folder
+            return View("~/Views/Administration/AdminDashboard.cshtml"); // This should map to AdminDashboard.cshtml in the Views folder
         }
 
         // GET: /Admin/Index
