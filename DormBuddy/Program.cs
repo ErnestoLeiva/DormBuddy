@@ -1,12 +1,18 @@
 using Microsoft.EntityFrameworkCore;
 using DormBuddy.Models;
 using Microsoft.AspNetCore.Identity;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 
 var builder = WebApplication.CreateBuilder(args);
 
 #region SERVICES CONFIGURATION
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+FirebaseApp.Create(new AppOptions() {
+    Credential = GoogleCredential.FromFile("dormbuddy-33ce0-firebase-adminsdk-5i0gl-c049a0fe9a.json")
+});
 
 #region DATABASE CONFIGURATION
 // Database configuration using MySQL

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace DormBuddy.Models
 {
@@ -10,6 +11,8 @@ namespace DormBuddy.Models
         public int Credits { get; set; }
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
+
+        public bool RememberMe { get; set; }
     }
 
     public class DBContext : IdentityDbContext<ApplicationUser, IdentityRole, string>

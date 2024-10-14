@@ -26,6 +26,9 @@ namespace DormBuddy.Controllers
 
         public IActionResult HomeLogin()
         {
+            if (User?.Identity?.IsAuthenticated == true)
+                return RedirectToAction("Dashboard", "Account");
+                
             return View();
         }
 
