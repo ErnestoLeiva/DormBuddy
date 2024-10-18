@@ -61,7 +61,7 @@ namespace DormBuddy.Models {
             try
             {
                 string subject = "Account Activation";
-                string message = GenerateEmailContent(user, link, "activationemail.html");
+                string message = GenerateEmailContent(user, link, "Models/EmailService/activationemail.html");
                 if (!string.IsNullOrEmpty(user.Email))
                     await SendEmailAsync(user.Email, subject, message); // Just await, no need for a result
                 else
@@ -82,12 +82,12 @@ namespace DormBuddy.Models {
             try
             {
                 string subject = "Reset Password";
-                string message = GenerateEmailContent(user, link, "passwordresetemail.html");
+                string message = GenerateEmailContent(user, link, "Models/EmailService/passwordresetemail.html");
                 if (!string.IsNullOrEmpty(user.Email))
                     await SendEmailAsync(user.Email, subject, message); // Just await, no need for a result
                 else
                     Console.WriteLine("Password reset email is null! Not Sent!");
-                Console.WriteLine("Password reset email has been sent for " + user.Email);
+                Console.WriteLine("Password reset email has been sent for " + user.Email); 
 
                 return true; // Email sent successfully
             }

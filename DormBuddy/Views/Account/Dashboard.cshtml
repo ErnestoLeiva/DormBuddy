@@ -3,7 +3,6 @@
 }
 
 @{
-    var roleLabel = ViewBag.UserRoles.Contains(",") ? "Roles" : "Role"; // ift there is more than one role add an 's'
     var roles = ViewBag.UserRoles.Split(',');
 }
 
@@ -26,31 +25,37 @@
         </div>
     }
 
-    <p>Welcome <b>@ViewBag.Username</b>!<br />
-    [@roleLabel: 
-    @{
-        for (int i = 0; i < roles.Length; i++)
-        {
-            var role = roles[i].Trim();
-            var conditionalComma = ",";
+    <p>Welcome <b>@ViewBag.Username</b>!
+    @if (roles.Length > 1) // ONLY SHOW IF THERES MORE ROLES THAN JUST "USER"
+    {
+        
+        var roleLabel = roles.Length > 1 ? "Roles" : "Role";
 
-            var roleColor = role switch
+        <p>[@roleLabel: 
+        @{
+            for (int i = 0; i < roles.Length; i++)
             {
-                "Admin" => "color: #B026FF; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;",     //neon-purple #B026FF
-                "Moderator" => "color: #39FF14; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;", //neon-green #39FF14
-                "User" => "color: #1F51FF; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;",      //neon-blue #1F51FF
-                _ => "color: black;" //dfefault color
-            };
-            if (i == roles.Length - 1) //dont add comma for last role
-            {
-                conditionalComma = null; 
+                var role = roles[i].Trim();
+                var conditionalComma = ",";
+
+                var roleColor = role switch
+                {
+                    "Admin" => "color: #B026FF; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;",     // neon-purple
+                    "Moderator" => "color: #39FF14; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;", // neon-green
+                    "User" => "color: #1F51FF; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;",      // neon-blue
+                    _ => "color: black;" // default color
+                };
+
+                if (i == roles.Length - 1) // Don't add comma for the last role
+                {
+                    conditionalComma = null; 
+                }
+
+                <span style="@roleColor">@role</span>@conditionalComma
             }
-
-            <span style="@roleColor">@role</span>@conditionalComma
-            //Example:    PURPLE     ADMIN        , or null
-        }
-    }]<br />
-    This is your user dashboard to control actions regarding your account.</p>
+        }]</p>
+    }
+    <p>This is your user dashboard to control actions regarding your account.</p>
 </div>
 
 <!-- DASHBOARD PANEL CARDS -->
@@ -65,7 +70,7 @@
                 </div>
                 <div class="card-body">
                     <p>Manage your dorm-related tasks and track progress.</p>
-                    <a href="/Account/Tasks" class="btn btn-primary">View Tasks</a>
+                    <a href="/Tasks/Index" class="btn btn-primary">View Tasks</a>
                 </div>
             </div>
         </div>
@@ -156,7 +161,7 @@
                         </div>
                         <div class="card-body">
                             <p>Manage site-wide settings and users.</p>
-                            <a href="#" class="btn btn-purple">Go to Admin Panel</a>
+                            <a href="/Administration/AdminPanel" class="btn btn-purple">Go to Admin Panel</a>
                         </div>
                     </div>
                 </div>
@@ -170,7 +175,7 @@
                         </div>
                         <div class="card-body">
                             <p>Manage site-wide settings and users.</p>
-                            <a href="#" class="btn btn-purple">Go to Moderator Panel</a>
+                            <a href="/Administration/ModeratorPanel" class="btn btn-purple">Go to Moderator Panel</a>
                         </div>
                     </div>
                 </div>

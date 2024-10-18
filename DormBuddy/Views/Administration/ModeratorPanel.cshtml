@@ -1,0 +1,78 @@
+@{
+    ViewData["Title"] = "Moderator Panel";
+}
+
+<!-- Return to Dashboard Button -->
+<div class="mb-4">
+    <a href="/Account/Dashboard" class="btn btn-outline-primary">
+        <i class="fa fa-chevron-left"></i> Return to Dashboard
+    </a>
+</div>
+
+<!-- MODERATOR PANEL HEADER -->
+<div class="text-center mb-4">
+    <h1 class="display-4">Moderator Panel</h1>
+    <p>Welcome, <b>@ViewBag.Username</b>! Manage the platform and users effectively.</p>
+</div>
+
+<div class="container">
+    <div class="row">
+        <!-- User Reports Section -->
+        <div class="col-md-4">
+            <div class="card text-center mb-4">
+                <div class="card-header bg-danger text-white">
+                    <i class="fas fa-flag fa-lg"></i>
+                    User Reports
+                </div>
+                <div class="card-body">
+                    <p>View and manage reports submitted by users.</p>
+                    <a href="/Administration/UserReports" class="btn btn-danger">View Reports</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Review Section -->
+        <div class="col-md-4">
+            <div class="card text-center mb-4">
+                <div class="card-header bg-warning text-white">
+                    <i class="fas fa-file-alt fa-lg"></i>
+                    Content Review
+                </div>
+                <div class="card-body">
+                    <p>Review content flagged for violations and manage it.</p>
+                    <a href="/Administration/ContentReview" class="btn btn-warning">Review Content</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Management Section -->
+        <div class="col-md-4">
+            <div class="card text-center mb-4">
+                <div class="card-header bg-info text-white">
+                    <i class="fas fa-users fa-lg"></i>
+                    User Management
+                </div>
+                <div class="card-body">
+                    <p>Manage users, warnings, and bans.</p>
+                    <a href="/Administration/UserManagement" class="btn btn-info">Manage Users</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Dispute Resolution Section -->
+        <div class="col-md-4 offset-md-4">
+            <div class="card text-center mb-4">
+                <div class="card-header bg-success text-white">
+                    <i class="fas fa-gavel fa-lg"></i>
+                    Dispute Resolution
+                </div>
+                <div class="card-body">
+                    <p>Handle disputes between users.</p>
+                    <a href="/Administration/DisputeResolution" class="btn btn-success">Resolve Disputes</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
