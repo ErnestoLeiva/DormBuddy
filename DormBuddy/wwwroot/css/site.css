@@ -57,13 +57,13 @@ body {
 /*.dashboard-header is for the admin div background*/
 .dashboard-header {
   background-color: aliceblue;
-  background-image: url('/images/AdminPanel.jpeg'); /*This image is found in the image folder under AdminPanel.jpeg*/
-  background-size: cover; /* Ensures the image covers the entire div */
-  background-repeat: no-repeat; /* Prevents the image from repeating */
-  width: 100% auto; /* Ensures full width of the page */
+  background-image: url('/images/AdminPanel.jpg'); /*This image is found in the image folder under AdminPanel.jpeg*/
+  /*background-size:auto; /* Ensures the image covers the entire div */
+ /* background-repeat: no-repeat; /* Prevents the image from repeating */
+  width: 100%; /* Ensures full width of the page */
   height: 240px; /* Adjust height to control how much space the image takes */
   padding: 50px 20px; 
-  color: rgb(114, 112, 112); 
+  color: rgb(234, 234, 234); 
 }
 
 .dashboard-header::before {
