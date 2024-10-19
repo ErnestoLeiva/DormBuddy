@@ -9,7 +9,7 @@
 <!-- DASHBOARD HEADER -->
 <div class="text-center mb-4">
     <h1 class="display-4">User Dashboard</h1>
-
+    <hr class="my-4">
     <!-- Display success message if it exists -->
     @if (TempData["message"] != null)
     {
@@ -55,8 +55,8 @@
             }
         }]</p>
     }
-    <p>This is your user dashboard to control actions regarding your account.</p>
 </div>
+<hr class="my-4">
 
 <!-- DASHBOARD PANEL CARDS -->
 <div class="container">
@@ -142,7 +142,7 @@
                 </div>
                 <div class="card-body">
                     <p>Need assistance? Reach out for help with any issues.</p>
-                    <a href="#" class="btn btn-dark">Get Help</a>
+                    <a href="/Home/ContactUs" class="btn btn-dark">Get Help</a>
                 </div>
             </div>
         </div>
