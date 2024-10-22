@@ -6,20 +6,12 @@ namespace DormBuddy.Models
     {
         public int Id { get; set; }
 
-        [Required]
-        [MaxLength(100)]
-        public string Name { get; set; }
+        [Required(ErrorMessage = "GroupName is required.")]
+        public string GroupName { get; set; } = string.Empty;
 
-        public DateTime CreatedDate { get; set; } = DateTime.Now;
+        public string CreatedBy { get; set; } = string.Empty; // UserId of the group creator
 
-        public int MaxMembers { get; set; } = 4;
-
-        [Required]
-        public string CreatedByUserId { get; set; }
-
-        [Required]
-        public string InvitationCode { get; set; }
-
-        public ICollection<GroupMemberModel> Members { get; set; } = new List<GroupMemberModel>();
+        // Navigation property to hold the list of users in the group
+        public List<ApplicationUser> Users { get; set; } = new List<ApplicationUser>();
     }
 }
