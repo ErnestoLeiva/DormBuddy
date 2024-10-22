@@ -10,7 +10,7 @@ html {
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(3, 2, 2, 0.685);
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.685);
 }
 
 html {
@@ -23,7 +23,7 @@ body {
 }
 
 .bg-purple {
-  background-color: #0e0e0f !important;
+  background-color: #6a0dad !important;
 }
 
 .btn-purple {
@@ -52,101 +52,4 @@ body {
   top: 50%;
   transform: translateY(-50%);
   cursor: pointer;
-}
-
-/*.dashboard-header is for the admin div background*/
-.dashboard-header {
-  background-color: aliceblue;
-  background-image: url('/images/AdminPanel.jpg'); /*This image is found in the image folder under AdminPanel.jpeg*/
-  /*background-size:auto; /* Ensures the image covers the entire div */
- /* background-repeat: no-repeat; /* Prevents the image from repeating */
-  width: 100%; /* Ensures full width of the page */
-  height: 240px; /* Adjust height to control how much space the image takes */
-  padding: 50px 20px; 
-  color: rgb(234, 234, 234); 
-}
-
-.dashboard-header::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color:aliceblue;  /* Background overlay */
-  z-index: -1; /* Ensures the overlay is behind the text */
-}
-
-/* Manage Users Button */
-.btn-manage-users {
-  background-color: #00055d; 
-  color: white; /* Text color */
-  border: none; /* Remove border */
-}
-
-.btn-manage-users:hover {
-  background-color: #5a22e6; 
-}
-
-/* View Reports Button */
-.btn-view-reports {
-  background-color: #ae9c27; 
-  color: white;
-  border: none;
-}
-
-.btn-view-reports:hover {
-  background-color: #b8b62f; 
-}
-
-/* Site Settings Button */
-.btn-site-settings {
-  background-color: #00055d; 
-  color: white;
-  border: none;
-}
-
-.btn-site-settings:hover {
-  background-color: #5a22e6; 
-}
-
-/* View Logs Button */
-.btn-view-logs {
-  background-color: #ae9c27; 
-  color: white;
-  border: none;
-}
-
-.btn-view-logs:hover {
-  background-color: #5a22e6; 
-}
-
-
-/* User Management Card Header */
-.card-header.user-management {
-  background-color: #5a22e6; 
-  color: white;
-}
-
-/* Reports & Analytics Card Header */
-.card-header.reports-analytics {
-  background-color: #ccaf2e; 
-  color: white;
-}
-
-/* Site Settings Card Header */
-.card-header.site-settings {
-  background-color: #5a22e6; 
-  color: white;
-}
-
-/* System Logs Card Header */
-.card-header.system-logs {
-  background-color: #ccaf2e; 
-  color: white;
-}
-
-/*The footer was overlapping the Log cards*/
-.footer {
-  display: none;
 }
