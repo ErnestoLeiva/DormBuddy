@@ -116,8 +116,6 @@ namespace DormBuddy.Controllers
         [HttpPost]
         public async Task<IActionResult> ToggleStatus(int taskId)
         {
-            Console.WriteLine("\n\n\nREACHED ACTION\n\n\n");
-            
             if (taskId <= 0)
             {
                 return Json(new { success = false, message = "Invalid Task ID." });
@@ -139,7 +137,6 @@ namespace DormBuddy.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Exception occurred: {ex.Message}\n{ex.StackTrace}");
                 _logger.LogError($"Error toggling task status with ID {taskId}: {ex.Message}");
                 return Json(new { success = false, message = "Error: Could not update the task." });
             }

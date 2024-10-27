@@ -24,6 +24,10 @@ namespace DormBuddy.Models
 
         // DBSet for persistent tasks feature - Ernesto Leiva 10/04/2024
         public DbSet<TaskModel> Tasks { get; set; }
+        
+        // DBSet for persistent expenses feature - Ernesto Leiva 10/27/2024
+        public DbSet<ExpenseModel> Expenses { get; set; }
+
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
