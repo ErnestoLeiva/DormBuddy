@@ -1,15 +1,13 @@
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace DormBuddy.Models
 {
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+    public class ApplicationUser : IdentityUser
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-            : base(options)
-        {
-        }
+        public required string FirstName { get; set; }
+        public required string LastName { get; set; }
+        public int Credits { get; set; } // Assuming you have Credits in your user model
 
-        // Other DbSet properties for your entities can go here
+        public ApplicationUser() { }
     }
 }
