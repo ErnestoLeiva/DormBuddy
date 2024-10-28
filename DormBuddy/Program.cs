@@ -4,33 +4,29 @@ using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
-#region SERVICES CONFIGURATION
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-#region DATABASE CONFIGURATION
 // Database configuration using MySQL
 builder.Services.AddDbContext<DBContext>(options =>
     options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
     new MySqlServerVersion(new Version(8, 0, 21))));
-#endregion
 
-#region IDENTITY CONFIGURATION
 // Identity configuration for user management
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => 
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
     options.SignIn.RequireConfirmedEmail = true;
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(60);
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.AllowedForNewUsers = true;
 })
     .AddEntityFrameworkStores<DBContext>()
     .AddDefaultTokenProviders();
-#endregion
 
-#region EMAIL SENDER
+// Email sender configuration
 builder.Services.AddTransient<DormBuddy.Models.IEmailSender, Smtp>();
-#endregion
 
-#region PASSWORD REQUIREMENTS
-// Configure password requirements for users
+// Password requirements
 builder.Services.Configure<IdentityOptions>(options =>
 {
     options.Password.RequireDigit = true;
@@ -40,19 +36,15 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequiredLength = 6;
     options.Password.RequiredUniqueChars = 1;
 });
-#endregion
 
-#region SESSION CONFIGURATION
 // Session configuration
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30);  // Set session timeout to 30 minutes
-    options.Cookie.HttpOnly = true;  // Secure cookie
-    options.Cookie.IsEssential = true;  // GDPR compliance
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
 });
-#endregion
 
-#region AUTHENTICATION AND AUTHORIZATION
 // Authentication/Authorization configuration
 builder.Services.AddAuthentication(options =>
 {
@@ -62,23 +54,19 @@ builder.Services.AddAuthentication(options =>
 .AddCookie(options =>
 {
     options.LoginPath = "/Account/Login";
-    options.AccessDeniedPath = "/Account/AccessDenied"; // Redirect on access denied
+    options.AccessDeniedPath = "/Account/AccessDenied";
 });
 
 // Role-based authorization policies
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
-    options.AddPolicy("ModeratorPolicy", policy => policy.RequireRole("Moderator", "Admin"));
-    options.AddPolicy("UserPolicy", policy => policy.RequireRole("User", "Moderator", "Admin"));
+    options.AddPolicy("AdminPolicy", policy => policy.RequireRole(Roles.Admin));
+    options.AddPolicy("ModeratorPolicy", policy => policy.RequireRole(Roles.Moderator, Roles.Admin));
+    options.AddPolicy("UserPolicy", policy => policy.RequireRole(Roles.User, Roles.Moderator, Roles.Admin));
 });
-#endregion
-
-#endregion
 
 var app = builder.Build();
 
-#region MIDDLEWARE CONFIGURATION
 // Configure middleware for HTTP request pipeline
 if (!app.Environment.IsDevelopment())
 {
@@ -90,10 +78,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-// Enable session handling
 app.UseSession();
-
-// Enable authentication and authorization
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -106,19 +91,18 @@ app.MapControllerRoute(
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=HomeLogin}/{id?}");
-#endregion
 
 await InitializeRolesAndAdminUser(app);
 
 app.Run();
 
-#region ROLE INITIALIZATION
 // Initialize default roles
 static async Task InitializeRolesAndAdminUser(WebApplication app)
 {
     using (var scope = app.Services.CreateScope())
     {
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
         string[] roles = { Roles.Admin, Roles.Moderator, Roles.User };
 
@@ -129,6 +113,27 @@ static async Task InitializeRolesAndAdminUser(WebApplication app)
                 await roleManager.CreateAsync(new IdentityRole(role));
             }
         }
+
+        var adminEmail = "DormbuddyTest@gmail.com";
+        var adminUser = await userManager.FindByEmailAsync(adminEmail);
+
+        if (adminUser == null)
+        {
+            var newAdmin = new ApplicationUser
+            {
+                UserName = adminEmail,
+                Email = adminEmail,
+                FirstName = "AdminTest",
+                LastName = "Account",
+                EmailConfirmed = true,
+            };
+
+            var createAdminResult = await userManager.CreateAsync(newAdmin, "Admin@123");
+
+            if (createAdminResult.Succeeded)
+            {
+                await userManager.AddToRoleAsync(newAdmin, Roles.Admin);
+            }
+        }
     }
 }
-#endregion
