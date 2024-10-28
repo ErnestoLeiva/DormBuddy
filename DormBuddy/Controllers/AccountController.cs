@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using DormBuddy.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -50,7 +51,8 @@ namespace DormBuddy.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login(string username, string password)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(string username, string password, bool rememberMe)
         {
             if (!ModelState.IsValid)
             {
@@ -89,6 +91,20 @@ namespace DormBuddy.Controllers
 
             if (result.Succeeded) {
                 await _userManager.ResetAccessFailedCountAsync(user);
+
+
+                var claims = new List<Claim>
+                {
+                    new Claim("FirstName", user.FirstName ?? ""),
+                    new Claim("LastName", user.LastName ?? ""),
+                    new Claim("Credits", user.Credits.ToString())
+                };
+
+                var claimsIdentity = new ClaimsIdentity(claims, IdentityConstants.ApplicationScheme);
+
+                // Sign in the user with the new identity that includes the custom claims
+                await _signInManager.SignInWithClaimsAsync(user, rememberMe, claims);
+
                 return RedirectToAction("Dashboard");
 
             } else {
@@ -292,9 +308,7 @@ namespace DormBuddy.Controllers
         [HttpPost]
         public async Task<ActionResult> ResetPassword(string userId, string token, ResetPasswordViewModel model) {
             
-            Console.WriteLine("part 1");
             if (ModelState.IsValid) {
-                Console.WriteLine("part 2");
                 var user = await _userManager.FindByIdAsync(userId);
 
                 if (user == null) {
@@ -390,6 +404,38 @@ namespace DormBuddy.Controllers
         public IActionResult Notifications() => User?.Identity?.IsAuthenticated == true ? View("~/Views/Account/Dashboard/Notifications.cshtml") : RedirectToAction("AccountForms");
 
         public IActionResult Settings() => User?.Identity?.IsAuthenticated == true ? View("~/Views/Account/Dashboard/Settings.cshtml") : RedirectToAction("AccountForms");
+
+        public IActionResult Profile() => User?.Identity?.IsAuthenticated == true ? View("~/Views/Account/Dashboard/Profile.cshtml") : RedirectToAction("AccountForms");
+
+        public IActionResult LoadSettings(string settingsPage)
+        {
+            switch (settingsPage)
+            {
+                case "GeneralSettings":
+                    return PartialView("Dashboard/Settings/_GeneralSettings");
+                case "AccountSettings":
+                    return PartialView("Dashboard/Settings/_AccountSettings");
+                case "PrivacySettings":
+                    return PartialView("Dashboard/Settings/_PrivacySettings");
+                default:
+                    return Content("Invalid settings page.");
+            }
+        }
+        
+        [HttpPost]
+        public IActionResult VerifyUser([FromForm] string idToken)
+        {
+            // Validate the token received from Firebase on the server side
+            if (string.IsNullOrEmpty(idToken))
+            {
+                return BadRequest("Invalid ID token");
+            }
+
+            // Here, you would validate the token using Firebase Admin SDK (or some other JWT verification method)
+            // For simplicity, assuming it's a valid token, return success
+            return Ok(new { message = "User verified successfully." });
+        }
+
 
         #endregion
 

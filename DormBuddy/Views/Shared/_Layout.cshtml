@@ -11,64 +11,81 @@
 
     <!-- Site-specific CSS -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/DormBuddy.styles.css" asp-append-version="true" />
+    <!--<link rel="stylesheet" href="~/DormBuddy.styles.css" asp-append-version="true" />-->
     <link rel="stylesheet" href="~/css/account.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true" />
-
+    <link rel="stylesheet" href="~/css/_Layout.css" asp-append-version="true"/>
+    
     <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="HomeLogin">
                     <img src="~/favicon.ico" alt="DormBuddy Logo" style="height: 24px; width: 24px; margin-right: 8px;" /> DormBuddy
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                
+                <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="HomeLogin">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
                         @if (User?.Identity != null && User.Identity.IsAuthenticated) {
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Dashboard">Dashboard</a>
-                        </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Dashboard">Dashboard</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="ContactUs">Contact Us</a>
+                            </li>
+                        } else {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="HomeLogin">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="ContactUs">Contact Us</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="AccountForms">Login/Sign Up</a>
+                            </li>
                         }
                     </ul>
-                    @if (User?.Identity != null && User.Identity.IsAuthenticated)
-                    {
-                        <div class="d-flex align-items-center">
-                            <a href="@Url.Action("Notifications", "Account")" class="mr-3 notification-btn">
-                                <i class="fas fa-bell"></i>
-                            </a>
-                            <div class="account-dropdown">
-                                <div class="dropdown">
-                                    <button class="btn btn-secondary dropdown-toggle" type="button" id="accountDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                         <i class="fas fa-user-circle"></i> @User.Identity.Name
-                                    </button>
-                                <div class="dropdown-menu dropdown-menu-right account-dropdown-menu" aria-labelledby="accountDropdown">
-                                    <a class="dropdown-item" href="@Url.Action("Settings", "Account")"><i class="fas fa-cog"></i> Account Settings</a>
-                                    <div class="dropdown-divider"></div>
-                                    <a class="dropdown-item" href="@Url.Action("Logout", "Account")"><i class="fas fa-sign-out-alt"></i> Logout</a>
-                                </div>
-                            </div>
-                        </div>
-                        </div>
-                    }
-                    else
-                    {
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="AccountForms">Login/Sign Up</a>
-                    }
                 </div>
+
+                @if (User?.Identity != null && User.Identity.IsAuthenticated) {
+
+                
+                string firstName = User.FindFirst("FirstName")?.Value ?? "";
+                string lastName = User.FindFirst("LastName")?.Value ?? "";
+                string credits = User.FindFirst("Credits")?.Value ?? "";
+
+                
+                <div class="creditsContainer">
+                    <p class="fa-solid fa-coins">  @credits</p>
+                </div>
+                <div class="dropdown">
+                    
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                
+                <img class="dropdown-avatar" src="#"/> @firstName @lastName
+    </button>
+
+                    <div class="dropdown-menu dropdown-menu-right text-left">
+                        <a class="dropdown-item fas fa-user" asp-controller="Account" asp-action="Profile"> Profile</a>
+                        <a class="dropdown-item fas fa-cog" asp-controller="Account" asp-action="Settings"> Settings</a>
+                        <div class="line-divider"></div>
+                        <a class="dropdown-item fas fa-sign-out-alt" asp-controller="Account" asp-action="Logout"> Sign Out</a>
+                    </div>
+                </div>
+                }
             </div>
         </nav>
     </header>
@@ -80,7 +97,7 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2024 - DormBuddy - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2024 - DormBuddy - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy Policy</a>
         </div>
     </footer>
 

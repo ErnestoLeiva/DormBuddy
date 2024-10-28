@@ -2,89 +2,184 @@
     ViewData["Title"] = "Dashboard";
 }
 
-<div class="dashboard-container">
-    <div class="dashboard-header">
-        <h1>User Dashboard</h1>
-        @if (TempData["message"] != null)
-        {
-            <div class="alert alert-success">
-                @TempData["message"]
-            </div>
-        }
-        @if (ViewBag.ErrorMessage != null)
-        {
-            <div class="alert alert-danger" role="alert">
-                @ViewBag.ErrorMessage
-            </div>
-        }
-        <p>Welcome <b>@ViewBag.Username</b>!</p>
-        <p>
-            @foreach (var role in ViewBag.UserRoles.Split(','))
-            {
-                <span class="role-badge @role.Trim().ToLower()">@role.Trim()</span>
-            }
-        </p>
-    </div>
+@{
+    var roles = ViewBag.UserRoles.Split(',');
+}
 
-    <div class="dashboard-grid">
-        <div class="card dashboard-card card-tasks">
-            <div class="card-header">
-                <i class="fas fa-tasks fa-lg"></i>
-                Task Management
-            </div>
-            <div class="card-body">
-                <p>Manage your dorm-related tasks and track progress.</p>
-                <a href="@Url.Action("Tasks", "Account")" class="btn btn-light">View Tasks</a>
-            </div>
-        </div>
-
-        <div class="card dashboard-card card-expenses">
-            <div class="card-header">
-                <i class="fas fa-money-bill-wave fa-lg"></i>
-                Expense Splitting
-            </div>
-            <div class="card-body">
-                <p>Track shared expenses and manage balance with dormmates.</p>
-                <a href="@Url.Action("Expenses", "Account")" class="btn btn-light">View Expenses</a>
-            </div>
-        </div>
-
-        <div class="card dashboard-card card-lending">
-            <div class="card-header">
-                <i class="fas fa-handshake fa-lg"></i>
-                Peer-to-Peer Lending
-            </div>
-            <div class="card-body">
-                <p>Manage loans and transactions with your dormmates.</p>
-                <a href="@Url.Action("Lending", "Account")" class="btn btn-light">View Lending</a>
-            </div>
-        </div>
-
-        <div class="card dashboard-card card-help">
-            <div class="card-header">
-                <i class="fas fa-question-circle fa-lg"></i>
-                Help & Support
-            </div>
-            <div class="card-body">
-                <p>Need assistance? Reach out for help with any issues.</p>
-                <a href="#" class="btn btn-light">Get Help</a>
-            </div>
-        </div>
-    </div>
-
-    @if (ViewBag.UserRoles.Contains("Admin") || ViewBag.UserRoles.Contains("Moderator"))
+<!-- DASHBOARD HEADER -->
+<div class="text-center mb-4">
+    <h1 class="display-4"><strong>User Dashboard</strong></h1>
+    <hr class="my-4">
+    <!-- Display success message if it exists -->
+    @if (TempData["message"] != null)
     {
-        <div class="admin-panel">
-            <div class="card dashboard-card card-admin">
-                <div class="card-header">
-                    <i class="fas fa-shield-alt fa-lg"></i>
-                    @(ViewBag.UserRoles.Contains("Admin") ? "Admin Panel" : "Moderator Panel")
+        <div class="alert alert-success">
+            @TempData["message"]
+        </div>
+    }
+    <!-- Display error message if it exists -->
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <div class="alert alert-danger" role="alert">
+            @ViewBag.ErrorMessage
+        </div>
+    }
+
+    <p>Welcome <b>@ViewBag.Username</b>!
+    @if (roles.Length > 1) // ONLY SHOW IF THERES MORE ROLES THAN JUST "USER"
+    {
+        
+        var roleLabel = roles.Length > 1 ? "Roles" : "Role";
+
+        <p>[@roleLabel: 
+        @{
+            for (int i = 0; i < roles.Length; i++)
+            {
+                var role = roles[i].Trim();
+                var conditionalComma = ",";
+
+                var roleColor = role switch
+                {
+                    "Admin" => "color: #B026FF; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;",     // neon-purple
+                    "Moderator" => "color: #39FF14; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;", // neon-green
+                    "User" => "color: #1F51FF; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;",      // neon-blue
+                    _ => "color: black;" // default color
+                };
+
+                if (i == roles.Length - 1) // Don't add comma for the last role
+                {
+                    conditionalComma = null; 
+                }
+
+                <span style="@roleColor">@role</span>@conditionalComma
+            }
+        }]</p>
+    }
+</div>
+<hr class="my-4">
+
+<!-- DASHBOARD PANEL CARDS -->
+<div class="container">
+    <div class="row">
+        <!-- Task Management Card -->
+        <div class="col-md-4">
+            <div class="card text-center mb-4">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-tasks fa-lg"></i>
+                    Task Management
                 </div>
                 <div class="card-body">
-                    <p>Manage site-wide settings and users.</p>
-                    <a href="#" class="btn btn-light">Go to @(ViewBag.UserRoles.Contains("Admin") ? "Admin" : "Moderator") Panel</a>
+                    <p>Manage your dorm-related tasks and track progress.</p>
+                    <a href="/Tasks/Index" class="btn btn-primary">View Tasks</a>
                 </div>
             </div>
+        </div>
+
+        <!-- Expense Splitting Card -->
+        <div class="col-md-4">
+            <div class="card text-center mb-4">
+                <div class="card-header bg-success text-white">
+                    <i class="fas fa-money-bill-wave fa-lg"></i>
+                    Expense Splitting
+                </div>
+                <div class="card-body">
+                    <p>Track shared expenses and manage balance with dormmates.</p>
+                    <a href="/Expenses/Index" class="btn btn-success">View Expenses</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- P2P Lending Card -->
+        <div class="col-md-4">
+            <div class="card text-center mb-4">
+                <div class="card-header bg-warning text-white">
+                    <i class="fas fa-handshake fa-lg"></i>
+                    Peer-to-Peer Lending
+                </div>
+                <div class="card-body">
+                    <p>Manage loans and transactions with your dormmates.</p>
+                    <a href="/Account/Lending" class="btn btn-warning">View Lending</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Account Settings Card -->
+        <div class="col-md-4">
+            <div class="card text-center mb-4">
+                <div class="card-header bg-info text-white">
+                    <i class="fas fa-user-cog fa-lg"></i>
+                    Account Settings
+                </div>
+                <div class="card-body">
+                    <p>Update your account information and preferences.</p>
+                    <a href="/Account/Settings" class="btn btn-info">Manage Account</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications Card -->
+        <div class="col-md-4">
+            <div class="card text-center mb-4">
+                <div class="card-header bg-danger text-white">
+                    <i class="fas fa-bell fa-lg"></i>
+                    Notifications
+                </div>
+                <div class="card-body">
+                    <p>Check new notifications from your dormmates.</p>
+                    <a href="/Account/Notifications" class="btn btn-danger">View Notifications</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Help & Support Card -->
+        <div class="col-md-4">
+            <div class="card text-center mb-4">
+                <div class="card-header bg-dark text-white">
+                    <i class="fas fa-cog fa-lg"></i>
+                    Help & Support
+                </div>
+                <div class="card-body">
+                    <p>Need assistance? Reach out for help with any issues.</p>
+                    <a href="/Home/ContactUs" class="btn btn-dark">Get Help</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN/MODERATOR ROW -->
+    @if (ViewBag.UserRoles.Contains("Admin") || ViewBag.UserRoles.Contains("Moderator"))
+    {
+        <div class="row">
+            @if (ViewBag.UserRoles.Contains("Admin")) {
+                <div class="col-md-4 offset-md-4">
+                    <div class="card text-center mb-4">
+                        <div class="card-header bg-purple text-white">
+                            <i class="fas fa-shield-alt fa-lg"></i>
+                            Admin Panel
+                        </div>
+                        <div class="card-body">
+                            <p>Manage site-wide settings and users.</p>
+                            <a href="/Administration/AdminPanel" class="btn btn-purple">Go to Admin Panel</a>
+                        </div>
+                    </div>
+                </div>
+            }
+            else if (!ViewBag.UserRoles.Contains("Admin") && ViewBag.UserRoles.Contains("Moderator")){
+                <div class="col-md-4 offset-md-4">
+                    <div class="card text-center mb-4">
+                        <div class="card-header bg-purple text-white">
+                            <i class="fas fa-shield-alt fa-lg"></i>
+                            Moderator Panel
+                        </div>
+                        <div class="card-body">
+                            <p>Manage site-wide settings and users.</p>
+                            <a href="/Administration/ModeratorPanel" class="btn btn-purple">Go to Moderator Panel</a>
+                        </div>
+                    </div>
+                </div>
+            }
         </div>
     }
 </div>

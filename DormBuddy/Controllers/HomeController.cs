@@ -26,10 +26,18 @@ namespace DormBuddy.Controllers
 
         public IActionResult HomeLogin()
         {
+            if (User?.Identity?.IsAuthenticated == true)
+                return RedirectToAction("Dashboard", "Account");
+                
             return View();
         }
 
         public IActionResult Privacy()
+        {
+            return View();
+        }
+
+        public IActionResult ContactUs()
         {
             return View();
         }
