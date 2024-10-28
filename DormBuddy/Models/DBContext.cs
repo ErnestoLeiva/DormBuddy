@@ -1,6 +1,3 @@
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -8,6 +5,7 @@ using DormBuddy.Models;
 
 namespace DormBuddy.Models
 {
+    public class DBContext : IdentityDbContext<ApplicationUser>
 
     public class ApplicationUser : IdentityUser
     {
@@ -26,18 +24,11 @@ namespace DormBuddy.Models
         {
         }
 
-       // public DbSet<ApplicationUser> ApplicationUsers { get; set; }
+        // Define DbSet properties for your entities
+        public DbSet<DB_accounts> Accounts { get; set; }
+        public DbSet<TaskModel> Tasks { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured) {
-                optionsBuilder.UseMySql("Server=shportfolio.net;Database=myportfolio_dormbuddy;User=myportfolio;Password=65eyqYcPHv;", 
-                    new MySqlServerVersion(new Version(8, 0, 2)));
-            }
-                
-        }
-
-        protected override void OnModelCreating(ModelBuilder builder)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(builder);
 
