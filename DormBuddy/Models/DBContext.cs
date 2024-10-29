@@ -13,6 +13,8 @@ namespace DormBuddy.Models
         public string? LastName { get; set; }
 
         public bool RememberMe { get; set; }
+
+        public string? TimeZone { get; set; }
     }
 
     public class DBContext : IdentityDbContext<ApplicationUser, IdentityRole, string>
@@ -82,7 +84,7 @@ namespace DormBuddy.Models
                 entity.Property(e => e.ProviderDisplayName).HasMaxLength(160);
             });
 
-            // Tasks configuratiobns for the requirments of string lenghts
+            // Tasks configuratiobns for the requirments of string lengths
             builder.Entity<TaskModel>(entity =>
             {
                 entity.Property(t => t.TaskName).HasMaxLength(160).IsRequired();

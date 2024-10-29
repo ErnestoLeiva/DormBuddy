@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+
+<!-- Dashboard Text -->
+
+  <data name="DormBuddyLogo" xml:space="preserve">
+    <value>DormBuddy</value>
+  </data>
+  <data name="Dashboard" xml:space="preserve">
+    <value>Tablero</value>
+  </data>
+  <data name="Privacy" xml:space="preserve">
+    <value>Privacidad</value>
+  </data>
+  <data name="ContactUs" xml:space="preserve">
+    <value>Contáctanos</value>
+  </data>
+  <data name="UserDashboard" xml:space="preserve">
+    <value>Tablero de Usuario</value>
+  </data>
+  <data name="Welcome" xml:space="preserve">
+    <value>Bienvenido</value>
+  </data>
+  <data name="TaskManagement" xml:space="preserve">
+    <value>Gestión de Tareas</value>
+  </data>
+  <data name="TaskManagementDescription" xml:space="preserve">
+    <value>Administra tus tareas relacionadas con el dormitorio y haz un seguimiento del progreso.</value>
+  </data>
+  <data name="ExpenseSplitting" xml:space="preserve">
+    <value>División de Gastos</value>
+  </data>
+  <data name="ExpenseSplittingDescription" xml:space="preserve">
+    <value>Haz un seguimiento de los gastos compartidos y gestiona el balance con tus compañeros de dormitorio.</value>
+  </data>
+  <data name="PeerToPeerLending" xml:space="preserve">
+    <value>Préstamos entre Personas</value>
+  </data>
+  <data name="PeerToPeerLendingDescription" xml:space="preserve">
+    <value>Administra préstamos y transacciones con tus compañeros de dormitorio.</value>
+  </data>
+  <data name="AccountSettings" xml:space="preserve">
+    <value>Configuración de Cuenta</value>
+  </data>
+  <data name="AccountSettingsDescription" xml:space="preserve">
+    <value>Actualiza la información y preferencias de tu cuenta.</value>
+  </data>
+  <data name="Notifications" xml:space="preserve">
+    <value>Notificaciones</value>
+  </data>
+  <data name="NotificationsDescription" xml:space="preserve">
+    <value>Revisa nuevas notificaciones de tus compañeros de dormitorio.</value>
+  </data>
+  <data name="HelpAndSupport" xml:space="preserve">
+    <value>Ayuda y Soporte</value>
+  </data>
+  <data name="HelpAndSupportDescription" xml:space="preserve">
+    <value>¿Necesitas ayuda? Contáctanos para asistencia con cualquier problema.</value>
+  </data>
+
+  <!-- Dashboard Buttons -->
+
+  <data name="ViewTasks" xml:space="preserve">
+    <value>Ver Tareas</value>
+  </data>
+  <data name="ViewExpenses" xml:space="preserve">
+      <value>Ver Gastos</value>
+  </data>
+  <data name="ViewLending" xml:space="preserve">
+      <value>Ver Préstamos</value>
+  </data>
+  <data name="ManageAccount" xml:space="preserve">
+      <value>Administrar Cuenta</value>
+  </data>
+  <data name="ViewNotifications" xml:space="preserve">
+      <value>Ver Notificaciones</value>
+  </data>
+  <data name="GetHelp" xml:space="preserve">
+      <value>Obtener Ayuda</value>
+  </data>
+
+</root>
