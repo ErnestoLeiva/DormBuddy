@@ -1,3 +1,9 @@
+@inject Microsoft.Extensions.Localization.IStringLocalizerFactory LocalizerFactory
+@{
+    var SharedLocalizer = LocalizerFactory.Create("SharedResource", typeof(Program).Assembly.GetName().Name ?? "");
+}
+
+
 @{
     ViewData["Title"] = "Dashboard";
 }
@@ -7,6 +13,75 @@
     <h1 class="display-4">User Dashboard</h1>
     <p>Welcome <b>@ViewBag.Username</b>! <br /> 
     This is your user dashboard to control actions regarding your account.</p>
+    <h1 class="display-4"><strong>@SharedLocalizer["UserDashboard"]</strong></h1>
+    <hr class="my-4">
+    <!-- Display success message if it exists -->
+    @if (TempData["message"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["message"]
+        </div>
+    }
+    <!-- Display error message if it exists -->
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <div class="alert alert-danger" role="alert">
+            @ViewBag.ErrorMessage
+        </div>
+    }
+
+    <!--<p>@ViewBag.CultureInfo</p>-->
+
+    <p>@SharedLocalizer["Welcome"] <b>@ViewBag.Username</b>!
+
+    <div id="eventDetails"></div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            function updateEventTime() {
+                $.get('@Url.Action("GetCurrentTime", "Account")', {}, function(data) {
+                    $('#eventDetails').html(data);
+                });
+            }
+
+            // Update the time every 10 seconds
+            setInterval(updateEventTime, 1000);
+
+            // Initial call to display the time immediately
+            updateEventTime();
+        });
+    </script>
+
+
+    @if (roles.Length > 1) // ONLY SHOW IF THERES MORE ROLES THAN JUST "USER"
+    {
+        
+        var roleLabel = roles.Length > 1 ? "Roles" : "Role";
+
+        <p>[@roleLabel: 
+        @{
+            for (int i = 0; i < roles.Length; i++)
+            {
+                var role = roles[i].Trim();
+                var conditionalComma = ",";
+
+                var roleColor = role switch
+                {
+                    "Admin" => "color: #B026FF; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;",     // neon-purple
+                    "Moderator" => "color: #39FF14; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;", // neon-green
+                    "User" => "color: #1F51FF; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;",      // neon-blue
+                    _ => "color: black;" // default color
+                };
+
+                if (i == roles.Length - 1) // Don't add comma for the last role
+                {
+                    conditionalComma = null; 
+                }
+
+                <span style="@roleColor">@role</span>@conditionalComma
+            }
+        }]</p>
+    }
 </div>
 
 <div class="container">
@@ -15,12 +90,12 @@
         <div class="col-md-4">
             <div class="card text-center mb-4">
                 <div class="card-header bg-primary text-white">
-                    <i class="fas fa-tasks fa-lg"></i> <!-- Task Icon -->
-                    Task Management
+                    <i class="fas fa-tasks fa-lg"></i>
+                    @SharedLocalizer["TaskManagement"]
                 </div>
                 <div class="card-body">
-                    <p>Manage your dorm-related tasks and track progress.</p>
-                    <a href="/Tasks/Index" class="btn btn-primary">View Tasks</a>
+                    <p>@SharedLocalizer["TaskManagementDescription"]</p>
+                    <a href="/Tasks/Index" class="btn btn-primary">@SharedLocalizer["ViewTasks"]</a>
                 </div>
             </div>
         </div>
@@ -29,12 +104,12 @@
         <div class="col-md-4">
             <div class="card text-center mb-4">
                 <div class="card-header bg-success text-white">
-                    <i class="fas fa-money-bill-wave fa-lg"></i> <!-- Expense Icon -->
-                    Expense Splitting
+                    <i class="fas fa-money-bill-wave fa-lg"></i>
+                    @SharedLocalizer["ExpenseSplitting"]
                 </div>
                 <div class="card-body">
-                    <p>Track shared expenses and manage balance with dormmates.</p>
-                    <a href="/Expenses/Index" class="btn btn-success">View Expenses</a>
+                    <p>@SharedLocalizer["ExpenseSplittingDescription"]</p>
+                    <a href="/Expenses/Index" class="btn btn-success">@SharedLocalizer["ViewExpenses"]</a>
                 </div>
             </div>
         </div>
@@ -45,10 +120,12 @@
                 <div class="card-header bg-warning text-white">
                     <i class="fas fa-handshake fa-lg"></i> <!-- Lending Icon -->
                     Peer-to-Peer Lending
+                    <i class="fas fa-handshake fa-lg"></i>
+                    @SharedLocalizer["PeerToPeerLending"]
                 </div>
                 <div class="card-body">
-                    <p>Manage loans and transactions with your dormmates.</p>
-                    <a href="/Account/Lending" class="btn btn-warning">View Lending</a>
+                    <p>@SharedLocalizer["PeerToPeerLendingDescription"]</p>
+                    <a href="/Account/Lending" class="btn btn-warning" style="color: white;">@SharedLocalizer["ViewLending"]</a>
                 </div>
             </div>
         </div>
@@ -61,10 +138,12 @@
                 <div class="card-header bg-info text-white">
                     <i class="fas fa-user-cog fa-lg"></i> <!-- Account Settings Icon -->
                     Account Settings
+                    <i class="fas fa-user-cog fa-lg"></i>
+                    @SharedLocalizer["AccountSettings"]
                 </div>
                 <div class="card-body">
-                    <p>Update your account information and preferences.</p>
-                    <a href="/Account/Settings" class="btn btn-info">Manage Account</a>
+                    <p>@SharedLocalizer["AccountSettingsDescription"]</p>
+                    <a href="/Account/Settings" class="btn btn-info">@SharedLocalizer["ManageAccount"]</a>
                 </div>
             </div>
         </div>
@@ -73,12 +152,12 @@
         <div class="col-md-4">
             <div class="card text-center mb-4">
                 <div class="card-header bg-danger text-white">
-                    <i class="fas fa-bell fa-lg"></i> <!-- Notification Icon -->
-                    Notifications
+                    <i class="fas fa-bell fa-lg"></i>
+                    @SharedLocalizer["Notifications"]
                 </div>
                 <div class="card-body">
-                    <p>Check new notifications from your dormmates.</p>
-                    <a href="/Account/Notifications" class="btn btn-danger">View Notifications</a>
+                    <p>@SharedLocalizer["NotificationsDescription"]</p>
+                    <a href="/Account/Notifications" class="btn btn-danger">@SharedLocalizer["ViewNotifications"]</a>
                 </div>
             </div>
         </div>
@@ -87,12 +166,12 @@
         <div class="col-md-4">
             <div class="card text-center mb-4">
                 <div class="card-header bg-dark text-white">
-                    <i class="fas fa-cog fa-lg"></i> <!-- Help Icon -->
-                    Help & Support
+                    <i class="fas fa-cog fa-lg"></i>
+                    @SharedLocalizer["HelpAndSupport"]
                 </div>
                 <div class="card-body">
-                    <p>Need assistance? Reach out for help with any issues.</p>
-                    <a href="#" class="btn btn-dark">Get Help</a>
+                    <p>@SharedLocalizer["HelpAndSupportDescription"]</p>
+                    <a href="/Home/ContactUs" class="btn btn-dark">@SharedLocalizer["GetHelp"]</a>
                 </div>
             </div>
         </div>
