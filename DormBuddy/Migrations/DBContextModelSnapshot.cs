@@ -22,37 +22,51 @@ namespace DormBuddy.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
+            modelBuilder.Entity("ApplicationUserGroupModel", b =>
+                {
+                    b.Property<int>("GroupsId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UsersId")
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("GroupsId", "UsersId");
+
+                    b.HasIndex("UsersId");
+
+                    b.ToTable("UserGroups", (string)null);
+                });
+
             modelBuilder.Entity("DormBuddy.Models.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("Credits")
                         .HasColumnType("int");
 
                     b.Property<string>("Email")
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<int?>("ExpenseModelId")
+                        .HasColumnType("int");
+
                     b.Property<string>("FirstName")
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("LastName")
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
+                        .HasColumnType("longtext");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("tinyint(1)");
@@ -61,36 +75,38 @@ namespace DormBuddy.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("NormalizedEmail")
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
 
                     b.Property<string>("NormalizedUserName")
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
 
                     b.Property<string>("PasswordHash")
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("PhoneNumber")
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
+                        .HasColumnType("longtext");
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<bool>("RememberMe")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<string>("SecurityStamp")
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
+                        .HasColumnType("longtext");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("UserName")
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ExpenseModelId");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -100,6 +116,75 @@ namespace DormBuddy.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("DormBuddy.Models.DB_accounts", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AccountName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Accounts");
+                });
+
+            modelBuilder.Entity("DormBuddy.Models.ExpenseModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("ExpenseName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(191)
+                        .HasColumnType("varchar(191)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Expenses");
+                });
+
+            modelBuilder.Entity("DormBuddy.Models.GroupModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("GroupName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Groups");
                 });
 
             modelBuilder.Entity("DormBuddy.Models.TaskModel", b =>
@@ -112,8 +197,7 @@ namespace DormBuddy.Migrations
 
                     b.Property<string>("AssignedTo")
                         .IsRequired()
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("DueDate")
                         .HasColumnType("datetime(6)");
@@ -123,13 +207,11 @@ namespace DormBuddy.Migrations
 
                     b.Property<string>("TaskName")
                         .IsRequired()
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
@@ -139,21 +221,19 @@ namespace DormBuddy.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Name")
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
 
                     b.Property<string>("NormalizedName")
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
 
                     b.HasKey("Id");
 
@@ -173,17 +253,14 @@ namespace DormBuddy.Migrations
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ClaimValue")
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("RoleId")
                         .IsRequired()
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
+                        .HasColumnType("varchar(255)");
 
                     b.HasKey("Id");
 
@@ -201,17 +278,14 @@ namespace DormBuddy.Migrations
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ClaimValue")
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
+                        .HasColumnType("varchar(255)");
 
                     b.HasKey("Id");
 
@@ -223,21 +297,17 @@ namespace DormBuddy.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("ProviderKey")
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("ProviderDisplayName")
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
+                        .HasColumnType("varchar(255)");
 
                     b.HasKey("LoginProvider", "ProviderKey");
 
@@ -249,12 +319,10 @@ namespace DormBuddy.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
                     b.Property<string>("UserId")
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("RoleId")
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
+                        .HasColumnType("varchar(255)");
 
                     b.HasKey("UserId", "RoleId");
 
@@ -266,24 +334,53 @@ namespace DormBuddy.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
                     b.Property<string>("UserId")
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("LoginProvider")
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Name")
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Value")
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
+                        .HasColumnType("longtext");
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("ApplicationUserGroupModel", b =>
+                {
+                    b.HasOne("DormBuddy.Models.GroupModel", null)
+                        .WithMany()
+                        .HasForeignKey("GroupsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DormBuddy.Models.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UsersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("DormBuddy.Models.ApplicationUser", b =>
+                {
+                    b.HasOne("DormBuddy.Models.ExpenseModel", null)
+                        .WithMany("SharedWith")
+                        .HasForeignKey("ExpenseModelId");
+                });
+
+            modelBuilder.Entity("DormBuddy.Models.ExpenseModel", b =>
+                {
+                    b.HasOne("DormBuddy.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -335,6 +432,11 @@ namespace DormBuddy.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("DormBuddy.Models.ExpenseModel", b =>
+                {
+                    b.Navigation("SharedWith");
                 });
 #pragma warning restore 612, 618
         }

@@ -12,113 +12,85 @@ namespace DormBuddy.Controllers
     [Authorize]
     public class ExpensesController : Controller
     {
-        private readonly ILogger<TasksController> _logger;
+        private readonly ILogger<ExpensesController> _logger;
+       // private readonly ILogger<TasksController> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly DBContext _dbContext;
-    
-        public ExpensesController(ILogger<TasksController> logger, DBContext dbContext, UserManager<ApplicationUser> userManager)
+        
+        public ExpensesController(ILogger<ExpensesController> logger, DBContext dbContext, UserManager<ApplicationUser> userManager)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger)); 
             _dbContext = dbContext;
             _userManager = userManager;
         }
+    public async Task<IActionResult> Index()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return RedirectToAction("Login", "Account");
 
-        public async Task<IActionResult> Index()
+        var expenses = await _dbContext.Expenses
+            .Where(e => e.UserId == user.Id)
+            .ToListAsync();
+
+        // Ensure required properties are initialized
+        var newExpense = new ExpenseModel 
+        { 
+            UserId = user.Id, // Set UserId
+            ExpenseName = string.Empty // Initialize ExpenseName to an empty string or a default value
+        };
+        return View("~/Views/Account/Dashboard/Expenses.cshtml", Tuple.Create(expenses, newExpense));
+    }
+
+    // POST: /Expenses/AddExpense
+    [HttpPost]
+    public async Task<IActionResult> AddExpense(ExpenseModel model)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return RedirectToAction("Login", "Account");
+
+        model.UserId = user.Id; // Set UserId if not set
+        model.User = user;
+
+        if (ModelState.IsValid)
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user != null)
-            {
-                var expenses = await _dbContext.Expenses
-                    .Where(e => e.UserId == user.Id)
-                    .ToListAsync();
-
-                var newExpense = new ExpenseModel { UserId = user.Id };
-                return View("~/Views/Account/Dashboard/Expenses.cshtml", Tuple.Create(expenses, newExpense));
-            }
-
-            return RedirectToAction("Login", "Account");
+            _dbContext.Expenses.Add(model);
+            await _dbContext.SaveChangesAsync();
+            TempData["message"] = "Expense added successfully!";
+        }
+        else
+        {
+            TempData["error"] = "Error: Invalid expense data.";
         }
 
-        // POST: /Expenses/AddExpense
-        [HttpPost]
-        public async Task<IActionResult> AddExpense(ExpenseModel model)
+        var expenses = await _dbContext.Expenses.Where(e => e.UserId == user.Id).ToListAsync();
+        
+        // Ensure required properties are initialized for newExpense
+        var newExpense = new ExpenseModel 
+        { 
+            UserId = user.Id, 
+            ExpenseName = string.Empty 
+        };
+        return View("~/Views/Account/Dashboard/Expenses.cshtml", Tuple.Create(expenses, newExpense));
+    }
+
+
+    // POST: /Expenses/DeleteExpense
+    [HttpPost]
+    public async Task<IActionResult> DeleteExpense(int expenseId)
+    {
+        var expense = await _dbContext.Expenses.FindAsync(expenseId);
+        if (expense == null)
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return RedirectToAction("Login", "Account");
-
-            model.UserId = user.Id;
-            model.isSplit = false;
-
-            if (ModelState.IsValid)
-            {
-                _dbContext.Expenses.Add(model);
-                await _dbContext.SaveChangesAsync();
-                TempData["message"] = $"Expense \"{model.ExpenseName}\" added successfully!";
-            }
-            else
-            {
-                TempData["error"] = "Error: Invalid expense data.";
-            }
-
-            var expenses = await _dbContext.Expenses.Where(e => e.UserId == user.Id).ToListAsync();
-            var newExpense = new ExpenseModel { UserId = user.Id };
-            return View("~/Views/Account/Dashboard/Expenses.cshtml", Tuple.Create(expenses, newExpense));
+            TempData["error"] = "Error: Expense not found.";
+            return RedirectToAction("Index");
         }
 
-        // POST: /Expenses/DeleteExpense
-        [HttpPost]
-        public async Task<IActionResult> DeleteExpense(int expenseId)
-        {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-                return RedirectToAction("Login", "Account");
+        _dbContext.Expenses.Remove(expense);
+        await _dbContext.SaveChangesAsync();
+        TempData["message"] = $"Expense \"{expense.ExpenseName}\" deleted successfully!";
 
-            if (expenseId <= 0)
-            {
-                TempData["error"] = "Invalid Expense ID.";
-            }
-            else
-            {
-                try
-                {
-                    var expense = await _dbContext.Expenses.FindAsync(expenseId);
-                    if (expense != null && expense.UserId == user.Id)
-                    {
-                        var expenseName = expense.ExpenseName;
-                        _dbContext.Expenses.Remove(expense);
-                        await _dbContext.SaveChangesAsync();
-                        TempData["message"] = $"Expense \"{expenseName}\" deleted successfully!";
-                    }
-                    else
-                    {
-                        TempData["error"] = "Error: Expense not found.";
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError($"Error deleting expense with ID {expenseId}: {ex.Message}");
-                    TempData["error"] = "Error: Could not delete the expense.";
-                }
-            }
-
-            var expenses = await _dbContext.Expenses.Where(e => e.UserId == user.Id).ToListAsync();
-            var newExpense = new ExpenseModel { UserId = user.Id };
-            return View("~/Views/Account/Dashboard/Expenses.cshtml", Tuple.Create(expenses, newExpense));
-        }
-
-        // POST: /Expenses/ToggleStatus
-        [HttpPost]
-        public async Task<IActionResult> ToggleStatus(int expenseId)
-        {
-            var expense = await _dbContext.Expenses.FindAsync(expenseId);
-            if (expense != null)
-            {
-                expense.isSplit = !expense.isSplit; 
-                await _dbContext.SaveChangesAsync();
-                return Json(new { success = true });
-            }
-            return Json(new { success = false, message = "Expense not found" });
-        }
+        return RedirectToAction("Index");
+    }
 
     }
 }

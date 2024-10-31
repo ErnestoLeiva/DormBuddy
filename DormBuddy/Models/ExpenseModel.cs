@@ -14,27 +14,19 @@ namespace DormBuddy.Models
         [Required, StringLength(100)]
         public string ExpenseName { get; set; } = string.Empty; // Initialized to avoid null issues
 
-        [Required]
-        [Range(0.01, double.MaxValue, ErrorMessage = "Amount must be greater than 0.")]
+        [Required, Range(0.01, double.MaxValue, ErrorMessage = "Amount must be greater than 0.")]
         public decimal Amount { get; set; }
-
-        [Required]
-        public string? SharedWith { get; set; }
 
         [Required]
         public DateTime Date { get; set; }
 
-        [Required]
-        public string? UserId { get; set; }
+        [StringLength(191)]
+        public string UserId { get; set; } = string.Empty; // Initialized to avoid null issues
 
         [ForeignKey("UserId")]
-        public ApplicationUser? CreatedBy { get; set; }
+        public virtual ApplicationUser User { get; set; } = new ApplicationUser(); // Initialize to avoid null warnings
 
-        [Required]
-        public bool isSplit { get; set; }
-        
-
-
+        public ICollection<ApplicationUser> SharedWith { get; set; } = new List<ApplicationUser>();
     }
 
 }
