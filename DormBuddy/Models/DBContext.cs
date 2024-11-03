@@ -1,17 +1,23 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace DormBuddy.Models
 {
+
     public class ApplicationUser : IdentityUser
     {
         public int Credits { get; set; }
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
-        public bool IsAdmin { get; set; }
+
         public bool RememberMe { get; set; }
-        public List<GroupModel> Groups { get; set; } = new List<GroupModel>();       
+
+        public string? TimeZone { get; set; }
+
+        public ICollection<GroupModel> Groups { get; set; } = new List<GroupModel>();
+
     }
 
     public class DBContext : IdentityDbContext<ApplicationUser, IdentityRole, string>
@@ -21,7 +27,14 @@ namespace DormBuddy.Models
         {
         }
 
+        // DBSet for persistent tasks feature - Ernesto Leiva 10/04/2024
         public DbSet<TaskModel> Tasks { get; set; }
+        
+        // DBSet for persistent expenses feature - Ernesto Leiva 10/27/2024
+        public DbSet<ExpenseModel> Expenses { get; set; }
+
+        public DbSet<ApplicationUser> ApplicationUsers { get; set; }
+        public DbSet<GroupModel> Groups { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -29,12 +42,17 @@ namespace DormBuddy.Models
                 optionsBuilder.UseMySql("Server=shportfolio.net;Database=myportfolio_dormbuddy;User=myportfolio;Password=65eyqYcPHv;", 
                     new MySqlServerVersion(new Version(8, 0, 2)));
             }
+                
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-
+            builder.Entity<GroupModel>()
+                .HasMany(g => g.Members)
+                .WithMany(u => u.Groups)
+                .UsingEntity(j => j.ToTable("UserGroups"));
+                
             // Ensure the maximum length is set for all string properties
             foreach (var entity in builder.Model.GetEntityTypes())
             {
@@ -57,6 +75,7 @@ namespace DormBuddy.Models
                 entity.Property(m => m.NormalizedUserName).HasMaxLength(160);
                 entity.Property(m => m.FirstName).HasMaxLength(160);
                 entity.Property(m => m.LastName).HasMaxLength(160);
+
             });
 
             builder.Entity<IdentityRole>(entity =>
@@ -72,6 +91,15 @@ namespace DormBuddy.Models
                 entity.Property(e => e.ProviderKey).HasMaxLength(160);
                 entity.Property(e => e.ProviderDisplayName).HasMaxLength(160);
             });
+
+            // Tasks configuratiobns for the requirments of string lengths
+            builder.Entity<TaskModel>(entity =>
+            {
+                entity.Property(t => t.TaskName).HasMaxLength(160).IsRequired();
+                entity.Property(t => t.AssignedTo).HasMaxLength(160).IsRequired();
+            });
         }
+
+
     }
 }

@@ -7,7 +7,7 @@ namespace DormBuddy.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class GroupsController : ControllerBase
+    public class GroupsController : Controller
     {
         private readonly DBContext _context;
 
@@ -15,13 +15,17 @@ namespace DormBuddy.Controllers
         {
             _context = context;
         }
-
+        public async Task<IActionResult> Index()
+        {
+            var groups = await _context.Groups.ToListAsync();
+            return View(groups);
+        }
         // GET: api/groups
         [HttpGet]
         public async Task<IActionResult> GetGroups()
         {
             var groups = await _context.Groups
-                .Include(g => g.Users) // If you need members' details in the response
+                .Include(g => g.Members) 
                 .ToListAsync();
 
             return Ok(groups);
@@ -32,7 +36,7 @@ namespace DormBuddy.Controllers
         public async Task<IActionResult> GetGroup(int id)
         {
             var group = await _context.Groups
-                .Include(g => g.Users)
+                .Include(g => g.Members)
                 .FirstOrDefaultAsync(g => g.Id == id);
 
             if (group == null)

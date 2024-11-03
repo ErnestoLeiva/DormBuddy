@@ -53,34 +53,30 @@
     </script>
 
 
-    @if (roles.Length > 1) // ONLY SHOW IF THERES MORE ROLES THAN JUST "USER"
+    @if (ViewBag.Roles.Count > 1) // ONLY SHOW IF THERES MORE ROLES THAN JUST "USER"
     {
-        
-        var roleLabel = roles.Length > 1 ? "Roles" : "Role";
 
-        <p>[@roleLabel: 
-        @{
-            for (int i = 0; i < roles.Length; i++)
+    var roleLabel = ViewBag.Roles.Count > 1 ? "Roles" : "Role";
+
+    <p>[@roleLabel:
+    @{
+        for (int i = 0; i < ViewBag.Roles.Count; i++)
+        {
+            var role = ViewBag.Roles[i].Name.Trim();
+            var conditionalComma = i == ViewBag.Roles.Count - 1 ? "" : ",";
+
+            var roleColor = role switch
             {
-                var role = roles[i].Trim();
-                var conditionalComma = ",";
+                "Admin" => "color: #B026FF; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;", // neon-purple
+                "Moderator" => "color: #39FF14; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;", // neon-green
+                "User" => "color: #1F51FF; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;", // neon-blue
+                _ => "color: black;" // default color
+            };
 
-                var roleColor = role switch
-                {
-                    "Admin" => "color: #B026FF; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;",     // neon-purple
-                    "Moderator" => "color: #39FF14; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;", // neon-green
-                    "User" => "color: #1F51FF; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;",      // neon-blue
-                    _ => "color: black;" // default color
-                };
-
-                if (i == roles.Length - 1) // Don't add comma for the last role
-                {
-                    conditionalComma = null; 
-                }
-
-                <span style="@roleColor">@role</span>@conditionalComma
-            }
-        }]</p>
+            <span style="@roleColor">@role</span>@conditionalComma
+        }
+    }]
+    </p>
     }
 </div>
 

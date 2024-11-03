@@ -1,9 +1,13 @@
 using System.Diagnostics;
+using System.Globalization;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using DormBuddy.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 
 namespace DormBuddy.Controllers
@@ -15,16 +19,23 @@ namespace DormBuddy.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender _emailSender;
 
+        private readonly TimeZoneService _timeZoneService;
+        private readonly RoleManager<IdentityRole> _roleManager;
+
         public AccountController(
             ILogger<AccountController> logger,
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            TimeZoneService timeZoneService,
+            RoleManager<IdentityRole> roleManager)       
         {
             _logger = logger;
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
+            _timeZoneService = timeZoneService;
+            _roleManager = roleManager;     
         }
 
         #region ACCOUNT FORMS
@@ -50,7 +61,8 @@ namespace DormBuddy.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login(string username, string password)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(string username, string password, bool rememberMe)
         {
             if (!ModelState.IsValid)
             {
@@ -89,6 +101,21 @@ namespace DormBuddy.Controllers
 
             if (result.Succeeded) {
                 await _userManager.ResetAccessFailedCountAsync(user);
+
+
+                var claims = new List<Claim>
+                {
+                    new Claim("FirstName", user.FirstName ?? ""),
+                    new Claim("LastName", user.LastName ?? ""),
+                    new Claim("Credits", user.Credits.ToString()),
+                    new Claim("Email", user.Email ?? "")
+                };
+
+                var claimsIdentity = new ClaimsIdentity(claims, IdentityConstants.ApplicationScheme);
+
+                // Sign in the user with the new identity that includes the custom claims
+                await _signInManager.SignInWithClaimsAsync(user, rememberMe, claims);
+
                 return RedirectToAction("Dashboard");
 
             } else {
@@ -154,7 +181,8 @@ namespace DormBuddy.Controllers
             }
 
             var passwordValidator = new PasswordValidator<ApplicationUser>();
-            var passwordValidationResult = await passwordValidator.ValidateAsync(_userManager, null, password);
+            var placeholder = new ApplicationUser();
+            var passwordValidationResult = await passwordValidator.ValidateAsync(_userManager, placeholder, password);
 
             if (!passwordValidationResult.Succeeded)
             {
@@ -292,9 +320,7 @@ namespace DormBuddy.Controllers
         [HttpPost]
         public async Task<ActionResult> ResetPassword(string userId, string token, ResetPasswordViewModel model) {
             
-            Console.WriteLine("part 1");
             if (ModelState.IsValid) {
-                Console.WriteLine("part 2");
                 var user = await _userManager.FindByIdAsync(userId);
 
                 if (user == null) {
@@ -369,6 +395,15 @@ namespace DormBuddy.Controllers
                 {
                     ViewBag.Username = $"{user.FirstName} {user.LastName}";
                     ViewBag.UserRoles = string.Join(", ", await _userManager.GetRolesAsync(user));
+                    
+                    // Get all roles
+                    var roles = await _roleManager.Roles.ToListAsync();
+                    ViewBag.Roles = await _roleManager.Roles.ToListAsync(); // Pass roles to the view
+
+                    var currentCulture = CultureInfo.CurrentCulture.Name;
+                    var currentUICulture = CultureInfo.CurrentUICulture.Name;
+
+                    ViewBag.CultureInfo = $"Current Culture: {currentCulture}, UI Culture: {currentUICulture}";
                 }
 
                 return View();
@@ -391,6 +426,38 @@ namespace DormBuddy.Controllers
 
         public IActionResult Settings() => User?.Identity?.IsAuthenticated == true ? View("~/Views/Account/Dashboard/Settings.cshtml") : RedirectToAction("AccountForms");
 
+        public IActionResult Profile() => User?.Identity?.IsAuthenticated == true ? View("~/Views/Account/Dashboard/Profile.cshtml") : RedirectToAction("AccountForms");
+
+        public IActionResult LoadSettings(string settingsPage)
+        {
+            switch (settingsPage)
+            {
+                case "GeneralSettings":
+                    return PartialView("Dashboard/Settings/_GeneralSettings");
+                case "AccountSettings":
+                    return PartialView("Dashboard/Settings/_AccountSettings");
+                case "PrivacySettings":
+                    return PartialView("Dashboard/Settings/_PrivacySettings");
+                default:
+                    return Content("Invalid settings page.");
+            }
+        }
+        
+        [HttpPost]
+        public IActionResult VerifyUser([FromForm] string idToken)
+        {
+            // Validate the token received from Firebase on the server side
+            if (string.IsNullOrEmpty(idToken))
+            {
+                return BadRequest("Invalid ID token");
+            }
+
+            // Here, you would validate the token using Firebase Admin SDK (or some other JWT verification method)
+            // For simplicity, assuming it's a valid token, return success
+            return Ok(new { message = "User verified successfully." });
+        }
+
+
         #endregion
 
         #region ACCESS DENIED
@@ -406,7 +473,68 @@ namespace DormBuddy.Controllers
         public IActionResult Error() => View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
 
         #endregion
+
+        #region Language Switching
+
+        [HttpPost]
+        public IActionResult ChangeLanguage(string culture)
+        {
+            // Remove the existing cookie
+            Response.Cookies.Delete("Culture");
+
+            // Set the new culture cookie
+            Response.Cookies.Append(
+            "Culture",
+            culture, 
+            new CookieOptions { 
+                Expires = DateTimeOffset.UtcNow.AddYears(1), 
+                IsEssential = true, 
+                SameSite = SameSiteMode.None, 
+                Secure = true // Ensure this is true if running under HTTPS
+            });
+
+            // Redirect back to the previous page
+            return Redirect(Request.Headers["Referer"].ToString());
+        }
+
+
+
+        #endregion
+
+        [HttpPost]
+        public async Task<IActionResult> ChangeTimeZone(string timeZone)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user != null)
+            {
+
+                Response.Cookies.Append(
+                "UserTimeZone",
+                timeZone, 
+                new CookieOptions { 
+                    Expires = DateTimeOffset.UtcNow.AddYears(1), 
+                    IsEssential = true, 
+                    SameSite = SameSiteMode.None, 
+                    Secure = true 
+                });
+            }
+
+            return Redirect(Request.Headers["Referer"].ToString());
+        }
+
+        public IActionResult GetCurrentTime()
+        {
+            DateTime utcNow = DateTime.UtcNow;
+
+            // Get the user's time zone from the cookie
+            string userTimeZoneId = Request.Cookies["UserTimeZone"] ?? "UTC";
+
+            // Convert the UTC time to the user's local time
+            DateTime eventLocalTime = _timeZoneService.ConvertToLocal(utcNow, userTimeZoneId);
+
+            // Return the local time as a string
+            return Content(eventLocalTime.ToString("F"));
+        }
+
     }
 }
-//testpassword@!
-//dormbudy pass: Thisisatestpassword1@!

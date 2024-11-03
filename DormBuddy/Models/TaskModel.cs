@@ -21,4 +21,3 @@ namespace DormBuddy.Models{
         public bool IsCompleted { get; set; }
     }
 }
-
