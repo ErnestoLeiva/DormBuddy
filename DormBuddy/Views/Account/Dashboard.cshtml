@@ -8,15 +8,13 @@
     ViewData["Title"] = "Dashboard";
 }
 
-@{
-    var roles = ViewBag.UserRoles.Split(',');
-}
 
-<!-- DASHBOARD HEADER -->
 <div class="text-center mb-4">
+    <h1 class="display-4">User Dashboard</h1>
+    <p>Welcome <b>@ViewBag.Username</b>! <br /> 
+    This is your user dashboard to control actions regarding your account.</p>
     <h1 class="display-4"><strong>@SharedLocalizer["UserDashboard"]</strong></h1>
     <hr class="my-4">
-
     <!-- Display success message if it exists -->
     @if (TempData["message"] != null)
     {
@@ -24,7 +22,6 @@
             @TempData["message"]
         </div>
     }
-    
     <!-- Display error message if it exists -->
     @if (ViewBag.ErrorMessage != null)
     {
@@ -33,9 +30,10 @@
         </div>
     }
 
+    <!--<p>@ViewBag.CultureInfo</p>-->
+
     <p>@SharedLocalizer["Welcome"] <b>@ViewBag.Username</b>!
 
-    <!-- SCRIPT TO DISPLAY CURRENT TIME. UPDATES EVERY SECOND-->
     <div id="eventDetails"></div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
@@ -45,70 +43,44 @@
                     $('#eventDetails').html(data);
                 });
             }
-            setInterval(updateEventTime, 5000);
+
+            // Update the time every 10 seconds
+            setInterval(updateEventTime, 1000);
+
+            // Initial call to display the time immediately
             updateEventTime();
         });
     </script>
 
 
-    @if (roles.Length > 1) // ONLY SHOW IF THERES MORE ROLES THAN JUST "USER"
+    @if (ViewBag.Roles.Count > 1) // ONLY SHOW IF THERES MORE ROLES THAN JUST "USER"
     {
-        var roleLabel = "Roles";
 
-        <p>[@roleLabel: 
-        @{
-            for (int i = 0; i < roles.Length; i++)
+    var roleLabel = ViewBag.Roles.Count > 1 ? "Roles" : "Role";
+
+    <p>[@roleLabel:
+    @{
+        for (int i = 0; i < ViewBag.Roles.Count; i++)
+        {
+            var role = ViewBag.Roles[i].Name.Trim();
+            var conditionalComma = i == ViewBag.Roles.Count - 1 ? "" : ",";
+
+            var roleColor = role switch
             {
-                var role = roles[i].Trim();
-                var conditionalComma = ",";
+                "Admin" => "color: #B026FF; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;", // neon-purple
+                "Moderator" => "color: #39FF14; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;", // neon-green
+                "User" => "color: #1F51FF; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;", // neon-blue
+                _ => "color: black;" // default color
+            };
 
-                var roleColor = role switch
-                {
-                    "Admin" => "color: #B026FF; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;",     // neon-purple
-                    "Moderator" => "color: #39FF14; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;", // neon-green
-                    "User" => "color: #1F51FF; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;",      // neon-blue
-                    _ => "color: black;" // default color
-                };
-
-                if (i == roles.Length - 1) // Don't add comma for the last role
-                {
-                    conditionalComma = null; 
-                }
-
-                <span style="@roleColor">@role</span>@conditionalComma
-            }
-        }]</p>
+            <span style="@roleColor">@role</span>@conditionalComma
+        }
+    }]
+    </p>
     }
 </div>
 
-<hr class="my-4">
-    <div class="chat-container container mt-4">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between">
-                <div>
-                    <button id="globalChatBtn" class="btn btn-primary btn-sm">Global Chat</button>
-                    <button id="dormChatBtn" class="btn btn-outline-primary btn-sm">Dorm Chat</button>
-                </div>
-            </div>
-            <div class="card-body" style="height: 400px; overflow-y: auto;" id="messageArea">
-                <!-- Messages will load here -->
-            </div>
-            <div class="card-footer">
-                <div class="input-group">
-                    <textarea id="messageInput" class="form-control" placeholder="Type your message..." style="resize: none;"></textarea>
-                    <button id="sendMessageBtn" class="btn btn-primary">Send</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-<!-- DASHBOARD PANEL CARDS -->
 <div class="container">
-<hr class="my-4">
-    <div style="display: flex; align-items: center; justify-content: center; margin:50px 0 50px 0;">
-        <h1 class="display-4"><strong>Shortcuts</strong></h1>
-    </div>
-
     <div class="row">
         <!-- Task Management Card -->
         <div class="col-md-4">
@@ -142,12 +114,14 @@
         <div class="col-md-4">
             <div class="card text-center mb-4">
                 <div class="card-header bg-warning text-white">
+                    <i class="fas fa-handshake fa-lg"></i> <!-- Lending Icon -->
+                    Peer-to-Peer Lending
                     <i class="fas fa-handshake fa-lg"></i>
                     @SharedLocalizer["PeerToPeerLending"]
                 </div>
                 <div class="card-body">
                     <p>@SharedLocalizer["PeerToPeerLendingDescription"]</p>
-                    <a href="/PeerLending/Index" class="btn btn-warning" style="color: white;">@SharedLocalizer["ViewLending"]</a>
+                    <a href="/Account/Lending" class="btn btn-warning" style="color: white;">@SharedLocalizer["ViewLending"]</a>
                 </div>
             </div>
         </div>
@@ -158,6 +132,8 @@
         <div class="col-md-4">
             <div class="card text-center mb-4">
                 <div class="card-header bg-info text-white">
+                    <i class="fas fa-user-cog fa-lg"></i> <!-- Account Settings Icon -->
+                    Account Settings
                     <i class="fas fa-user-cog fa-lg"></i>
                     @SharedLocalizer["AccountSettings"]
                 </div>
@@ -177,7 +153,7 @@
                 </div>
                 <div class="card-body">
                     <p>@SharedLocalizer["NotificationsDescription"]</p>
-                    <a asp-controller="Notifications" asp-action="Index" class="btn btn-danger">@SharedLocalizer["ViewNotifications"]</a>
+                    <a href="/Account/Notifications" class="btn btn-danger">@SharedLocalizer["ViewNotifications"]</a>
                 </div>
             </div>
         </div>
@@ -192,237 +168,6 @@
                 <div class="card-body">
                     <p>@SharedLocalizer["HelpAndSupportDescription"]</p>
                     <a href="/Home/ContactUs" class="btn btn-dark">@SharedLocalizer["GetHelp"]</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <!-- Group Management Card -->
-        <div class="col-md-4 offset-md-4">
-            <div class="card text-center mb-4">
-                <div class="card-header bg-info text-white">
-                    <i class="fas fa-users fa-lg"></i>
-                    Manage Groups
-                </div>
-                <div class="card-body">
-                    <p>Create or join a group for collaboration with dormmates.</p>
-                    <a href="/Groups/Index" class="btn btn-info">View Groups</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ADMIN/MODERATOR ROW -->
-    @if (ViewBag.UserRoles.Contains("Admin") || ViewBag.UserRoles.Contains("Moderator"))
-    {
-        <div class="row">
-            @if (ViewBag.UserRoles.Contains("Admin")) {
-                <div class="col-md-4 offset-md-4">
-                    <div class="card text-center mb-4">
-                        <div class="card-header bg-purple text-white">
-                            <i class="fas fa-shield-alt fa-lg"></i>
-                            Admin Panel
-                        </div>
-                        <div class="card-body">
-                            <p>Manage site-wide settings and users.</p>
-                            <a href="/Administration/AdminPanel" class="btn btn-purple">Go to Admin Panel</a>
-                        </div>
-                    </div>
-                </div>
-            }
-            else if (!ViewBag.UserRoles.Contains("Admin") && ViewBag.UserRoles.Contains("Moderator")){
-                <div class="col-md-4 offset-md-4">
-                    <div class="card text-center mb-4">
-                        <div class="card-header bg-purple text-white">
-                            <i class="fas fa-shield-alt fa-lg"></i>
-                            Moderator Panel
-                        </div>
-                        <div class="card-body">
-                            <p>Manage site-wide settings and users.</p>
-                            <a href="/Administration/ModeratorPanel" class="btn btn-purple">Go to Moderator Panel</a>
-                        </div>
-                    </div>
-                </div>
-            }
-
-        </div>
-        
-    }
-
-    <hr class="my-4" style="padding-bottom:200px;">
-
-</div>
-
-
-
-
-<script>
-    $(document).ready(function () {
-    let chatType = 1; // Default chat type : 0 - global, 1 - dorm, 2 - private
-
-    // Load messages on page load
-    loadMessages();
-
-    // Set interval to refresh messages every 5 seconds
-    setInterval(loadMessages, 5000);
-
-    // Switch to global chat
-    $("#globalChatBtn").on("click", function () {
-        chatType = 1;
-        $("#globalChatBtn").removeClass("btn-outline-primary").addClass("btn-primary");
-        $("#dormChatBtn").removeClass("btn-primary").addClass("btn-outline-primary");
-        loadMessages();
-    });
-
-    // Switch to dorm chat
-    $("#dormChatBtn").on("click", function () {
-        chatType = 2;
-        $("#dormChatBtn").removeClass("btn-outline-primary").addClass("btn-primary");
-        $("#globalChatBtn").removeClass("btn-primary").addClass("btn-outline-primary");
-        loadMessages();
-    });
-
-    // Send a new message
-    $("#sendMessageBtn").on("click", function () {
-        const message = $("#messageInput").val().trim();
-        if (message) {
-
-            $.ajax({
-                url: '/api/Imgur/SendDashboardMessage?type='+chatType+"&message="+message,
-                type: 'POST',
-                contentType: 'application/json',
-                success: function(response) {
-                    loadMessages();
-                    $('#messageInput').val('');
-                },
-                error: function(xhr, status, error) {
-                    console.log('Error:', error);
-                }
-            });
-        }
-    });
-
-    let lastId = -1;
-    // Function to load messages
-    function loadMessages() {
-        $.ajax({
-                url: '/api/Imgur/GetDashboardMessages',
-                type: 'GET',
-                contentType: 'application/json',
-                data: {
-                    type: chatType
-                },
-                success: function(messages) {
-                    var messageArea = $('#messageArea');
-                    messages.value.r.forEach(msg => {
-                        const messageHtml = `
-                            <div class="mb-2">
-                                <strong><a href='profile?username=${msg.user.userName}' target='_blank'>${msg.user.userName}</a>:</strong> ${msg.message}
-                                <div class="text-muted small">${msg.sent_at}</div>
-                            </div>`;
-                        
-                        if (msg.id > lastId) {
-                            messageArea.append(messageHtml);
-                            lastId = msg.id;
-                        }
-                    });
-
-                    // Scroll to the bottom
-                    messageArea.scrollTop(messageArea[0].scrollHeight);
-                },
-                error: function(xhr, status, error) {
-                    console.log('Error:', error);
-                }
-            });
-    }
-});
-
-</script>
-<div class="container">
-    <div class="row">
-        <!-- Task Management Card -->
-        <div class="col-md-4">
-            <div class="card text-center mb-4">
-                <div class="card-header bg-primary text-white">
-                    <i class="fas fa-tasks fa-lg"></i> <!-- Task Icon -->
-                    Task Management
-                </div>
-                <div class="card-body">
-                    <p>Manage your dorm-related tasks and track progress.</p>
-                    <a href="/Tasks/Index" class="btn btn-primary">View Tasks</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Expense Splitting Card -->
-        <div class="col-md-4">
-            <div class="card text-center mb-4">
-                <div class="card-header bg-success text-white">
-                    <i class="fas fa-money-bill-wave fa-lg"></i> <!-- Expense Icon -->
-                    Expense Splitting
-                </div>
-                <div class="card-body">
-                    <p>Track shared expenses and manage balance with dormmates.</p>
-                    <a href="/Account/Expenses" class="btn btn-success">View Expenses</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- P2P Lending Card -->
-        <div class="col-md-4">
-            <div class="card text-center mb-4">
-                <div class="card-header bg-warning text-white">
-                    <i class="fas fa-handshake fa-lg"></i> <!-- Lending Icon -->
-                    Peer-to-Peer Lending
-                </div>
-                <div class="card-body">
-                    <p>Manage loans and transactions with your dormmates.</p>
-                    <a href="/Account/Lending" class="btn btn-warning">View Lending</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <!-- Account Settings Card -->
-        <div class="col-md-4">
-            <div class="card text-center mb-4">
-                <div class="card-header bg-info text-white">
-                    <i class="fas fa-user-cog fa-lg"></i> <!-- Account Settings Icon -->
-                    Account Settings
-                </div>
-                <div class="card-body">
-                    <p>Update your account information and preferences.</p>
-                    <a href="/Account/Settings" class="btn btn-info">Manage Account</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Notifications Card -->
-        <div class="col-md-4">
-            <div class="card text-center mb-4">
-                <div class="card-header bg-danger text-white">
-                    <i class="fas fa-bell fa-lg"></i> <!-- Notification Icon -->
-                    Notifications
-                </div>
-                <div class="card-body">
-                    <p>Check new notifications from your dormmates.</p>
-                    <a href="/Account/Notifications" class="btn btn-danger">View Notifications</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Help & Support Card -->
-        <div class="col-md-4">
-            <div class="card text-center mb-4">
-                <div class="card-header bg-dark text-white">
-                    <i class="fas fa-cog fa-lg"></i> <!-- Help Icon -->
-                    Help & Support
-                </div>
-                <div class="card-body">
-                    <p>Need assistance? Reach out for help with any issues.</p>
-                    <a href="#" class="btn btn-dark">Get Help</a>
                 </div>
             </div>
         </div>

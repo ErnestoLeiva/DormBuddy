@@ -1,25 +1,10 @@
+@model Tuple<List<DormBuddy.Models.ExpenseModel>, DormBuddy.Models.ExpenseModel>
+
 @{
     ViewData["Title"] = "Expense Splitting";
     var expenses = Model?.Item1 ?? new List<DormBuddy.Models.ExpenseModel>(); // Initialize as empty list if null
     var newExpense = Model?.Item2 ?? new DormBuddy.Models.ExpenseModel(); // Initialize new instance if null
 }
-
-<!-- Status toggle icons styling -->
-<style>
-    .badge.bg-success {
-        background-color: #28a745;
-        padding: 5px;
-        font-size: 0.9em;
-    }
-
-    .badge.bg-danger {
-        background-color: #dc3545;
-        font-size: 1.05em;
-    }
-</style>
-
-
-
 
 <!-- Return to Dashboard Button -->
 <div class="mb-4">
@@ -38,15 +23,14 @@
 <!-- Display success message if it exists -->
 @if (TempData["message"] != null)
 {
-    <div class="alert alert-success" role="alert">
+    <div class="alert alert-success">
         @TempData["message"]
     </div>
 }
-
 <!-- Display error message if it exists -->
 @if (TempData["error"] != null)
 {
-    <div class="alert alert-danger" role="alert">
+    <div class="alert alert-danger">
         @TempData["error"]
     </div>
 }
@@ -83,7 +67,6 @@
                 <th>Expense Name</th>
                 <th>Amount</th>
                 <th>Shared With</th>
-                <th>Split?</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -91,7 +74,7 @@
             @if (!expenses.Any())
             {
                 <tr id="noExpensesMessage">
-                    <td colspan="5" class="text-center">No current expenses...</td>
+                    <td colspan="4" class="text-center">No current expenses...</td>
                 </tr>
             }
             else
@@ -100,18 +83,9 @@
                 {
                     <tr>
                         <td>@expense.ExpenseName</td>
-                        <td class="amount-cell" data-amount="@expense.Amount">@expense.Amount</td>
-                        <td>@expense.SharedWith</td>
-                        <td class="text-center">
-                            <span class="badge @(expense.isSplit ? "bg-success" : "bg-danger")">
-                                <i class="fa @(expense.isSplit ? "fa-check" : "fa-times")" aria-hidden="true"></i>
-                            </span>
-                        </td>
+                        <td>@expense.Amount.ToString("C")</td>
+                        <td>@expense.SharedWith</td> <!-- Display "Shared With" data -->
                         <td>
-                            <button class="btn @(expense.isSplit ? "btn-warning" : "btn-success") btn-sm"
-                                onclick="toggleExpenseStatus(this, @expense.Id)">
-                                Toggle Status
-                            </button>
                             <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteConfirmationModal" 
                                 onclick="setExpenseToDelete('@expense.ExpenseName', '@expense.Id')">Delete</button>
                         </td>
@@ -121,6 +95,7 @@
         </tbody>
     </table>
 </div>
+
 
 <!-- Bootstrap Modal for Confirming Expense Deletion -->
 <div class="modal fade" id="deleteConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
@@ -149,79 +124,30 @@
 @section Scripts {
     <script>
         window.onload = function() {
-            setDateToNow();
+            setDateToToday();
         }
 
-        // Set the date used in the database to the current LOCAL users time
-        function setDateToNow() {
+        function setDateToToday() {
             const now = new Date();
             const year = now.getFullYear();
             const month = (now.getMonth() + 1).toString().padStart(2, '0');
             const day = now.getDate().toString().padStart(2, '0');
-            const hours = now.getHours().toString().padStart(2, '0');
-            const minutes = now.getMinutes().toString().padStart(2, '0');
-            const seconds = now.getSeconds().toString().padStart(2, '0');
-            
-            const localDateTime = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
-            document.getElementById('date').value = localDateTime;
+            const localDate = `${year}-${month}-${day}`;
+            document.getElementById('date').value = localDate;
         }
 
-        // Used for confirmation pop-up Bootstrap Modal
         function setExpenseToDelete(expenseName, expenseId) {
             document.getElementById('expenseToDeleteName').innerText = expenseName;
             document.getElementById('expenseToDeleteId').value = expenseId;
         }
-        
-        function toggleExpenseStatus(button, expenseId) {
-            console.log("Expense ID to toggle: " + expenseId);
 
-            const row = button.closest('tr');
-            const statusCell = row.cells[3];
-            const isSplit = statusCell.querySelector('i').classList.contains('fa-check'); // Check current status
-
-            $.ajax({
-                url: '/Expenses/ToggleStatus',
-                type: 'POST',
-                data: {
-                    expenseId: expenseId
-                },
-                success: function(response) {
-                    console.log(response);
-                    if (response.success) {
-                        if (isSplit) {
-                            statusCell.innerHTML = '<span class="badge bg-danger"><i class="fa fa-times" aria-hidden="true"></i></span>';
-                            button.classList.remove('btn-warning');
-                            button.classList.add('btn-success');
-                        } else {
-                            statusCell.innerHTML = '<span class="badge bg-success"><i class="fa fa-check" aria-hidden="true"></i></span>';
-                            button.classList.remove('btn-success');
-                            button.classList.add('btn-warning');
-                        }
-                    } else {
-                        alert('Failed to update expense status: ' + response.message);
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error:', status, error);
-                    alert('Error while updating expense status.');
-                }
-            });
-        }
-
-        // Format currency dynamically based on user's locale
-        document.addEventListener("DOMContentLoaded", function() {
-            document.querySelectorAll(".amount-cell").forEach(function(cell) {
-                const amount = parseFloat(cell.getAttribute("data-amount"));
-                if (!isNaN(amount)) {
-                    cell.innerText = new Intl.NumberFormat(navigator.language, { style: "currency", currency: "USD" }).format(amount);
-                }
-            });
-        });
-
+        // Validate Amount field to ensure it has only up to two decimal places
         document.getElementById("amount").addEventListener("input", function (event) {
             const value = event.target.value;
             const decimalPattern = /^\d+(\.\d{0,2})?$/;
+
             if (!decimalPattern.test(value)) {
+                // Remove extra decimal places if present
                 event.target.value = parseFloat(value).toFixed(2);
             }
         });
