@@ -47,7 +47,8 @@ namespace DormBuddy.Controllers
             return Ok(group);
         }
 
-        [HttpPost]
+    [HttpPost]
+    [IgnoreAntiforgeryToken]
     public async Task<IActionResult> CreateGroup([FromBody] GroupModel group)
     {
         if (!ModelState.IsValid)
