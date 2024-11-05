@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DormBuddy.Migrations
 {
     [DbContext(typeof(DBContext))]
-    [Migration("20241105011429_AddUserGroupsTable")]
-    partial class AddUserGroupsTable
+    [Migration("20241105013105_CreateUserGroups")]
+    partial class CreateUserGroups
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

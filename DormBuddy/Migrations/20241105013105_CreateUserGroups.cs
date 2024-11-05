@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DormBuddy.Migrations
 {
     /// <inheritdoc />
-    public partial class CreateUserGroupsTable : Migration
+    public partial class CreateUserGroups : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
