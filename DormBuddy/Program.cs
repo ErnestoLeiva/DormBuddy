@@ -3,38 +3,82 @@ using DormBuddy.Models;
 using Microsoft.AspNetCore.Identity;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
+using Microsoft.AspNetCore.Localization;
+using System.Globalization;
+using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Mvc.Razor;
+using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 
-#region SERVICES CONFIGURATION
-// Add services to the container.
-builder.Services.AddControllersWithViews();
+// Logging configuration
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+builder.Logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning);
 
-FirebaseApp.Create(new AppOptions() {
+// Set up localization with a specific resource path
+builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+
+#region SERVICES CONFIGURATION
+
+// Cookie policy configuration
+builder.Services.Configure<CookiePolicyOptions>(options =>
+{
+    options.CheckConsentNeeded = context => true;
+    options.MinimumSameSitePolicy = SameSiteMode.None;
+    options.Secure = builder.Environment.IsDevelopment() 
+        ? CookieSecurePolicy.SameAsRequest 
+        : CookieSecurePolicy.Always;
+});
+
+builder.Services.AddSingleton<TimeZoneService>();
+
+builder.Services.AddControllersWithViews().AddViewLocalization().AddDataAnnotationsLocalization();
+
+builder.Services.Configure<RequestLocalizationOptions>(options => 
+{
+
+    var supportedCultures = new[]
+    {
+        new CultureInfo("en"),
+        new CultureInfo("es")
+    };
+
+    options.DefaultRequestCulture = new RequestCulture("en");
+    options.SupportedCultures = supportedCultures;
+    options.SupportedUICultures = supportedCultures;
+
+    options.RequestCultureProviders.Insert(0, new CookieRequestCultureProvider
+    {
+        CookieName = "Culture"
+    });
+
+    options.FallBackToParentCultures = true;
+});
+
+// Initialize Firebase
+FirebaseApp.Create(new AppOptions() 
+{
     Credential = GoogleCredential.FromFile("dormbuddy-33ce0-firebase-adminsdk-5i0gl-c049a0fe9a.json")
 });
 
 #region DATABASE CONFIGURATION
-// Database configuration using MySQL
 builder.Services.AddDbContext<DBContext>(options =>
     options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
     new MySqlServerVersion(new Version(8, 0, 2))));
 #endregion
 
 #region IDENTITY CONFIGURATION
-// Identity configuration for user management
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => 
 {
-    // email confirmation
     options.SignIn.RequireConfirmedEmail = true;
-
-    // lockout settings
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(60);
     options.Lockout.MaxFailedAccessAttempts = 5;
     options.Lockout.AllowedForNewUsers = true;
 })
-    .AddEntityFrameworkStores<DBContext>()
-    .AddDefaultTokenProviders();
+.AddEntityFrameworkStores<DBContext>()
+.AddDefaultTokenProviders();
 #endregion
 
 #region EMAIL SENDER
@@ -42,7 +86,6 @@ builder.Services.AddTransient<DormBuddy.Models.IEmailSender, Smtp>();
 #endregion
 
 #region PASSWORD REQUIREMENTS
-// Configure password requirements for users
 builder.Services.Configure<IdentityOptions>(options =>
 {
     options.Password.RequireDigit = true;
@@ -55,17 +98,15 @@ builder.Services.Configure<IdentityOptions>(options =>
 #endregion
 
 #region SESSION CONFIGURATION
-// Session configuration
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30);  // Set session timeout to 30 minutes
-    options.Cookie.HttpOnly = true;  // Secure cookie
-    options.Cookie.IsEssential = true;  // GDPR compliance
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
 });
 #endregion
 
 #region AUTHENTICATION AND AUTHORIZATION
-// Authentication/Authorization configuration
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
@@ -74,10 +115,9 @@ builder.Services.AddAuthentication(options =>
 .AddCookie(options =>
 {
     options.LoginPath = "/Account/Login";
-    options.AccessDeniedPath = "/Account/AccessDenied"; // Redirect on access denied
+    options.AccessDeniedPath = "/Account/AccessDenied";
 });
 
-// Role-based authorization policies
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
@@ -91,25 +131,43 @@ builder.Services.AddAuthorization(options =>
 var app = builder.Build();
 
 #region MIDDLEWARE CONFIGURATION
-// Configure middleware for HTTP request pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
+} 
+else 
+{
+    Console.WriteLine("Development mode: Active");
 }
+
+app.UseCookiePolicy();
+
+var localizationOptions = app.Services.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value;
+app.UseRequestLocalization(localizationOptions);
+
+app.Use(async (context, next) =>
+{
+
+    var cookieValue = context.Request.Cookies["Culture"];
+    if (!string.IsNullOrEmpty(cookieValue))
+    {
+        var culture = new CultureInfo(cookieValue);
+        CultureInfo.CurrentCulture = culture;
+        CultureInfo.CurrentUICulture = culture;
+    }
+
+    await next.Invoke();
+});
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-// Enable session handling
 app.UseSession();
-
-// Enable authentication and authorization
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Map default routes
 app.MapControllerRoute(
     name: "account",
     pattern: "Account/{action=AccountForms}/{id?}",
@@ -125,7 +183,6 @@ await InitializeRolesAndAdminUser(app);
 app.Run();
 
 #region ROLE INITIALIZATION
-// Initialize default roles
 static async Task InitializeRolesAndAdminUser(WebApplication app)
 {
     using (var scope = app.Services.CreateScope())

@@ -7,67 +7,81 @@
 </head>
 <body>
 
-<div>
-    <h2>Account Settings</h2>
+@if (User?.Identity != null && User?.Identity.IsAuthenticated != null) {
 
-    <label for="email">Current Email</label>
-    <input id="emailchange" type="email" class="form-control" />
+    string firstName = User.FindFirst("FirstName")?.Value ?? "";
+    string lastName = User.FindFirst("LastName")?.Value ?? "";
+    string email = User.FindFirst("Email")?.Value ?? "";
 
-    
-    <label for="username">Current Username</label>
-    <input id="usernamechange" type="text" class="form-control" />
+    <div>
+        <h2>Account Settings</h2>
 
-    <label for="password">Old Password</label>
-    <input id="passwordchange_old" type="password" class="form-control" />
+        <label for="email">Current Email</label>
+        <input id="emailchange" type="email" class="form-control" value="@email" />
 
-    <label for="emailchange">New Password</label>
-    <input id="emailchange_new" type="password" class="form-control" />
+        
+        <label for="username">Current Username</label>
+        <input id="usernamechange" type="text" class="form-control" value="@User.Identity.Name" />
 
-    <label for="emailchange">Re-Enter Password</label>
-    <input id="emailchange_new_retyped" type="password" class="form-control" />
+        <label for="firstname">Current First Name</label>
+        <input id="firstnamechange" type="text" class="form-control" value="@firstName" />
 
-    <!-- Two-Factor Authentication Setting -->
-    <label for="twofactor">Two-Factor Authentication</label>
-    <select id="twofactor" class="form-control" onchange="toggleMobileAuthSection()">
-        <option value="disabled">Disabled</option>
-        <option value="enabled">Enabled</option>
-    </select>
+        <label for="lastname">Current Last Name</label>
+        <input id="lastnamechange" type="text" class="form-control" value="@lastName" />
 
-    <!-- Mobile Authentication -->
-    <div id="mobile-auth-section" style="display: none;">
-        <h3>Mobile Authentication</h3>
-        <div>
-            <label for="country-code">Country Code</label>
-            <select id="country-code" class="form-control">
-                <option value="+1">+1 (USA)</option>
-                <option value="+44">+44 (UK)</option>
-                <option value="+91">+91 (India)</option>
-                <!-- Add more country codes as needed -->
-            </select>
-            <!-- Phone Number Input -->
-            <label for="phone-number">Phone Number</label>
-            <input type="tel" id="phone-number" class="form-control" placeholder="Enter phone number" />
+        <label for="password">Old Password</label>
+        <input id="passwordchange_old" type="password" class="form-control" />
+
+        <label for="emailchange">New Password</label>
+        <input id="emailchange_new" type="password" class="form-control" />
+
+        <label for="emailchange">Re-Enter Password</label>
+        <input id="emailchange_new_retyped" type="password" class="form-control" />
+
+        <!-- Two-Factor Authentication Setting -->
+        <label for="twofactor">Two-Factor Authentication</label>
+        <select id="twofactor" class="form-control" onchange="toggleMobileAuthSection()">
+            <option value="disabled">Disabled</option>
+            <option value="enabled">Enabled</option>
+        </select>
+
+        <!-- Mobile Authentication -->
+        <div id="mobile-auth-section" style="display: none;">
+            <h3>Mobile Authentication</h3>
+            <div>
+                <label for="country-code">Country Code</label>
+                <select id="country-code" class="form-control">
+                    <option value="+1">+1 (USA)</option>
+                    <option value="+44">+44 (UK)</option>
+                    <option value="+91">+91 (India)</option>
+                    <!-- Add more country codes as needed -->
+                </select>
+                <!-- Phone Number Input -->
+                <label for="phone-number">Phone Number</label>
+                <input type="tel" id="phone-number" class="form-control" placeholder="Enter phone number" />
+            </div>
+
+            <!-- reCAPTCHA -->
+            <div id="recaptcha-container"></div> <!-- This is where the reCAPTCHA will be rendered -->
+
+            <!-- Send Code Button -->
+            <button id="send-code-btn">Send Verification Code</button>
+
+            <!-- Input for Verification Code -->
+            <div id="code-verification-section" style="display:none;">
+                <label for="verification-code">Enter Verification Code</label>
+                <input type="text" id="verification-code" class="form-control" placeholder="Enter code" />
+                <button id="verify-code-btn" onclick="verifyCode()">Verify Code</button>
+            </div>
+
+            <!-- Verification Status -->
+            <div id="verification-status"></div>
         </div>
 
-        <!-- reCAPTCHA -->
-        <div id="recaptcha-container"></div> <!-- This is where the reCAPTCHA will be rendered -->
-
-        <!-- Send Code Button -->
-        <button id="send-code-btn">Send Verification Code</button>
-
-        <!-- Input for Verification Code -->
-        <div id="code-verification-section" style="display:none;">
-            <label for="verification-code">Enter Verification Code</label>
-            <input type="text" id="verification-code" class="form-control" placeholder="Enter code" />
-            <button id="verify-code-btn" onclick="verifyCode()">Verify Code</button>
-        </div>
-
-        <!-- Verification Status -->
-        <div id="verification-status"></div>
+        <input id="deleteaccount" type="submit" class="form-control" value="Remove Account Permanently" style="margin-top: 50px; background-color: red; color: white;" />
     </div>
 
-    <input id="deleteaccount" type="submit" class="form-control" value="Remove Account Permanently" style="margin-top: 50px; background-color: red; color: white;" />
-</div>
+}
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";

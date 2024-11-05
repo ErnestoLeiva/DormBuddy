@@ -16,8 +16,9 @@ namespace DormBuddy.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly DBContext _dbContext;
     
-        public ExpensesController(DBContext dbContext, UserManager<ApplicationUser> userManager)
+        public ExpensesController(ILogger<TasksController> logger, DBContext dbContext, UserManager<ApplicationUser> userManager)
         {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _dbContext = dbContext;
             _userManager = userManager;
         }
