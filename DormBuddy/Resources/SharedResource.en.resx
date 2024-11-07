@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+
+  <!-- Dashboard Text -->
+
+  <data name="DormBuddyLogo" xml:space="preserve">
+    <value>DormBuddy</value>
+  </data>
+  <data name="Dashboard" xml:space="preserve">
+    <value>Dashboard</value>
+  </data>
+  <data name="Privacy" xml:space="preserve">
+    <value>Privacy</value>
+  </data>
+  <data name="ContactUs" xml:space="preserve">
+    <value>Contact Us</value>
+  </data>
+  <data name="UserDashboard" xml:space="preserve">
+    <value>User Dashboard</value>
+  </data>
+  <data name="Welcome" xml:space="preserve">
+    <value>Welcome</value>
+  </data>
+  <data name="TaskManagement" xml:space="preserve">
+    <value>Task Management</value>
+  </data>
+  <data name="TaskManagementDescription" xml:space="preserve">
+    <value>Manage your dorm-related tasks and track progress.</value>
+  </data>
+  <data name="ExpenseSplitting" xml:space="preserve">
+    <value>Expense Splitting</value>
+  </data>
+  <data name="ExpenseSplittingDescription" xml:space="preserve">
+    <value>Track shared expenses and manage balance with dormmates.</value>
+  </data>
+  <data name="PeerToPeerLending" xml:space="preserve">
+    <value>Peer-to-Peer Lending</value>
+  </data>
+  <data name="PeerToPeerLendingDescription" xml:space="preserve">
+    <value>Manage loans and transactions with your dormmates.</value>
+  </data>
+  <data name="AccountSettings" xml:space="preserve">
+    <value>Account Settings</value>
+  </data>
+  <data name="AccountSettingsDescription" xml:space="preserve">
+    <value>Update your account information and preferences.</value>
+  </data>
+  <data name="Notifications" xml:space="preserve">
+    <value>Notifications</value>
+  </data>
+  <data name="NotificationsDescription" xml:space="preserve">
+    <value>Check new notifications from your dormmates.</value>
+  </data>
+  <data name="HelpAndSupport" xml:space="preserve">
+    <value>Help &amp; Support</value>
+  </data>
+  <data name="HelpAndSupportDescription" xml:space="preserve">
+    <value>Need assistance? Reach out for help with any issues.</value>
+  </data>
+
+  <!-- Dashboard Buttons -->
+
+  <data name="ViewTasks" xml:space="preserve">
+    <value>View Tasks</value>
+  </data>
+  <data name="ViewExpenses" xml:space="preserve">
+      <value>View Expenses</value>
+  </data>
+  <data name="ViewLending" xml:space="preserve">
+      <value>View Lending</value>
+  </data>
+  <data name="ManageAccount" xml:space="preserve">
+      <value>Manage Account</value>
+  </data>
+  <data name="ViewNotifications" xml:space="preserve">
+      <value>View Notifications</value>
+  </data>
+  <data name="GetHelp" xml:space="preserve">
+      <value>Get Help</value>
+  </data>
+
+</root>

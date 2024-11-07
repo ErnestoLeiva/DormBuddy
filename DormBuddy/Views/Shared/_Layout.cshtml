@@ -1,4 +1,9 @@
-﻿<!DOCTYPE html>
+﻿@inject Microsoft.Extensions.Localization.IStringLocalizerFactory LocalizerFactory
+@{
+    var SharedLocalizer = LocalizerFactory.Create("SharedResource", typeof(Program).Assembly.GetName().Name ?? "");
+}
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -25,7 +30,7 @@
         <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="HomeLogin">
-                    <img src="~/favicon.ico" alt="DormBuddy Logo" style="height: 24px; width: 24px; margin-right: 8px;" /> DormBuddy
+                    <img src="~/favicon.ico" alt="DormBuddy Logo" style="height: 24px; width: 24px; margin-right: 8px;" /> @SharedLocalizer["DormBuddyLogo"]
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -35,13 +40,13 @@
                     <ul class="navbar-nav flex-grow-1">
                         @if (User?.Identity != null && User.Identity.IsAuthenticated) {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Dashboard">Dashboard</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Dashboard">@SharedLocalizer["Dashboard"]</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">@SharedLocalizer["Privacy"]</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="ContactUs">Contact Us</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="ContactUs">@SharedLocalizer["ContactUs"]</a>
                             </li>
                         } else {
                             <li class="nav-item">

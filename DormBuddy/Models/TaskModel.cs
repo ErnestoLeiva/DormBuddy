@@ -7,13 +7,13 @@ namespace DormBuddy.Models{
         public int Id { get; set; }
 
         [Required(ErrorMessage = "The UserId field is required.")]
-        public string UserId { get; set; }  // unique key
+        public string? UserId { get; set; }  // unique key
 
         [Required(ErrorMessage = "The TaskName field is required.")]
-        public string TaskName { get; set; }
+        public string? TaskName { get; set; }
 
         [Required(ErrorMessage = "The AssignedTo field is required.")]
-        public string AssignedTo { get; set; }
+        public string? AssignedTo { get; set; }
 
         [Required(ErrorMessage = "The DueDate field is required.")]
         public DateTime DueDate { get; set; }
