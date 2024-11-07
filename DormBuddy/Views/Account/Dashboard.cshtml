@@ -53,31 +53,35 @@
     </script>
 
 
-    @if (ViewBag.Roles.Count > 1) // ONLY SHOW IF THERES MORE ROLES THAN JUST "USER"
-    {
-
+@if (ViewBag.Roles != null && ViewBag.Roles.Count > 1) 
+{
     var roleLabel = ViewBag.Roles.Count > 1 ? "Roles" : "Role";
 
-    <p>[@roleLabel:
+    <p>[@roleLabel: 
     @{
         for (int i = 0; i < ViewBag.Roles.Count; i++)
         {
-            var role = ViewBag.Roles[i].Name.Trim();
-            var conditionalComma = i == ViewBag.Roles.Count - 1 ? "" : ",";
+            var role = ViewBag.Roles[i].Trim();
+            var conditionalComma = ",";
 
             var roleColor = role switch
             {
-                "Admin" => "color: #B026FF; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;", // neon-purple
+                "Admin" => "color: #B026FF; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;",     // neon-purple
                 "Moderator" => "color: #39FF14; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;", // neon-green
-                "User" => "color: #1F51FF; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;", // neon-blue
+                "User" => "color: #1F51FF; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;",      // neon-blue
                 _ => "color: black;" // default color
             };
 
+            if (i == ViewBag.Roles.Count - 1) // Don't add comma for the last role
+            {
+                conditionalComma = null; 
+            }
+
             <span style="@roleColor">@role</span>@conditionalComma
         }
-    }]
-    </p>
-    }
+    }]</p>
+}
+
 </div>
 
 <div class="container">

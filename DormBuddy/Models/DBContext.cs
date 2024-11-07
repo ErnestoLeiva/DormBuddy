@@ -51,7 +51,7 @@ namespace DormBuddy.Models
             builder.Entity<GroupModel>()
                 .HasMany(g => g.Members)
                 .WithMany(u => u.Groups)
-                .UsingEntity(j => j.ToTable("Groups"));
+                .UsingEntity(j => j.ToTable("UserGroups"));
 
             // Ensure the maximum length is set for all string properties
             foreach (var entity in builder.Model.GetEntityTypes())
