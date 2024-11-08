@@ -17,24 +17,23 @@ namespace DormBuddy.Models
         public string? TimeZone { get; set; }
 
         public ICollection<GroupModel> Groups { get; set; } = new List<GroupModel>();
+        public ICollection<ApplicationUser> Members { get; set; } = new List<ApplicationUser>();
 
     }
 
     public class DBContext : IdentityDbContext<ApplicationUser, IdentityRole, string>
     {
         public DBContext(DbContextOptions<DBContext> options)
-            : base(options)
-        {
-        }
+            : base(options){}
 
         // DBSet for persistent tasks feature - Ernesto Leiva 10/04/2024
         public DbSet<TaskModel> Tasks { get; set; }
         
         // DBSet for persistent expenses feature - Ernesto Leiva 10/27/2024
         public DbSet<ExpenseModel> Expenses { get; set; }
-
-        public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<GroupModel> Groups { get; set; }
+        public DbSet<ApplicationUser> ApplicationUsers { get; set; }
+
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -51,8 +50,8 @@ namespace DormBuddy.Models
             builder.Entity<GroupModel>()
                 .HasMany(g => g.Members)
                 .WithMany(u => u.Groups)
-                .UsingEntity(j => j.ToTable("UserGroups"));
-                
+                .UsingEntity(j => j.ToTable("GroupMembers"));
+
             // Ensure the maximum length is set for all string properties
             foreach (var entity in builder.Model.GetEntityTypes())
             {
