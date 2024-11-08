@@ -13,8 +13,7 @@ namespace DormBuddy.Models
 
         // Navigation property to hold the list of users in the group
       //  public List<ApplicationUser> Users { get; set; } = new List<ApplicationUser>();
-        //public ICollection<ApplicationUser> Members { get; set; } = new List<ApplicationUser>();
-      public ICollection<ApplicationUser> Members { get; set; } = new List<ApplicationUser>();
+        public List<ApplicationUser> Members { get; set; } = new List<ApplicationUser>();
 
     }
 }

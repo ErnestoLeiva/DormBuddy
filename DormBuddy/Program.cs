@@ -32,19 +32,24 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
         : CookieSecurePolicy.Always;
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin", policy =>
+    {
+        policy.WithOrigins("http://localhost:5000") // Replace with your frontend URL
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
+
 builder.Services.AddSingleton<TimeZoneService>();
 
 builder.Services.AddControllersWithViews().AddViewLocalization().AddDataAnnotationsLocalization();
 
 builder.Services.Configure<RequestLocalizationOptions>(options => 
 {
-
-    var supportedCultures = new[]
-    {
-        new CultureInfo("en"),
-        new CultureInfo("es")
-    };
-
+    var supportedCultures = new[] { new CultureInfo("en"), new CultureInfo("es") };
     options.DefaultRequestCulture = new RequestCulture("en");
     options.SupportedCultures = supportedCultures;
     options.SupportedUICultures = supportedCultures;
@@ -130,7 +135,9 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
-#region MIDDLEWARE CONFIGURATION
+// Middleware Configuration
+app.UseCors("AllowSpecificOrigin");
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -148,7 +155,6 @@ app.UseRequestLocalization(localizationOptions);
 
 app.Use(async (context, next) =>
 {
-
     var cookieValue = context.Request.Cookies["Culture"];
     if (!string.IsNullOrEmpty(cookieValue))
     {
@@ -176,7 +182,6 @@ app.MapControllerRoute(
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=HomeLogin}/{id?}");
-#endregion
 
 await InitializeRolesAndAdminUser(app);
 
