@@ -39,9 +39,6 @@ namespace DormBuddy.Controllers
             return RedirectToAction("Login", "Account");
         }
 
-
-
-
         // POST: /Expenses/AddExpense
         [HttpPost]
         public async Task<IActionResult> AddExpense(ExpenseModel model)

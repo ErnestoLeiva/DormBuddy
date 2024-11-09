@@ -35,6 +35,7 @@
 
     <p>@SharedLocalizer["Welcome"] <b>@ViewBag.Username</b>!
 
+    <!-- SCRIPT TO DISPLAY CURRENT TIME. UPDATES EVERY SECOND-->
     <div id="eventDetails"></div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
@@ -44,11 +45,7 @@
                     $('#eventDetails').html(data);
                 });
             }
-
-            // Update the time every 10 seconds
             setInterval(updateEventTime, 1000);
-
-            // Initial call to display the time immediately
             updateEventTime();
         });
     </script>
@@ -56,8 +53,7 @@
 
     @if (roles.Length > 1) // ONLY SHOW IF THERES MORE ROLES THAN JUST "USER"
     {
-        
-        var roleLabel = roles.Length > 1 ? "Roles" : "Role";
+        var roleLabel = "Roles";
 
         <p>[@roleLabel: 
         @{
