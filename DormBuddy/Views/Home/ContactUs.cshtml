@@ -3,6 +3,9 @@
     //Layout = "~/Views/Shared/_HomePageLayout.cshtml";
 }
 
+<!-- Link to the specific ContactUs.css file -->
+<link rel="stylesheet" href="~/css/contactus.css" asp-append-version="true" />
+
 
 @*IF LOGGED IN, allow user to go back to dashboard...*@
 @if (User?.Identity != null && User.Identity.IsAuthenticated) {
@@ -17,7 +20,61 @@
 <div class="text-center mb-4">
     <h1>@ViewData["Title"]</h1>
 </div>
-<hr class="my-4">
+<!-- <hr class="my-4">
 <div class="container mt-5">
     <p>You can contact us here!</p>
+</div> -->
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="board" style="display: flex; justify-content: center; align-content: center; background: #fff;">
+            <div class="row">
+                <div class="col-md-9" id="mainpanel" style="margin: 0; padding: 0;">
+
+                <div class="ContactUsContainer">
+                    <div id="content">
+                        <div id="left-side">
+                            <div id="details">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <div id="topic">Address</div>
+                                <div id="text-one">807 Sunny Dr</div>
+                                <div id="text-two">Miami, FL 33174</div>
+                            </div>
+                            <div id="details">
+                                <i class="fas fa-phone-alt"></i>
+                                <div id="topic">Phone</div>
+                                <div id="text-one">+1 305 123 1234</div>
+                                <div id="text-two">+1 305 456 7890</div>
+                            </div>
+                            <div id="details">
+                                <i class="fas fa-envelope"></i>
+                                <div id="topic">Email</div>
+                                <div id="text-one">dormbuddy@gmail.com</div>
+                                <div id="text-two">contactus.dormbuddy@gmail.com</div>
+                            </div>
+                        </div>
+                        <div id="right-side">
+                            <div id="topic-text">Send us a message</div>
+                            <p> Please do not hesitate to contact us if you have any inquires!</p> 
+                            <form action="#">
+                                <div id="input-box">
+                                    <input type="text" placeholder="Enter your name" class="form-control">
+                                </div>
+                                <div id="input-box">
+                                    <input type="text" placeholder="Enter your email" class="form-control">
+                                </div>
+                                <div id="input-box">
+                                    <textarea placeholder="Type your message here" class="form-control"></textarea>
+                                </div>
+                                <div id="button">
+                                    <input type="button" value="Send Now">
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
