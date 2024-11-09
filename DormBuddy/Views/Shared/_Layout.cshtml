@@ -19,6 +19,10 @@
     <!--<link rel="stylesheet" href="~/DormBuddy.styles.css" asp-append-version="true" />-->
     <link rel="stylesheet" href="~/css/account.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/_Layout.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/tasks.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/expenses.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/settings.css" asp-append-version="true" />
     
     <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -84,10 +88,16 @@
     </button>
 
                     <div class="dropdown-menu dropdown-menu-right text-left">
-                        <a class="dropdown-item fas fa-user" asp-controller="Account" asp-action="Profile"> Profile</a>
-                        <a class="dropdown-item fas fa-cog" asp-controller="Account" asp-action="Settings"> Settings</a>
+                        <a class="dropdown-item" asp-controller="Account" asp-action="Profile">
+                            <i class="fas fa-user"></i> Profile
+                        </a>
+                        <a class="dropdown-item" asp-controller="Account" asp-action="Settings">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
                         <div class="line-divider"></div>
-                        <a class="dropdown-item fas fa-sign-out-alt" asp-controller="Account" asp-action="Logout"> Sign Out</a>
+                        <a class="dropdown-item" asp-controller="Account" asp-action="Logout">
+                            <i class="fas fa-sign-out-alt"></i> Sign Out
+                        </a>
                     </div>
                 </div>
                 }

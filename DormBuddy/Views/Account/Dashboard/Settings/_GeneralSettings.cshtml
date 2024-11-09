@@ -1,45 +1,48 @@
-<div class="container mt-4">
-    <h2 class="mb-4">General Settings</h2>
+<div>
+    <h2>General Settings</h2>
     
     <!-- Language Selection -->
-    <div class="mb-3">
+    <div class="form-group">
         @{
             var currentCulture = Context.Request.Cookies["Culture"] ?? "en";
-
             var currentTimeZone = Context.Request.Cookies["UserTimeZone"] ?? "UTC";
         }
 
         <form id="languageForm" method="post" asp-controller="Account" asp-action="ChangeLanguage">
             <label for="language" class="form-label">Language</label>
-            <select class="form-select w-100" name="culture" onchange="this.form.submit()">
-                @Html.Raw("<option value='en' " + (currentCulture == "en" ? "selected" : "") + ">English</option>")
-                @Html.Raw("<option value='es' " + (currentCulture == "es" ? "selected" : "") + ">Español</option>")
-            </select>
+            <div class="select-wrapper">
+                <select class="form-control" name="culture" onchange="this.form.submit()">
+                    @Html.Raw("<option value='en' " + (currentCulture == "en" ? "selected" : "") + ">English</option>")
+                    @Html.Raw("<option value='es' " + (currentCulture == "es" ? "selected" : "") + ">Español</option>")
+                </select>
+            </div>
         </form>
     </div>
     
     <!-- Timezone Selection -->
-    <div class="mb-3">
+    <div class="form-group">
         <form id="timezoneform" method="post" asp-controller="Account" asp-action="ChangeTimeZone">
             <label for="timeZone" class="form-label">Timezone</label>
-            <select class="form-select w-100" name="timeZone" id="timeZone" onchange="this.form.submit()">
-                @Html.Raw($"<option value='Pacific Standard Time' {(currentTimeZone == "Pacific Standard Time" ? "selected" : "")}>Pacific Standard Time (UTC-8)</option>")
-                @Html.Raw($"<option value='Mountain Standard Time' {(currentTimeZone == "Mountain Standard Time" ? "selected" : "")}>Mountain Standard Time (UTC-7)</option>")
-                @Html.Raw($"<option value='Central Standard Time' {(currentTimeZone == "Central Standard Time" ? "selected" : "")}>Central Standard Time (UTC-6)</option>")
-                @Html.Raw($"<option value='Eastern Standard Time' {(currentTimeZone == "Eastern Standard Time" ? "selected" : "")}>Eastern Standard Time (UTC-5)</option>")
-                @Html.Raw($"<option value='Atlantic Standard Time' {(currentTimeZone == "Atlantic Standard Time" ? "selected" : "")}>Atlantic Standard Time (UTC-4)</option>")
-                @Html.Raw($"<option value='Greenland Standard Time' {(currentTimeZone == "Greenland Standard Time" ? "selected" : "")}>Greenland Standard Time (UTC-3)</option>")
-                @Html.Raw($"<option value='Western European Time' {(currentTimeZone == "Western European Time" ? "selected" : "")}>Western European Time (UTC+0)</option>")
-                @Html.Raw($"<option value='Central European Time' {(currentTimeZone == "Central European Time" ? "selected" : "")}>Central European Time (UTC+1)</option>")
-                @Html.Raw($"<option value='Eastern European Time' {(currentTimeZone == "Eastern European Time" ? "selected" : "")}>Eastern European Time (UTC+2)</option>")
-                @Html.Raw($"<option value='Moscow Standard Time' {(currentTimeZone == "Moscow Standard Time" ? "selected" : "")}>Moscow Standard Time (UTC+3)</option>")
-                @Html.Raw($"<option value='Arabian Standard Time' {(currentTimeZone == "Arabian Standard Time" ? "selected" : "")}>Arabian Standard Time (UTC+3)</option>")
-                @Html.Raw($"<option value='India Standard Time' {(currentTimeZone == "India Standard Time" ? "selected" : "")}>India Standard Time (UTC+5:30)</option>")
-                @Html.Raw($"<option value='China Standard Time' {(currentTimeZone == "China Standard Time" ? "selected" : "")}>China Standard Time (UTC+8)</option>")
-                @Html.Raw($"<option value='Japan Standard Time' {(currentTimeZone == "Japan Standard Time" ? "selected" : "")}>Japan Standard Time (UTC+9)</option>")
-                @Html.Raw($"<option value='Australian Eastern Time' {(currentTimeZone == "Australian Eastern Time" ? "selected" : "")}>Australian Eastern Time (UTC+10)</option>")
-                @Html.Raw($"<option value='New Zealand Standard Time' {(currentTimeZone == "New Zealand Standard Time" ? "selected" : "")}>New Zealand Standard Time (UTC+12)</option>")
-            </select>
+            <div class="select-wrapper">
+                <select class="form-control" name="timeZone" id="timeZone" onchange="this.form.submit()">
+                    @Html.Raw($"<option value='Pacific Standard Time' {(currentTimeZone == "Pacific Standard Time" ? "selected" : "")}>Pacific Standard Time (UTC-8)</option>")
+                    @Html.Raw($"<option value='Mountain Standard Time' {(currentTimeZone == "Mountain Standard Time" ? "selected" : "")}>Mountain Standard Time (UTC-7)</option>")
+                    @Html.Raw($"<option value='Central Standard Time' {(currentTimeZone == "Central Standard Time" ? "selected" : "")}>Central Standard Time (UTC-6)</option>")
+                    @Html.Raw($"<option value='Eastern Standard Time' {(currentTimeZone == "Eastern Standard Time" ? "selected" : "")}>Eastern Standard Time (UTC-5)</option>")
+                    @Html.Raw($"<option value='Atlantic Standard Time' {(currentTimeZone == "Atlantic Standard Time" ? "selected" : "")}>Atlantic Standard Time (UTC-4)</option>")
+                    @Html.Raw($"<option value='Greenland Standard Time' {(currentTimeZone == "Greenland Standard Time" ? "selected" : "")}>Greenland Standard Time (UTC-3)</option>")
+                    @Html.Raw($"<option value='Western European Time' {(currentTimeZone == "Western European Time" ? "selected" : "")}>Western European Time (UTC+0)</option>")
+                    @Html.Raw($"<option value='Central European Time' {(currentTimeZone == "Central European Time" ? "selected" : "")}>Central European Time (UTC+1)</option>")
+                    @Html.Raw($"<option value='Eastern European Time' {(currentTimeZone == "Eastern European Time" ? "selected" : "")}>Eastern European Time (UTC+2)</option>")
+                    @Html.Raw($"<option value='Moscow Standard Time' {(currentTimeZone == "Moscow Standard Time" ? "selected" : "")}>Moscow Standard Time (UTC+3)</option>")
+                    @Html.Raw($"<option value='Arabian Standard Time' {(currentTimeZone == "Arabian Standard Time" ? "selected" : "")}>Arabian Standard Time (UTC+3)</option>")
+                    @Html.Raw($"<option value='India Standard Time' {(currentTimeZone == "India Standard Time" ? "selected" : "")}>India Standard Time (UTC+5:30)</option>")
+                    @Html.Raw($"<option value='China Standard Time' {(currentTimeZone == "China Standard Time" ? "selected" : "")}>China Standard Time (UTC+8)</option>")
+                    @Html.Raw($"<option value='Japan Standard Time' {(currentTimeZone == "Japan Standard Time" ? "selected" : "")}>Japan Standard Time (UTC+9)</option>")
+                    @Html.Raw($"<option value='Australian Eastern Time' {(currentTimeZone == "Australian Eastern Time" ? "selected" : "")}>Australian Eastern Time (UTC+10)</option>")
+                    @Html.Raw($"<option value='New Zealand Standard Time' {(currentTimeZone == "New Zealand Standard Time" ? "selected" : "")}>New Zealand Standard Time (UTC+12)</option>")
+                </select>
+            </div>
         </form>
     </div>
 </div>

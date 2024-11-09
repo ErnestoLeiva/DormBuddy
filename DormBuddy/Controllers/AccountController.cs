@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 
 namespace DormBuddy.Controllers
 {
@@ -17,21 +18,24 @@ namespace DormBuddy.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender _emailSender;
-
         private readonly TimeZoneService _timeZoneService;
+        private readonly DBContext _context;
+        
 
         public AccountController(
             ILogger<AccountController> logger,
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IEmailSender emailSender,
-            TimeZoneService timeZoneService)
+            TimeZoneService timeZoneService,
+            DBContext context)
         {
             _logger = logger;
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
             _timeZoneService = timeZoneService;
+            _context = context;
         }
 
         #region ACCOUNT FORMS
@@ -385,23 +389,31 @@ namespace DormBuddy.Controllers
         public async Task<IActionResult> Dashboard()
         {
             if (User?.Identity?.IsAuthenticated == true)
-            {
-                var user = await _userManager.GetUserAsync(User);
-                if (user != null)
-                {
-                    ViewBag.Username = $"{user.FirstName} {user.LastName}";
-                    ViewBag.UserRoles = string.Join(", ", await _userManager.GetRolesAsync(user));
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user != null)
+        {
+            ViewBag.Username = $"{user.FirstName} {user.LastName}";
+            ViewBag.UserRoles = string.Join(", ", await _userManager.GetRolesAsync(user));
 
-                    var currentCulture = CultureInfo.CurrentCulture.Name;
-                    var currentUICulture = CultureInfo.CurrentUICulture.Name;
+            // Count incomplete tasks
+            ViewBag.TaskCount = await _context.Tasks
+                .CountAsync(t => t.UserId == user.Id && !t.IsCompleted);
 
-                    ViewBag.CultureInfo = $"Current Culture: {currentCulture}, UI Culture: {currentUICulture}";
-                }
+            // Count expenses
+            ViewBag.PendingExpenses = await _context.Expenses
+                .CountAsync(e => e.UserId == user.Id);
 
-                return View();
-            }
+            //static active until implemented
+            ViewBag.LoanStatus = "Active";
+            
+            //static 3 until implemented
+            ViewBag.NewNotifications = 3;
 
-            return RedirectToAction("AccountForms");
+            return View();
+        }
+    }
+    return RedirectToAction("AccountForms");
         }
 
         #endregion
@@ -426,11 +438,11 @@ namespace DormBuddy.Controllers
             {
                 case "GeneralSettings":
                     return PartialView("Dashboard/Settings/_GeneralSettings");
-                case "AccountSettings":
+                 case "AccountSettings":
                     return PartialView("Dashboard/Settings/_AccountSettings");
-                case "PrivacySettings":
+                 case "PrivacySettings":
                     return PartialView("Dashboard/Settings/_PrivacySettings");
-                default:
+            default:
                     return Content("Invalid settings page.");
             }
         }

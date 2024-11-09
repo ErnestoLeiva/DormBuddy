@@ -1,42 +1,128 @@
 @inject Microsoft.Extensions.Localization.IStringLocalizerFactory LocalizerFactory
 @{
     var SharedLocalizer = LocalizerFactory.Create("SharedResource", typeof(Program).Assembly.GetName().Name ?? "");
-}
-
-
-@{
     ViewData["Title"] = "Dashboard";
 }
 
-@{
-    var roles = ViewBag.UserRoles.Split(',');
-}
+<div class="dashboard-header text-center">
+    <h1 class="display-4">@SharedLocalizer["UserDashboard"]</h1>
+    <p>@SharedLocalizer["Welcome"] @ViewBag.Username</p>
+    <p id="eventDetails"></p>
+</div>
 
-<!-- DASHBOARD HEADER -->
-<div class="text-center mb-4">
-    <h1 class="display-4"><strong>@SharedLocalizer["UserDashboard"]</strong></h1>
-    <hr class="my-4">
-    <!-- Display success message if it exists -->
-    @if (TempData["message"] != null)
+<div class="dashboard-grid">
+    <!-- Task Management -->
+    <div class="dashboard-card">
+        <div class="card-status">
+            <div class="status-icon">
+                <i class="fas fa-tasks"></i>
+            </div>
+            <span class="status-badge">@ViewBag.TaskCount Tasks</span>
+        </div>
+        <div class="card-content">
+            <h3 class="card-title">@SharedLocalizer["TaskManagement"]</h3>
+            <p class="card-description">@SharedLocalizer["TaskManagementDescription"]</p>
+            <a href="/Tasks/Index" class="card-button">@SharedLocalizer["ViewTasks"]</a>
+        </div>
+    </div>
+
+    <!-- Expense Splitting -->
+    <div class="dashboard-card">
+        <div class="card-status">
+            <div class="status-icon">
+                <i class="fas fa-money-bill-wave"></i>
+            </div>
+            <span class="status-badge">@ViewBag.PendingExpenses Pending</span>
+        </div>
+        <div class="card-content">
+            <h3 class="card-title">@SharedLocalizer["ExpenseSplitting"]</h3>
+            <p class="card-description">@SharedLocalizer["ExpenseSplittingDescription"]</p>
+            <a href="/Expenses/Index" class="card-button">@SharedLocalizer["ViewExpenses"]</a>
+        </div>
+    </div>
+
+    <!-- P2P Lending -->
+    <div class="dashboard-card">
+        <div class="card-status">
+            <div class="status-icon">
+                <i class="fas fa-handshake"></i>
+            </div>
+            <span class="status-badge">@ViewBag.LoanStatus</span>
+        </div>
+        <div class="card-content">
+            <h3 class="card-title">@SharedLocalizer["PeerToPeerLending"]</h3>
+            <p class="card-description">@SharedLocalizer["PeerToPeerLendingDescription"]</p>
+            <a href="/Account/Lending" class="card-button">@SharedLocalizer["ViewLending"]</a>
+        </div>
+    </div>
+
+    <!-- Account Settings -->
+    <div class="dashboard-card">
+        <div class="card-status">
+            <div class="status-icon">
+                <i class="fas fa-user-cog"></i>
+            </div>
+            <div class="status-badge"></div>
+        </div>
+        <div class="card-content">
+            <h3 class="card-title">@SharedLocalizer["AccountSettings"]</h3>
+            <p class="card-description">@SharedLocalizer["AccountSettingsDescription"]</p>
+            <a href="/Account/Settings" class="card-button">@SharedLocalizer["ManageAccount"]</a>
+        </div>
+    </div>
+
+    <!-- Notifications -->
+    <div class="dashboard-card">
+        <div class="card-status">
+            <div class="status-icon">
+                <i class="fas fa-bell"></i>
+            </div>
+            <span class="status-badge">@ViewBag.NewNotifications New</span>
+        </div>
+        <div class="card-content">
+            <h3 class="card-title">@SharedLocalizer["Notifications"]</h3>
+            <p class="card-description">@SharedLocalizer["NotificationsDescription"]</p>
+            <a href="/Account/Notifications" class="card-button">@SharedLocalizer["ViewNotifications"]</a>
+        </div>
+    </div>
+
+    <!-- Help & Support -->
+    <div class="dashboard-card">
+        <div class="card-status">
+            <div class="status-icon">
+                <i class="fas fa-question-circle"></i>
+            </div>
+            <div class="status-badge"></div>
+        </div>
+        <div class="card-content">
+            <h3 class="card-title">@SharedLocalizer["HelpAndSupport"]</h3>
+            <p class="card-description">@SharedLocalizer["HelpAndSupportDescription"]</p>
+            <a href="/Home/ContactUs" class="card-button">@SharedLocalizer["GetHelp"]</a>
+        </div>
+    </div>
+
+    <!-- Admin Panel - Only shown for admin users -->
+    @if (ViewBag.UserRoles.Contains("Admin"))
     {
-        <div class="alert alert-success">
-            @TempData["message"]
+        <div class="admin-card-container">
+            <div class="dashboard-card admin-card">
+                <div class="card-status">
+                    <div class="status-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <span class="status-badge">Admin</span>
+                </div>
+                <div class="card-content">
+                    <h3 class="card-title">Admin Panel</h3>
+                    <p class="card-description">Manage site-wide settings and users.</p>
+                    <a href="/Administration/AdminPanel" class="card-button">Go to Admin Panel</a>
+                </div>
+            </div>
         </div>
     }
-    <!-- Display error message if it exists -->
-    @if (ViewBag.ErrorMessage != null)
-    {
-        <div class="alert alert-danger" role="alert">
-            @ViewBag.ErrorMessage
-        </div>
-    }
+</div>
 
-    <!--<p>@ViewBag.CultureInfo</p>-->
-
-    <p>@SharedLocalizer["Welcome"] <b>@ViewBag.Username</b>!
-
-    <div id="eventDetails"></div>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+@section Scripts {
     <script>
         $(document).ready(function() {
             function updateEventTime() {
@@ -44,170 +130,8 @@
                     $('#eventDetails').html(data);
                 });
             }
-
-            // Update the time every 10 seconds
             setInterval(updateEventTime, 1000);
-
-            // Initial call to display the time immediately
             updateEventTime();
         });
     </script>
-
-
-    @if (roles.Length > 1) // ONLY SHOW IF THERES MORE ROLES THAN JUST "USER"
-    {
-        
-        var roleLabel = roles.Length > 1 ? "Roles" : "Role";
-
-        <p>[@roleLabel: 
-        @{
-            for (int i = 0; i < roles.Length; i++)
-            {
-                var role = roles[i].Trim();
-                var conditionalComma = ",";
-
-                var roleColor = role switch
-                {
-                    "Admin" => "color: #B026FF; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;",     // neon-purple
-                    "Moderator" => "color: #39FF14; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;", // neon-green
-                    "User" => "color: #1F51FF; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;",      // neon-blue
-                    _ => "color: black;" // default color
-                };
-
-                if (i == roles.Length - 1) // Don't add comma for the last role
-                {
-                    conditionalComma = null; 
-                }
-
-                <span style="@roleColor">@role</span>@conditionalComma
-            }
-        }]</p>
-    }
-</div>
-<hr class="my-4">
-
-<!-- DASHBOARD PANEL CARDS -->
-<div class="container">
-    <div class="row">
-        <!-- Task Management Card -->
-        <div class="col-md-4">
-            <div class="card text-center mb-4">
-                <div class="card-header bg-primary text-white">
-                    <i class="fas fa-tasks fa-lg"></i>
-                    @SharedLocalizer["TaskManagement"]
-                </div>
-                <div class="card-body">
-                    <p>@SharedLocalizer["TaskManagementDescription"]</p>
-                    <a href="/Tasks/Index" class="btn btn-primary">@SharedLocalizer["ViewTasks"]</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Expense Splitting Card -->
-        <div class="col-md-4">
-            <div class="card text-center mb-4">
-                <div class="card-header bg-success text-white">
-                    <i class="fas fa-money-bill-wave fa-lg"></i>
-                    @SharedLocalizer["ExpenseSplitting"]
-                </div>
-                <div class="card-body">
-                    <p>@SharedLocalizer["ExpenseSplittingDescription"]</p>
-                    <a href="/Expenses/Index" class="btn btn-success">@SharedLocalizer["ViewExpenses"]</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- P2P Lending Card -->
-        <div class="col-md-4">
-            <div class="card text-center mb-4">
-                <div class="card-header bg-warning text-white">
-                    <i class="fas fa-handshake fa-lg"></i>
-                    @SharedLocalizer["PeerToPeerLending"]
-                </div>
-                <div class="card-body">
-                    <p>@SharedLocalizer["PeerToPeerLendingDescription"]</p>
-                    <a href="/Account/Lending" class="btn btn-warning" style="color: white;">@SharedLocalizer["ViewLending"]</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <!-- Account Settings Card -->
-        <div class="col-md-4">
-            <div class="card text-center mb-4">
-                <div class="card-header bg-info text-white">
-                    <i class="fas fa-user-cog fa-lg"></i>
-                    @SharedLocalizer["AccountSettings"]
-                </div>
-                <div class="card-body">
-                    <p>@SharedLocalizer["AccountSettingsDescription"]</p>
-                    <a href="/Account/Settings" class="btn btn-info">@SharedLocalizer["ManageAccount"]</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Notifications Card -->
-        <div class="col-md-4">
-            <div class="card text-center mb-4">
-                <div class="card-header bg-danger text-white">
-                    <i class="fas fa-bell fa-lg"></i>
-                    @SharedLocalizer["Notifications"]
-                </div>
-                <div class="card-body">
-                    <p>@SharedLocalizer["NotificationsDescription"]</p>
-                    <a href="/Account/Notifications" class="btn btn-danger">@SharedLocalizer["ViewNotifications"]</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Help & Support Card -->
-        <div class="col-md-4">
-            <div class="card text-center mb-4">
-                <div class="card-header bg-dark text-white">
-                    <i class="fas fa-cog fa-lg"></i>
-                    @SharedLocalizer["HelpAndSupport"]
-                </div>
-                <div class="card-body">
-                    <p>@SharedLocalizer["HelpAndSupportDescription"]</p>
-                    <a href="/Home/ContactUs" class="btn btn-dark">@SharedLocalizer["GetHelp"]</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ADMIN/MODERATOR ROW -->
-    @if (ViewBag.UserRoles.Contains("Admin") || ViewBag.UserRoles.Contains("Moderator"))
-    {
-        <div class="row">
-            @if (ViewBag.UserRoles.Contains("Admin")) {
-                <div class="col-md-4 offset-md-4">
-                    <div class="card text-center mb-4">
-                        <div class="card-header bg-purple text-white">
-                            <i class="fas fa-shield-alt fa-lg"></i>
-                            Admin Panel
-                        </div>
-                        <div class="card-body">
-                            <p>Manage site-wide settings and users.</p>
-                            <a href="/Administration/AdminPanel" class="btn btn-purple">Go to Admin Panel</a>
-                        </div>
-                    </div>
-                </div>
-            }
-            else if (!ViewBag.UserRoles.Contains("Admin") && ViewBag.UserRoles.Contains("Moderator")){
-                <div class="col-md-4 offset-md-4">
-                    <div class="card text-center mb-4">
-                        <div class="card-header bg-purple text-white">
-                            <i class="fas fa-shield-alt fa-lg"></i>
-                            Moderator Panel
-                        </div>
-                        <div class="card-body">
-                            <p>Manage site-wide settings and users.</p>
-                            <a href="/Administration/ModeratorPanel" class="btn btn-purple">Go to Moderator Panel</a>
-                        </div>
-                    </div>
-                </div>
-            }
-        </div>
-    }
-</div>
+}

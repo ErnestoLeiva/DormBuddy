@@ -1,6 +1,10 @@
 ﻿/* Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
 for details on configuring this project to bundle and minify static web assets. */
 
+.navbar, .dropdown, .creditsContainer {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
 a.navbar-brand {
   color: #0077cc;
   white-space: normal;
@@ -11,7 +15,6 @@ a.navbar-brand {
 a {
   color: #0077cc;
 }
-
 
 
 .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
@@ -94,4 +97,156 @@ button.accept-policy {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+/* Credits Container */
+.creditsContainer {
+  background: #857a92;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  color: white;
+  display: flex;
+  align-items: center;
+  margin-right: 1rem;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.creditsContainer:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.creditsContainer p {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.creditsContainer p::before {
+  content: '$';
+  font-weight: 600;
+}
+
+.fa-coins {
+  color: #ffd700;
+}
+
+/* Dropdown Button */
+.dropdown .btn-secondary {
+  font-family: inherit;
+  background: white;
+  color: #2d3748;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown .btn-secondary:hover,
+.dropdown .btn-secondary:focus {
+  background: #f8fafc;
+  border-color: #4e95d1;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Dropdown Menu */
+.dropdown-menu {
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  min-width: 200px;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: white;
+}
+
+.dropdown-menu .dropdown-item {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  font-size: 0.95rem;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #4a5568;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.dropdown-item::after {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+}
+
+.dropdown-item i {
+  font-size: 1rem;
+  width: 20px;
+  color: #4e95d1;
+}
+
+.dropdown-item:hover {
+  background: #f7fafc;
+  color: #2d3748;
+  transform: translateX(4px);
+}
+
+/* Sign Out Item */
+.dropdown-item.fa-sign-out-alt {
+  color: #d11a1a;
+}
+
+.dropdown-item.fa-sign-out-alt i {
+  color: #e53e3e;
+}
+
+.dropdown-item.fa-sign-out-alt:hover {
+  background: #fff5f5;
+  color: #ce1919;
+}
+
+/* Avatar */
+.dropdown-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid #e2e8f0;
+  padding: 2px;
+  background: #f7fafc;
+}
+
+.line-divider {
+  height: 1px;
+  background: #e2e8f0;
+  margin: 0.5rem 0;
+}
+
+.navbar {
+  padding: 0.75rem 1rem;
+}
+
+.navbar-brand {
+  font-weight: 600;
+  color: #2d3748 !important;
+}
+
+.nav-link {
+  font-weight: 500;
+  padding: 0.5rem 1rem !important;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+  background: #f7fafc;
+  color: #4e95d1 !important;
 }

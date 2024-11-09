@@ -4,129 +4,183 @@
     ViewData["Title"] = "Task Management";
     var tasks = Model.Item1;
     var newTask = Model.Item2;
+    
+    // Calculate stats
+    var totalTasks = tasks.Count;
+    var incompleteTasks = tasks.Count(t => !t.IsCompleted);
+    var overdueTasks = tasks.Count(t => !t.IsCompleted && t.DueDate < DateTime.Now);
+    var dueTodayTasks = tasks.Count(t => !t.IsCompleted && t.DueDate.Date == DateTime.Today);
 }
 
-<!-- Return to Dashboard Button -->
-<div class="mb-4">
-    <a href="/Account/Dashboard" class="btn btn-outline-primary">
+<div class="tasks-container">
+    <!-- Return Button -->
+    <a href="/Account/Dashboard" class="return-button">
         <i class="fa fa-chevron-left"></i> Return to Dashboard
     </a>
-</div>
-
-<!-- Tasks Header -->
-<div class="text-center mb-4">
-    <h1 class="display-4">Task Management</h1>
-    <p>Manage your dorm-related tasks and track progress.</p>
-</div>
-
-<!-- Display success message if it exists -->
-@if (TempData["message"] != null)
-{
-    <div class="alert alert-success">
-        @TempData["message"]
+    <div class="settings-header">
+        <h1>Task Management</h1>
+        <p>Manage your dorm-related tasks and track progress</p>
     </div>
-}
-<!-- Display validation errors -->
-@if (!ViewData.ModelState.IsValid)
-{
-    <div class="alert alert-danger">
-        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-        {
-            <p>@error.ErrorMessage</p>
-        }
-    </div>
-}
-
-<!-- Task Form to Add New Task -->
-<div class="container mb-4">
-    <h4>Add New Task</h4>
-    <form method="post" asp-action="AddTask">
-        
-        <input type="hidden" id="UserId" name="UserId" value="@newTask.UserId" />
-        
-        <div class="form-group">
-            <label for="taskName">Task Name</label>
-            <input type="text" class="form-control" id="taskName" name="TaskName" placeholder="Enter task name" required />
-        </div>
-        <div class="form-group">
-            <label for="assignedTo">Assigned To</label>
-            <input type="text" class="form-control" id="assignedTo" name="AssignedTo" placeholder="Enter name" required />
-        </div>
-        <div class="form-group">
-            <label for="dueDate">Due Date</label>
-            <input type="date" class="form-control" id="dueDate" name="DueDate" required />
-        </div>
-        <div class="form-group">
-            <label for="dueTime">Due Time</label>
-            <div class="d-flex">
-                <select class="form-control mr-2" name="DueTimeHour">
-                    @for (int i = 1; i <= 12; i++)
-                    {
-                        <option>@i</option>
-                    }
-                </select>
-                <select class="form-control mr-2" name="DueTimeMinute">
-                    @for (int i = 0; i < 60; i += 5) { <option>@i.ToString("D2")</option> }
-                </select>
-                <select class="form-control" name="DueTimeAMPM">
-                    <option>AM</option>
-                    <option>PM</option>
-                </select>
+    <!-- Stats Cards -->
+    <div class="stats-container">
+        <div class="stat-card stat-all">
+            <div class="stat-icon">
+                <i class="fas fa-tasks"></i>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-number">@totalTasks</h3>
+                <p class="stat-label">All Tasks</p>
             </div>
         </div>
-        <button type="submit" class="btn btn-primary">Add Task</button>
-    </form>
-</div>
 
-<!-- Task Table -->
-<div class="table-responsive">
-    <table class="table table-striped table-bordered" id="taskTable">
-        <thead class="thead-dark">
-            <tr>
-                <th>Task Name</th>
-                <th>Assigned To</th>
-                <th>Due Date</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody id="taskTableBody">
-            @if (!tasks.Any())
+        <div class="stat-card stat-incomplete">
+            <div class="stat-icon">
+                <i class="fas fa-clipboard-list"></i>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-number">@incompleteTasks</h3>
+                <p class="stat-label">Incomplete</p>
+            </div>
+        </div>
+
+        <div class="stat-card stat-overdue">
+            <div class="stat-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-number">@overdueTasks</h3>
+                <p class="stat-label">Overdue</p>
+            </div>
+        </div>
+
+        <div class="stat-card stat-due-today">
+            <div class="stat-icon">
+                <i class="fas fa-bell"></i>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-number">@dueTodayTasks</h3>
+                <p class="stat-label">Due Today</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Messages Section -->
+    @if (TempData["message"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["message"]
+        </div>
+    }
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger">
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
             {
-                <tr id="noTasksMessage">
-                    <td colspan="5" class="text-center">No remaining tasks...</td>
-                </tr>
+                <p>@error.ErrorMessage</p>
             }
-            else
-            {
-                foreach (var task in tasks)
+        </div>
+    }
+
+    <!-- Add Task Form -->
+    <div class="add-task-section">
+        <h4>Add New Task</h4>
+        <form method="post" asp-action="AddTask">
+            <input type="hidden" id="UserId" name="UserId" value="@newTask.UserId" />
+            
+            <div class="form-group">
+                <label for="taskName">Task Name</label>
+                <input type="text" class="form-control" id="taskName" name="TaskName" placeholder="Enter task name" required />
+            </div>
+            
+            <div class="form-group">
+                <label for="assignedTo">Assigned To</label>
+                <input type="text" class="form-control" id="assignedTo" name="AssignedTo" placeholder="Enter name" required />
+            </div>
+            
+            <div class="form-group">
+                <label for="dueDate">Due Date</label>
+                <input type="date" class="form-control" id="dueDate" name="DueDate" required />
+            </div>
+            
+            <div class="form-group">
+                <label for="dueTime">Due Time</label>
+                <div class="time-select-group">
+                    <select class="form-control" name="DueTimeHour">
+                        @for (int i = 1; i <= 12; i++)
+                        {
+                            <option>@i</option>
+                        }
+                    </select>
+                    <select class="form-control" name="DueTimeMinute">
+                        @for (int i = 0; i < 60; i += 5)
+                        {
+                            <option>@i.ToString("D2")</option>
+                        }
+                    </select>
+                    <select class="form-control" name="DueTimeAMPM">
+                        <option>AM</option>
+                        <option>PM</option>
+                    </select>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Task</button>
+        </form>
+    </div>
+
+    <!-- Tasks Table -->
+    <div class="table-container">
+        <table class="table" id="taskTable">
+            <thead>
+                <tr>
+                    <th>Task Name</th>
+                    <th>Assigned To</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="taskTableBody">
+                @if (!tasks.Any())
                 {
-                    <tr>
-                        <td>@task.TaskName</td>
-                        <td>@task.AssignedTo</td>
-                        <td>@task.DueDate.ToString("MM/dd/yyyy hh:mm tt")</td>
-                        <td>
-                            <span class="badge @(task.IsCompleted ? "bg-success" : "bg-warning text-dark")">
-                                @(task.IsCompleted ? "Completed" : "In Progress")
-                            </span>
-                        </td>
-                        <td>
-                            <button class="btn @(task.IsCompleted ? "btn-warning" : "btn-success") btn-sm"
-                                onclick="toggleTaskStatus(this, @task.Id)">
-                                @(task.IsCompleted ? "Mark as In-Progress" : "Mark as Completed")
-                            </button>
-                            <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteConfirmationModal" 
-                                onclick="setTaskToDelete('@task.TaskName', '@task.Id')">Delete</button>
-                        </td>
+                    <tr id="noTasksMessage">
+                        <td colspan="5" class="text-center">No remaining tasks...</td>
                     </tr>
                 }
-            }
-        </tbody>
-    </table>
+                else
+                {
+                    foreach (var task in tasks)
+                    {
+                        <tr>
+                            <td>@task.TaskName</td>
+                            <td>@task.AssignedTo</td>
+                            <td>@task.DueDate.ToString("MM/dd/yyyy hh:mm tt")</td>
+                            <td>
+                                <span class="badge @(task.IsCompleted ? "bg-success" : "bg-warning text-dark")">
+                                    @(task.IsCompleted ? "Completed" : "In Progress")
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn @(task.IsCompleted ? "btn-warning" : "btn-success") btn-sm"
+                                    onclick="toggleTaskStatus(this, @task.Id)">
+                                    @(task.IsCompleted ? "Mark as In-Progress" : "Mark as Completed")
+                                </button>
+                                <button class="btn btn-danger btn-sm" data-toggle="modal" 
+                                    data-target="#deleteConfirmationModal" 
+                                    onclick="setTaskToDelete('@task.TaskName', '@task.Id')">
+                                    Delete
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
 </div>
 
-<!-- Bootstrap Modal for Confirming Task Deletion -->
-<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" role="dialog" 
+     aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -149,7 +203,6 @@
     </div>
 </div>
 
-
 @section Scripts {
     <script>
         window.onload = function() {
@@ -163,6 +216,7 @@
             const day = now.getDate().toString().padStart(2, '0');
             const localDate = `${year}-${month}-${day}`;
             document.getElementById('dueDate').value = localDate;
+            
             let hour = now.getHours();
             let minute = now.getMinutes();
             minute = Math.ceil(minute / 5) * 5;
@@ -171,10 +225,13 @@
                 hour += 1;
             }
 
-    document.querySelector('select[name="DueTimeHour"]').value = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
-    document.querySelector('select[name="DueTimeMinute"]').value = minute.toString().padStart(2, '0');
-    document.querySelector('select[name="DueTimeAMPM"]').value = hour >= 12 ? 'PM' : 'AM';
-}
+            document.querySelector('select[name="DueTimeHour"]').value = 
+                hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
+            document.querySelector('select[name="DueTimeMinute"]').value = 
+                minute.toString().padStart(2, '0');
+            document.querySelector('select[name="DueTimeAMPM"]').value = 
+                hour >= 12 ? 'PM' : 'AM';
+        }
 
         function setTaskToDelete(taskName, taskId) {
             document.getElementById('taskToDeleteName').innerText = taskName;
@@ -182,21 +239,16 @@
         }
 
         function toggleTaskStatus(button, taskId) {
-            console.log("Task ID to toggle: " + taskId);
-
             const row = button.closest('tr');
             const statusCell = row.cells[3];
             const isCompleted = statusCell.innerText.trim() === 'Completed';
+            
             $.ajax({
                 url: '/Tasks/ToggleStatus',
                 type: 'POST',
-                data: {
-                    taskId: taskId
-                },
+                data: { taskId: taskId },
                 success: function(response) {
-                    console.log(response);
                     if (response.success) {
-                        
                         if (!isCompleted) {
                             statusCell.innerHTML = '<span class="badge bg-success">Completed</span>';
                             button.classList.remove('btn-success');
@@ -218,6 +270,5 @@
                 }
             });
         }
-
     </script>
 }

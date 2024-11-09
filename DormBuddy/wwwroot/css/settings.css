@@ -1,0 +1,267 @@
+/* Container */
+.settings-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+/* Return Button */
+.return-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    color: #4e95d1;
+    background: white;
+    border: 1px solid #4e95d1;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    margin-bottom: 2rem;
+}
+
+.return-button:hover {
+    background: #4e95d1;
+    color: white;
+    text-decoration: none;
+}
+
+.return-button i {
+    margin-right: 0.5rem;
+}
+
+/* Enhanced Header */
+.settings-header {
+    background: linear-gradient(135deg, #f6f9fc 0%, #edf2f7 100%);
+    padding: 2.5rem 2rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.settings-header h1 {
+    color: #2d3748;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.settings-header p {
+    color: #718096;
+    font-size: 1.1rem;
+}
+
+/* Tab Navigation */
+.settings-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.tab-button {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    border: none;
+    color: white;
+    transition: transform 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease;
+    min-width: 150px;
+}
+
+.tab-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.tab-button.active {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.tab-general {
+    background-color: rgb(89, 199, 226);
+}
+.tab-general:hover {
+    background-color: rgb(79, 179, 206);
+}
+
+.tab-account {
+    background-color: rgb(255, 79, 152);
+}
+.tab-account:hover {
+    background-color: rgb(235, 69, 142);
+}
+
+.tab-privacy {
+    background-color: rgb(154, 154, 240);
+}
+.tab-privacy:hover {
+    background-color: rgb(134, 134, 220);
+}
+
+/* Content Area */
+.settings-content {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+/* Form Controls */
+.form-control, 
+.form-select {
+    display: block;
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #2d3748;
+    background-color: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    height: auto;
+    margin-bottom: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+    width: 100%;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #2d3748;
+}
+
+/* Select Wrapper and Styling */
+.select-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.select-wrapper::after {
+    content: '\f107';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #4a5568;
+}
+
+select.form-control {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding-right: 2.5rem;
+    position: relative;
+    cursor: pointer;
+    min-height: 42px;
+    box-sizing: border-box;
+}
+
+/* Input Styling */
+input.form-control {
+    min-height: 42px;
+    box-sizing: border-box;
+}
+
+/* Focus States */
+.form-control:focus,
+.form-select:focus {
+    border-color: #4e95d1;
+    box-shadow: 0 0 0 3px rgba(78, 149, 209, 0.1);
+    outline: none;
+}
+
+/* Settings Sections */
+.settings-content > div {
+    margin-bottom: 2rem;
+}
+
+.settings-content h2 {
+    color: #2d3748;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #edf2f7;
+}
+
+/* Button Styling */
+button.form-control {
+    cursor: pointer;
+    font-weight: 500;
+}
+
+input[type="submit"].form-control[value="Remove Account Permanently"] {
+    background-color: #ff4444;
+    color: white;
+    font-weight: 600;
+    margin-top: 2rem;
+    transition: background-color 0.2s ease;
+}
+
+input[type="submit"].form-control[value="Remove Account Permanently"]:hover {
+    background-color: #cc0000;
+}
+
+/* Mobile Authentication Section */
+#mobile-auth-section {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+#mobile-auth-section h3 {
+    color: #2d3748;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+#verification-status {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+    background-color: #f7fafc;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .settings-tabs {
+        flex-direction: column;
+        padding: 0 1rem;
+    }
+
+    .tab-button {
+        width: 100%;
+    }
+
+    .settings-content {
+        padding: 1.5rem;
+    }
+
+    .settings-header h1 {
+        font-size: 2rem;
+    }
+
+    .form-control,
+    .form-select {
+        font-size: 16px; 
+    }
+}
+
+.text-muted {
+    color: #718096;
+}
+
+.mb-4 {
+    margin-bottom: 1.5rem;
+}
