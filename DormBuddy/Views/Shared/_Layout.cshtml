@@ -19,6 +19,7 @@
     <!--<link rel="stylesheet" href="~/DormBuddy.styles.css" asp-append-version="true" />-->
     <link rel="stylesheet" href="~/css/account.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/_Layout.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="~/css/profile.css" asp-append-version="true" />
     
     <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -71,6 +72,7 @@
                 string firstName = User.FindFirst("FirstName")?.Value ?? "";
                 string lastName = User.FindFirst("LastName")?.Value ?? "";
                 string credits = User.FindFirst("Credits")?.Value ?? "";
+                string profileimage = User.FindFirst("ProfileImageUrl")?.Value ?? "";
 
                 
                 <div class="creditsContainer">
@@ -79,8 +81,8 @@
                 <div class="dropdown">
                     
                     <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                
-                <img class="dropdown-avatar" src="#"/> @firstName @lastName
+
+                <img class="dropdown-avatar" src="@profileimage"/> @firstName @lastName
     </button>
 
                     <div class="dropdown-menu dropdown-menu-right text-left">

@@ -1,3 +1,5 @@
+@model Model_Profile
+
 @{
     ViewData["Title"] = "Profile";
 }
@@ -9,6 +11,49 @@
     </a>
 </div>
 
-<div class="text-center mb-4">
-    <h1 class="display-4">Profile Page</h1>
+@if (User?.Identity?.Name == Model.Username)
+{
+    <div class="text-right mb-4">
+        <a class="btn btn-outline-primary" href="#">Configuration</a>
+    </div>
+}
+
+<!-- Profile Image Section -->
+<div class="profile-image-container text-center">
+    <div class="profile-image-border">
+        <img src="@Model.ProfileImageUrl" alt="Profile Image" class="profile-image">
+    </div>
+</div>
+
+<!-- Profile Information Section -->
+<div class="container">
+    <div class="row">
+        <!-- Left Column: Basic Profile Information -->
+        <div class="col-md-4 profile-info">
+            <h3>@Model.FullName</h3>
+            <p class="text-muted">@Model.Username</p>
+            <p>@Model.Email</p>
+            @{
+                var bio = Model.Bio;
+
+                if (bio == "" || bio == null) {
+                    bio = "No biography has been set";
+                }
+            }
+            
+
+            @{
+                var lastlogin = Model.LastLogin;
+
+                var status = Model.OnlineStatus;
+            }
+
+
+            <p>Last Login: @lastlogin</p>
+
+            <p>Current Status: @status</p>
+
+            <p>@bio</p>
+        </div>
+    </div>
 </div>

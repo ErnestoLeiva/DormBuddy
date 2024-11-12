@@ -1,0 +1,43 @@
+.profile-image-container {
+    margin-bottom: 40px; /* Adds more space below the profile image */
+    width: 100%;
+    text-align: center; /* Centers the image in the container */
+    border-bottom: 1px solid #ddd; /* Lighter line for a softer effect */
+    padding-bottom: 20px; /* Padding below image to give space */
+}
+
+.profile-info {
+    margin-bottom: 30px; /* Space between the profile info and about sections */
+}
+
+.card {
+    margin-bottom: 30px; /* Space between cards */
+}
+
+.container {
+    margin-top: 40px; /* Adds space above the container */
+}
+
+.card-header {
+    background-color: #f8f9fa; /* Light background for header */
+    font-weight: bold;
+}
+
+.card-body {
+    padding: 15px;
+}
+
+.profile-image {
+    width: 150px;
+    height: 150px;
+    min-width: 150px;
+    min-height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #333;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin-bottom: -75px; /* Pulls the image down to hover over the border line */
+    position: relative;
+    z-index: 1; /* Ensures the image appears on top of the border */
+    background-color: white;
+}

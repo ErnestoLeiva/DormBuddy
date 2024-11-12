@@ -33,8 +33,17 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
 });
 
 builder.Services.AddSingleton<TimeZoneService>();
+builder.Services.AddSingleton<ImgurService>();
+builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 
-builder.Services.AddControllersWithViews().AddViewLocalization().AddDataAnnotationsLocalization();
+builder.Services.AddScoped<UserLastUpdateActionFilter>();
+
+builder.Services.AddControllersWithViews(options => 
+{
+    options.Filters.Add<UserLastUpdateActionFilter>();
+})
+.AddViewLocalization()
+.AddDataAnnotationsLocalization();
 
 builder.Services.Configure<RequestLocalizationOptions>(options => 
 {

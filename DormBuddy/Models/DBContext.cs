@@ -14,7 +14,6 @@ namespace DormBuddy.Models
 
         public bool RememberMe { get; set; }
 
-        public string? TimeZone { get; set; }
     }
 
     public class DBContext : IdentityDbContext<ApplicationUser, IdentityRole, string>
@@ -31,6 +30,10 @@ namespace DormBuddy.Models
         public DbSet<ExpenseModel> Expenses { get; set; }
 
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
+
+        public DbSet<UserProfile> UserProfiles { get; set; }
+
+        public DbSet<UserLastUpdate> UserLastUpdate { get; set; } // saves the last time the user updated the browser to find online status
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

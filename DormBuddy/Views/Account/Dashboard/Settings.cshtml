@@ -3,7 +3,6 @@
 }
 
 <style>
-
     #navigationButtons {
         display: flex;
         justify-content: center;
@@ -16,7 +15,6 @@
         background-color: rgb(250, 250, 250);
         padding: 20px;
     }
-
 </style>
 
 <!-- Return to Dashboard Button -->
@@ -41,15 +39,12 @@
 
     <!-- Content Area to Display the Settings -->
     <div id="settings-content">
-        <!-- This is where the settings pages will be loaded dynamically -->
+        <!-- Default to 'GeneralSettings' content load -->
     </div>
 </div>
 
 @section Scripts {
     <script type="text/javascript">
-
-        loadSettings("GeneralSettings");
-
         // Function to load settings dynamically
         function loadSettings(page) {
             $.ajax({
@@ -64,5 +59,15 @@
                 }
             });
         }
+
+        // Initially load settings based on ViewBag.LoadPage
+        $(document).ready(function() {
+            var initialPage = '@ViewBag.LoadPage';
+            if (initialPage) {
+                loadSettings(initialPage);
+            } else {
+                loadSettings('GeneralSettings'); // Default to general settings
+            }
+        });
     </script>
 }
