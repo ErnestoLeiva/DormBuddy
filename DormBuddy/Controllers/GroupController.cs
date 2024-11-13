@@ -78,7 +78,10 @@ namespace DormBuddy.Controllers
                 _context.Groups.Add(group);
                 await _context.SaveChangesAsync();
 
-                return Ok(group);
+                //return Ok(group); //
+
+                // Return 201 Created with the URI of the created resource
+               return CreatedAtAction(nameof(GetGroup), new { id = group.Id }, group);
             }
             catch (Exception ex)
             {
