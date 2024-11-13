@@ -16,7 +16,7 @@ namespace DormBuddy.Models
 
         public string? TimeZone { get; set; }
 
-        public ICollection<GroupModel> Groups { get; set; } = new List<GroupModel>();
+       // public ICollection<GroupModel> Groups { get; set; } = new List<GroupModel>();
         public ICollection<ApplicationUser> Members { get; set; } = new List<ApplicationUser>();
 
     }
