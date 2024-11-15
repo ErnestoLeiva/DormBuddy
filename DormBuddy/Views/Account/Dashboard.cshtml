@@ -8,13 +8,15 @@
     ViewData["Title"] = "Dashboard";
 }
 
+@{
+    var roles = ViewBag.UserRoles.Split(',');
+}
 
+<!-- DASHBOARD HEADER -->
 <div class="text-center mb-4">
-    <h1 class="display-4">User Dashboard</h1>
-    <p>Welcome <b>@ViewBag.Username</b>! <br /> 
-    This is your user dashboard to control actions regarding your account.</p>
     <h1 class="display-4"><strong>@SharedLocalizer["UserDashboard"]</strong></h1>
     <hr class="my-4">
+
     <!-- Display success message if it exists -->
     @if (TempData["message"] != null)
     {
@@ -22,6 +24,7 @@
             @TempData["message"]
         </div>
     }
+    
     <!-- Display error message if it exists -->
     @if (ViewBag.ErrorMessage != null)
     {
@@ -30,10 +33,9 @@
         </div>
     }
 
-    <!--<p>@ViewBag.CultureInfo</p>-->
-
     <p>@SharedLocalizer["Welcome"] <b>@ViewBag.Username</b>!
 
+    <!-- SCRIPT TO DISPLAY CURRENT TIME. UPDATES EVERY SECOND-->
     <div id="eventDetails"></div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
@@ -43,47 +45,44 @@
                     $('#eventDetails').html(data);
                 });
             }
-
-            // Update the time every 10 seconds
             setInterval(updateEventTime, 1000);
-
-            // Initial call to display the time immediately
             updateEventTime();
         });
     </script>
 
 
-@if (ViewBag.Roles != null && ViewBag.Roles.Count > 1) 
-{
-    var roleLabel = ViewBag.Roles.Count > 1 ? "Roles" : "Role";
+    @if (roles.Length > 1) // ONLY SHOW IF THERES MORE ROLES THAN JUST "USER"
+    {
+        var roleLabel = "Roles";
 
-    <p>[@roleLabel: 
-    @{
-        for (int i = 0; i < ViewBag.Roles.Count; i++)
-        {
-            var role = ViewBag.Roles[i].Trim();
-            var conditionalComma = ",";
-
-            var roleColor = role switch
+        <p>[@roleLabel: 
+        @{
+            for (int i = 0; i < roles.Length; i++)
             {
-                "Admin" => "color: #B026FF; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;",     // neon-purple
-                "Moderator" => "color: #39FF14; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;", // neon-green
-                "User" => "color: #1F51FF; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;",      // neon-blue
-                _ => "color: black;" // default color
-            };
+                var role = roles[i].Trim();
+                var conditionalComma = ",";
 
-            if (i == ViewBag.Roles.Count - 1) // Don't add comma for the last role
-            {
-                conditionalComma = null; 
+                var roleColor = role switch
+                {
+                    "Admin" => "color: #B026FF; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;",     // neon-purple
+                    "Moderator" => "color: #39FF14; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;", // neon-green
+                    "User" => "color: #1F51FF; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;",      // neon-blue
+                    _ => "color: black;" // default color
+                };
+
+                if (i == roles.Length - 1) // Don't add comma for the last role
+                {
+                    conditionalComma = null; 
+                }
+
+                <span style="@roleColor">@role</span>@conditionalComma
             }
-
-            <span style="@roleColor">@role</span>@conditionalComma
-        }
-    }]</p>
-}
-
+        }]</p>
+    }
 </div>
+<hr class="my-4">
 
+<!-- DASHBOARD PANEL CARDS -->
 <div class="container">
     <div class="row">
         <!-- Task Management Card -->
@@ -118,14 +117,12 @@
         <div class="col-md-4">
             <div class="card text-center mb-4">
                 <div class="card-header bg-warning text-white">
-                    <i class="fas fa-handshake fa-lg"></i> <!-- Lending Icon -->
-                    Peer-to-Peer Lending
                     <i class="fas fa-handshake fa-lg"></i>
                     @SharedLocalizer["PeerToPeerLending"]
                 </div>
                 <div class="card-body">
                     <p>@SharedLocalizer["PeerToPeerLendingDescription"]</p>
-                    <a href="/Account/Lending" class="btn btn-warning" style="color: white;">@SharedLocalizer["ViewLending"]</a>
+                    <a href="/PeerLending/Index" class="btn btn-warning" style="color: white;">@SharedLocalizer["ViewLending"]</a>
                 </div>
             </div>
         </div>
@@ -136,8 +133,6 @@
         <div class="col-md-4">
             <div class="card text-center mb-4">
                 <div class="card-header bg-info text-white">
-                    <i class="fas fa-user-cog fa-lg"></i> <!-- Account Settings Icon -->
-                    Account Settings
                     <i class="fas fa-user-cog fa-lg"></i>
                     @SharedLocalizer["AccountSettings"]
                 </div>
@@ -176,4 +171,39 @@
             </div>
         </div>
     </div>
+
+    <!-- ADMIN/MODERATOR ROW -->
+    @if (ViewBag.UserRoles.Contains("Admin") || ViewBag.UserRoles.Contains("Moderator"))
+    {
+        <div class="row">
+            @if (ViewBag.UserRoles.Contains("Admin")) {
+                <div class="col-md-4 offset-md-4">
+                    <div class="card text-center mb-4">
+                        <div class="card-header bg-purple text-white">
+                            <i class="fas fa-shield-alt fa-lg"></i>
+                            Admin Panel
+                        </div>
+                        <div class="card-body">
+                            <p>Manage site-wide settings and users.</p>
+                            <a href="/Administration/AdminPanel" class="btn btn-purple">Go to Admin Panel</a>
+                        </div>
+                    </div>
+                </div>
+            }
+            else if (!ViewBag.UserRoles.Contains("Admin") && ViewBag.UserRoles.Contains("Moderator")){
+                <div class="col-md-4 offset-md-4">
+                    <div class="card text-center mb-4">
+                        <div class="card-header bg-purple text-white">
+                            <i class="fas fa-shield-alt fa-lg"></i>
+                            Moderator Panel
+                        </div>
+                        <div class="card-body">
+                            <p>Manage site-wide settings and users.</p>
+                            <a href="/Administration/ModeratorPanel" class="btn btn-purple">Go to Moderator Panel</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
 </div>
