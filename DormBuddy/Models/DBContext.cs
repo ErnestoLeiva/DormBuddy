@@ -30,6 +30,9 @@ namespace DormBuddy.Models
         // DBSet for persistent expenses feature - Ernesto Leiva 10/27/2024
         public DbSet<ExpenseModel> Expenses { get; set; }
 
+        // DBSet for persistent peer-lending feature - Ernesto Leiva 11/04/2024
+        public DbSet<PeerLendingModel> PeerLendings {get; set; }
+
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
