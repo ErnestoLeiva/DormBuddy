@@ -4,6 +4,7 @@ using DormBuddy.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,13 +12,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DormBuddy.Migrations
 {
     [DbContext(typeof(DBContext))]
-    partial class DBContextModelSnapshot : ModelSnapshot
+    [Migration("20241117170239_AddUserActivityTracking")]
+    partial class AddUserActivityTracking
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.10")
                 .HasAnnotation("ProductVersion", "8.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
@@ -35,22 +37,6 @@ namespace DormBuddy.Migrations
                     b.HasKey("GroupsId", "MembersId");
 
                     b.HasIndex("MembersId");
-
-                    b.ToTable("UserGroups", (string)null);
-                });
-
-            modelBuilder.Entity("ApplicationUserGroupModel", b =>
-                {
-                    b.Property<int>("GroupsId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("MembersId")
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
-
-                    b.HasKey("GroupsId", "MembersId");
-
-                    b.HasIndex("UsersId");
 
                     b.ToTable("UserGroups", (string)null);
                 });
@@ -119,10 +105,6 @@ namespace DormBuddy.Migrations
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("SecurityStamp")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("TemporaryProperty")
-                        .IsRequired()
                         .HasMaxLength(160)
                         .HasColumnType("varchar(160)");
 

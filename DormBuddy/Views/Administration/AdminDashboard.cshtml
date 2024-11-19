@@ -1,0 +1,112 @@
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="text-center dashboard-header">
+    <h1 class="display-4">Admin Dashboard</h1>
+    <p>Welcome Admin @ViewBag.Username! Manage your site and users from here.</p>
+
+    <div class="mt-4">
+        <!-- Buttons Section -->
+        <a class="btn btn-manage-users" href="/Admin/UserManagement">Manage Users</a>
+        <a class="btn btn-view-reports" href="/Admin/Reports">View Reports</a>
+        <a class="btn btn-site-settings" href="/Admin/Settings">Site Settings</a>
+        <a class="btn btn-view-logs" href="/Admin/Logs">View Logs</a>
+        <a class="btn btn-primary" href="/Admin/MonthlyReport">View Monthly Report</a>
+    </div>
+
+    <hr class="my-4">
+
+    <div class="container">
+        <div class="row">
+            <!-- User Management Card -->
+            <div class="col-md-4">
+                <div class="card text-center mb-4">
+                    <div class="card-header user-management">
+                        <i class="fas fa-users fa-lg"></i>
+                        User Management
+                    </div>
+                    <div class="card-body">
+                        <p>View, update, or delete user accounts and assign roles.</p>
+                        <a href="/Admin/UserManagement" class="btn btn-manage-users">Manage Users</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports Card -->
+            <div class="col-md-4">
+                <div class="card text-center mb-4">
+                    <div class="card-header reports-analytics">
+                        <i class="fas fa-chart-line fa-lg"></i>
+                        Reports & Analytics
+                    </div>
+                    <div class="card-body">
+                        <p>View usage statistics, activity logs, and reports on platform health.</p>
+                        <a href="/Admin/Reports" class="btn btn-view-reports">View Reports</a>
+                        <a href="/Admin/ExportMonthlyReport" class="btn btn-secondary">Download CSV Report</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Card -->
+            <div class="col-md-4">
+                <div class="card text-center mb-4">
+                    <div class="card-header site-settings">
+                        <i class="fas fa-cogs fa-lg"></i>
+                        Site Settings
+                    </div>
+                    <div class="card-body">
+                        <p>Adjust platform settings and configurations for users.</p>
+                        <a href="/Admin/Settings" class="btn btn-site-settings">Site Settings</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- System Logs Card -->
+            <div class="col-md-4">
+                <div class="card text-center mb-4">
+                    <div class="card-header system-logs">
+                        <i class="fas fa-file-alt fa-lg"></i>
+                        System Logs
+                    </div>
+                    <div class="card-body">
+                        <p>Access detailed logs for all system events and user activities.</p>
+                        <a href="/Admin/Logs" class="btn btn-view-logs">View Logs</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monthly Report Card -->
+            <div class="col-md-4">
+                <div class="card text-center mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <i class="fas fa-user-shield fa-lg"></i>
+                        Monthly Report
+                    </div>
+                    <div class="card-body">
+                        <p>Generate and view detailed activity reports.</p>
+                        <a href="/Admin/MonthlyReport" class="btn btn-primary">View Monthly Activity Report</a>
+                        <a href="/Admin/ExportMonthlyReport" class="btn btn-secondary">Download CSV</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Role Management Card -->
+            <div class="col-md-4">
+                <div class="card text-center mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <i class="fas fa-user-shield fa-lg"></i>
+                        Role Management
+                    </div>
+                    <div class="card-body">
+                        <p>Assign, update, or revoke roles for users.</p>
+                        <a href="/Admin/ManageRoles" class="btn btn-secondary">Manage Roles</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

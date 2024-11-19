@@ -8,6 +8,7 @@ using System.Globalization;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Mvc.Razor;
 using System.Net;
+using DormBuddy.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,8 +28,8 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
 {
     options.CheckConsentNeeded = context => true;
     options.MinimumSameSitePolicy = SameSiteMode.None;
-    options.Secure = builder.Environment.IsDevelopment() 
-        ? CookieSecurePolicy.SameAsRequest 
+    options.Secure = builder.Environment.IsDevelopment()
+        ? CookieSecurePolicy.SameAsRequest
         : CookieSecurePolicy.Always;
 });
 
@@ -42,12 +43,12 @@ builder.Services.AddCors(options =>
     });
 });
 
-
 builder.Services.AddSingleton<TimeZoneService>();
+builder.Services.AddScoped<ActivityReportService>(); // Register the ActivityReportService here
 
 builder.Services.AddControllersWithViews().AddViewLocalization().AddDataAnnotationsLocalization();
 
-builder.Services.Configure<RequestLocalizationOptions>(options => 
+builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
     var supportedCultures = new[] { new CultureInfo("en"), new CultureInfo("es") };
     options.DefaultRequestCulture = new RequestCulture("en");
@@ -63,7 +64,7 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 });
 
 // Initialize Firebase
-FirebaseApp.Create(new AppOptions() 
+FirebaseApp.Create(new AppOptions()
 {
     Credential = GoogleCredential.FromFile("dormbuddy-33ce0-firebase-adminsdk-5i0gl-c049a0fe9a.json")
 });
@@ -75,7 +76,7 @@ builder.Services.AddDbContext<DBContext>(options =>
 #endregion
 
 #region IDENTITY CONFIGURATION
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => 
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
     options.SignIn.RequireConfirmedEmail = true;
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(60);
@@ -141,8 +142,8 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
-} 
-else 
+}
+else
 {
     Console.WriteLine("Development mode: Active");
 }
@@ -174,11 +175,13 @@ app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Admin-specific route
 app.MapControllerRoute(
-    name: "account",
-    pattern: "Account/{action=AccountForms}/{id?}",
-    defaults: new { controller = "Account" });
+    name: "admin",
+    pattern: "Admin/{action=AdminDashboard}/{id?}",
+    defaults: new { controller = "Admin" });
 
+// Default route
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=HomeLogin}/{id?}");
