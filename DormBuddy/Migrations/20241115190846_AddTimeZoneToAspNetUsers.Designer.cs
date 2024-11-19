@@ -4,6 +4,7 @@ using DormBuddy.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DormBuddy.Migrations
 {
     [DbContext(typeof(DBContext))]
-    partial class DBContextModelSnapshot : ModelSnapshot
+    [Migration("20241115190846_AddTimeZoneToAspNetUsers")]
+    partial class AddTimeZoneToAspNetUsers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -66,9 +69,6 @@ namespace DormBuddy.Migrations
                         .HasMaxLength(160)
                         .HasColumnType("varchar(160)");
 
-                    b.Property<DateTime?>("LastLoginDate")
-                        .HasColumnType("datetime(6)");
-
                     b.Property<string>("LastName")
                         .HasMaxLength(160)
                         .HasColumnType("varchar(160)");
@@ -108,9 +108,6 @@ namespace DormBuddy.Migrations
                     b.Property<string>("TimeZone")
                         .HasMaxLength(160)
                         .HasColumnType("varchar(160)");
-
-                    b.Property<int>("TotalLogins")
-                        .HasColumnType("int");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("tinyint(1)");
@@ -164,8 +161,6 @@ namespace DormBuddy.Migrations
                         .HasColumnType("tinyint(1)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Expenses");
                 });
@@ -422,17 +417,6 @@ namespace DormBuddy.Migrations
                         .HasForeignKey("MembersId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("DormBuddy.Models.ExpenseModel", b =>
-                {
-                    b.HasOne("DormBuddy.Models.ApplicationUser", "CreatedBy")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CreatedBy");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

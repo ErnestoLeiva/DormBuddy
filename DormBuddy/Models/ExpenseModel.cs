@@ -27,8 +27,14 @@ namespace DormBuddy.Models
         [Required]
         public string? UserId { get; set; }
 
+        [ForeignKey("UserId")]
+        public ApplicationUser? CreatedBy { get; set; }
+
         [Required]
         public bool isSplit { get; set; }
+        
+
+
     }
 
 }

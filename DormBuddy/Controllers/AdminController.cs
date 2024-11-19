@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using DormBuddy.Models;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore; 
-
-
+using Microsoft.EntityFrameworkCore;
+using DormBuddy.Services;
+using System.Text;
 
 namespace DormBuddy.Controllers
 {
@@ -15,11 +15,13 @@ namespace DormBuddy.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly ActivityReportService _activityReportService;
 
-        public AdminController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+        public AdminController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, ActivityReportService activityReportService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _activityReportService = activityReportService;
         }
 
         // Admin Dashboard
@@ -36,10 +38,10 @@ namespace DormBuddy.Controllers
             // Set the username in ViewBag for use in the view
             ViewBag.Username = $"{user.FirstName} {user.LastName}";
             ViewBag.TotalUsers = _userManager.Users.Count();
-            ViewBag.TotalReports = 10;  
+            ViewBag.TotalReports = 10;
             ViewBag.ActiveSessions = 5;
 
-            return View("~/Views/Administration/AdminDashboard.cshtml"); // This should map to AdminDashboard.cshtml in the Views folder
+            return View("~/Views/Administration/AdminDashboard.cshtml");
         }
 
         // GET: /Admin/Index
@@ -73,8 +75,32 @@ namespace DormBuddy.Controllers
                 return Ok("Role assigned successfully");
             }
 
-            // Handle errors here
             return BadRequest("Error assigning role");
+        }
+
+        // GET: /Admin/MonthlyReport (HTML View)
+        [HttpGet]
+        public async Task<IActionResult> MonthlyReportView()
+        {
+            var report = await _activityReportService.GenerateMonthlyActivityReport();
+            return View("~/Views/Admin/MonthlyReport.cshtml", report);
+        }
+
+        // GET: /Admin/ExportMonthlyReport (CSV Download)
+        [HttpGet]
+        public async Task<IActionResult> ExportMonthlyReport()
+        {
+            var report = await _activityReportService.GenerateMonthlyActivityReport();
+
+            var csv = new StringBuilder();
+            csv.AppendLine("User,Total Logins,Last Login,Groups Joined,Tasks Created,Expenses Added");
+
+            foreach (var user in report)
+            {
+                csv.AppendLine($"{user.FullName},{user.TotalLogins},{user.LastLoginDate},{user.GroupsJoined},{user.TasksCreated},{user.ExpensesAdded}");
+            }
+
+            return File(Encoding.UTF8.GetBytes(csv.ToString()), "text/csv", "MonthlyReport.csv");
         }
     }
 }

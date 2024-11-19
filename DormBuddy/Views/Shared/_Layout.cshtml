@@ -16,12 +16,10 @@
 
     <!-- Site-specific CSS -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <!--<link rel="stylesheet" href="~/DormBuddy.styles.css" asp-append-version="true" />-->
     <link rel="stylesheet" href="~/css/account.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/_Layout.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="~/css/_Layout.css" asp-append-version="true" />
     
     <!-- FontAwesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     @await RenderSectionAsync("Styles", required: false)
 </head>
@@ -43,7 +41,13 @@
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Dashboard">@SharedLocalizer["Dashboard"]</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">@SharedLocalizer["Privacy"]</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="AdminDashboard">Admin Dashboard</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="MonthlyReportView">Monthly Report</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="ExportMonthlyReport">Download Report</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="ContactUs">@SharedLocalizer["ContactUs"]</a>
@@ -67,29 +71,24 @@
 
                 @if (User?.Identity != null && User.Identity.IsAuthenticated) {
 
-                
-                string firstName = User.FindFirst("FirstName")?.Value ?? "";
-                string lastName = User.FindFirst("LastName")?.Value ?? "";
-                string credits = User.FindFirst("Credits")?.Value ?? "";
+                    string firstName = User.FindFirst("FirstName")?.Value ?? "";
+                    string lastName = User.FindFirst("LastName")?.Value ?? "";
+                    string credits = User.FindFirst("Credits")?.Value ?? "";
 
-                
-                <div class="creditsContainer">
-                    <p class="fa-solid fa-coins">  @credits</p>
-                </div>
-                <div class="dropdown">
-                    
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                
-                <img class="dropdown-avatar" src="#"/> @firstName @lastName
-    </button>
-
-                    <div class="dropdown-menu dropdown-menu-right text-left">
-                        <a class="dropdown-item fas fa-user" asp-controller="Account" asp-action="Profile"> Profile</a>
-                        <a class="dropdown-item fas fa-cog" asp-controller="Account" asp-action="Settings"> Settings</a>
-                        <div class="line-divider"></div>
-                        <a class="dropdown-item fas fa-sign-out-alt" asp-controller="Account" asp-action="Logout"> Sign Out</a>
+                    <div class="creditsContainer">
+                        <p class="fa-solid fa-coins"> @credits</p>
                     </div>
-                </div>
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <img class="dropdown-avatar" src="#" /> @firstName @lastName
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right text-left">
+                            <a class="dropdown-item fas fa-user" asp-controller="Account" asp-action="Profile"> Profile</a>
+                            <a class="dropdown-item fas fa-cog" asp-controller="Account" asp-action="Settings"> Settings</a>
+                            <div class="line-divider"></div>
+                            <a class="dropdown-item fas fa-sign-out-alt" asp-controller="Account" asp-action="Logout"> Sign Out</a>
+                        </div>
+                    </div>
                 }
             </div>
         </nav>

@@ -1,0 +1,29 @@
+@model List<DormBuddy.Services.UserActivityReport>
+
+<h1>Monthly Activity Report</h1>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>User</th>
+            <th>Total Logins</th>
+            <th>Last Login</th>
+            <th>Groups Joined</th>
+            <th>Tasks Created</th>
+            <th>Expenses Added</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.FullName</td>
+                <td>@user.TotalLogins</td>
+                <td>@user.LastLoginDate?.ToString("yyyy-MM-dd")</td>
+                <td>@user.GroupsJoined</td>
+                <td>@user.TasksCreated</td>
+                <td>@user.ExpensesAdded</td>
+            </tr>
+        }
+    </tbody>
+</table>

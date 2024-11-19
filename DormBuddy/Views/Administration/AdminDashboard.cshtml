@@ -6,12 +6,13 @@
     <h1 class="display-4">Admin Dashboard</h1>
     <p>Welcome Admin @ViewBag.Username! Manage your site and users from here.</p>
 
-    <!-- Updated buttons with custom classes -->
     <div class="mt-4">
+        <!-- Buttons Section -->
         <a class="btn btn-manage-users" href="/Admin/UserManagement">Manage Users</a>
         <a class="btn btn-view-reports" href="/Admin/Reports">View Reports</a>
         <a class="btn btn-site-settings" href="/Admin/Settings">Site Settings</a>
         <a class="btn btn-view-logs" href="/Admin/Logs">View Logs</a>
+        <a class="btn btn-primary" href="/Admin/MonthlyReport">View Monthly Report</a>
     </div>
 
     <hr class="my-4">
@@ -42,6 +43,7 @@
                     <div class="card-body">
                         <p>View usage statistics, activity logs, and reports on platform health.</p>
                         <a href="/Admin/Reports" class="btn btn-view-reports">View Reports</a>
+                        <a href="/Admin/ExportMonthlyReport" class="btn btn-secondary">Download CSV Report</a>
                     </div>
                 </div>
             </div>
@@ -76,6 +78,21 @@
                 </div>
             </div>
 
+            <!-- Monthly Report Card -->
+            <div class="col-md-4">
+                <div class="card text-center mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <i class="fas fa-user-shield fa-lg"></i>
+                        Monthly Report
+                    </div>
+                    <div class="card-body">
+                        <p>Generate and view detailed activity reports.</p>
+                        <a href="/Admin/MonthlyReport" class="btn btn-primary">View Monthly Activity Report</a>
+                        <a href="/Admin/ExportMonthlyReport" class="btn btn-secondary">Download CSV</a>
+                    </div>
+                </div>
+            </div>
+
             <!-- Role Management Card -->
             <div class="col-md-4">
                 <div class="card text-center mb-4">
@@ -91,5 +108,4 @@
             </div>
         </div>
     </div>
-    
 </div>
