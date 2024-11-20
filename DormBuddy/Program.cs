@@ -57,11 +57,7 @@ builder.Services.AddControllersWithViews(options =>
 
 builder.Services.Configure<RequestLocalizationOptions>(options => 
 {
-    var supportedCultures = new[]
-    {
-        new CultureInfo("en"),
-        new CultureInfo("es")
-    };
+    var supportedCultures = new[] { new CultureInfo("en"), new CultureInfo("es") };
 
     options.DefaultRequestCulture = new RequestCulture("en");
     options.SupportedCultures = supportedCultures;
@@ -84,7 +80,7 @@ FirebaseApp.Create(new AppOptions()
 #region DATABASE CONFIGURATION
 builder.Services.AddDbContext<DBContext>(options =>
     options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
-    new MySqlServerVersion(new Version(8, 0, 2))));
+    new MySqlServerVersion(new Version(8, 0, 2)))); 
 #endregion
 
 #region IDENTITY CONFIGURATION
@@ -186,24 +182,60 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=HomeLogin}/{id?}");
 #endregion
 
+// Call InitializeRolesAndAdminUser to create roles and the default admin user
 await InitializeRolesAndAdminUser(app);
 
 app.Run();
 
-#region ROLE INITIALIZATION
+#region ROLE AND ADMIN INITIALIZATION
 static async Task InitializeRolesAndAdminUser(WebApplication app)
 {
     using (var scope = app.Services.CreateScope())
     {
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
+        // Define roles
         string[] roles = { Roles.Admin, Roles.Moderator, Roles.User };
 
+        // Create roles if they don't exist
         foreach (var role in roles)
         {
             if (!await roleManager.RoleExistsAsync(role))
             {
                 await roleManager.CreateAsync(new IdentityRole(role));
+            }
+        }
+
+        // Create the default admin user if it doesn't exist
+        var defaultAdminEmail = "admin@dormbuddy.com"; // Use a real email
+        var defaultAdminUsername = "admin";
+        var defaultAdminPassword = "Adminpass123!"; // Use a secure password
+
+        var adminUser = await userManager.FindByEmailAsync(defaultAdminEmail);
+
+        if (adminUser == null)
+        {
+            adminUser = new ApplicationUser
+            {
+                UserName = defaultAdminUsername,
+                Email = defaultAdminEmail
+            };
+
+            var createUserResult = await userManager.CreateAsync(adminUser, defaultAdminPassword);
+
+            if (createUserResult.Succeeded)
+            {
+                // Assign the Admin role to the user
+                await userManager.AddToRoleAsync(adminUser, Roles.Admin);
+            }
+            else
+            {
+                // Log any errors or handle them as needed
+                foreach (var error in createUserResult.Errors)
+                {
+                    Console.WriteLine($"Error creating admin user: {error.Description}");
+                }
             }
         }
     }
