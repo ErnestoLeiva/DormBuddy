@@ -16,6 +16,7 @@
 <div class="text-center mb-4">
     <h1 class="display-4"><strong>@SharedLocalizer["UserDashboard"]</strong></h1>
     <hr class="my-4">
+
     <!-- Display success message if it exists -->
     @if (TempData["message"] != null)
     {
@@ -23,6 +24,7 @@
             @TempData["message"]
         </div>
     }
+    
     <!-- Display error message if it exists -->
     @if (ViewBag.ErrorMessage != null)
     {
@@ -30,8 +32,6 @@
             @ViewBag.ErrorMessage
         </div>
     }
-
-    <!--<p>@ViewBag.CultureInfo</p>-->
 
     <p>@SharedLocalizer["Welcome"] <b>@ViewBag.Username</b>!
 
@@ -122,7 +122,7 @@
                 </div>
                 <div class="card-body">
                     <p>@SharedLocalizer["PeerToPeerLendingDescription"]</p>
-                    <a href="/Account/Lending" class="btn btn-warning" style="color: white;">@SharedLocalizer["ViewLending"]</a>
+                    <a href="/PeerLending/Index" class="btn btn-warning" style="color: white;">@SharedLocalizer["ViewLending"]</a>
                 </div>
             </div>
         </div>

@@ -23,6 +23,7 @@
         <form id="timezoneform" method="post" asp-controller="Account" asp-action="ChangeTimeZone">
             <label for="timeZone" class="form-label">Timezone</label>
             <select class="form-select w-100" name="timeZone" id="timeZone" onchange="this.form.submit()">
+                @Html.Raw($"<option value='No Timezone selected' {(currentTimeZone == "UTC" ? "selected" : "")}>No Timezone Selected</option>")
                 @Html.Raw($"<option value='Pacific Standard Time' {(currentTimeZone == "Pacific Standard Time" ? "selected" : "")}>Pacific Standard Time (UTC-8)</option>")
                 @Html.Raw($"<option value='Mountain Standard Time' {(currentTimeZone == "Mountain Standard Time" ? "selected" : "")}>Mountain Standard Time (UTC-7)</option>")
                 @Html.Raw($"<option value='Central Standard Time' {(currentTimeZone == "Central Standard Time" ? "selected" : "")}>Central Standard Time (UTC-6)</option>")

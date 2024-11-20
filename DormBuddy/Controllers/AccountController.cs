@@ -10,10 +10,11 @@ using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace DormBuddy.Controllers
 {
-    public class AccountController : Controller
+    public class AccountController : BaseController
     {
         private readonly ILogger<AccountController> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
@@ -25,6 +26,7 @@ namespace DormBuddy.Controllers
         private readonly IConfiguration _configuration;
 
         private readonly DBContext _context;
+        private readonly IMemoryCache _memoryCache;
 
         public AccountController(
             ILogger<AccountController> logger,
@@ -33,7 +35,8 @@ namespace DormBuddy.Controllers
             IEmailSender emailSender,
             TimeZoneService timeZoneService,
             IConfiguration configuration,
-            DBContext context)
+            IMemoryCache memoryCache,
+            DBContext context) : base(userManager, signInManager, context, logger, memoryCache)
         {
             _logger = logger;
             _userManager = userManager;
@@ -42,6 +45,7 @@ namespace DormBuddy.Controllers
             _timeZoneService = timeZoneService;
             _configuration = configuration;
             _context = context;
+            _memoryCache = memoryCache;
         }
 
         #region ACCOUNT FORMS
@@ -108,21 +112,10 @@ namespace DormBuddy.Controllers
             if (result.Succeeded) {
                 await _userManager.ResetAccessFailedCountAsync(user);
 
-                var profile = await getProfile(user);
+                //var profile = await getProfile(user);
+                var profile = await GetUserInformation(user.UserName);
 
-                var claims = new List<Claim>
-                {
-                    new Claim("FirstName", user.FirstName ?? ""),
-                    new Claim("LastName", user.LastName ?? ""),
-                    new Claim("Credits", user.Credits.ToString()),
-                    new Claim("Email", user.Email ?? ""),
-                    new Claim("ProfileImageUrl", profile.ProfileImageUrl ?? _configuration["Profile:Default_ProfileImage"])
-                };
-
-                var claimsIdentity = new ClaimsIdentity(claims, IdentityConstants.ApplicationScheme);
-
-                // Sign in the user with the new identity that includes the custom claims
-                await _signInManager.SignInWithClaimsAsync(user, rememberMe, claims);
+                await _signInManager.SignInAsync(user, rememberMe);
 
                 profile.LastLogin = DateTime.UtcNow;
                  _context.SaveChanges();
@@ -155,6 +148,7 @@ namespace DormBuddy.Controllers
         #endregion
 
         public async Task<UserProfile> getProfile(ApplicationUser user) {
+            /*
             var profile = await _context.UserProfiles.FirstOrDefaultAsync(p => p.UserId == user.Id);
 
             if (profile == null)
@@ -168,6 +162,8 @@ namespace DormBuddy.Controllers
             }
 
             return profile;
+            */
+            return await GetUserInformation(user.UserName);
         }
 
         public async Task<UserLastUpdate> getUserLastUpdate(ApplicationUser u) {
@@ -468,9 +464,9 @@ namespace DormBuddy.Controllers
         public IActionResult Settings() {
             if (User?.Identity?.IsAuthenticated == true) {
 
-                string loadPage = Request.Query["page"];
+                string loadPage = Request.Query["page"].ToString() ?? "";
 
-                var allowedPages = new List<string> { "AccountSettings", "GeneralSettings", "PrivacySettings" };
+                var allowedPages = new List<string> { "AccountSettings", "GeneralSettings", "PrivacySettings", "ProfileSettings" };
 
                 // Check if the 'page' is a valid value from the list
                 if (!allowedPages.Contains(loadPage) && !string.IsNullOrEmpty(loadPage))
@@ -486,92 +482,69 @@ namespace DormBuddy.Controllers
         }
 
 
-public async Task<IActionResult> Profile()
-{
-    try
-    {
-        // Ensure the user is authenticated
-        if (User?.Identity?.IsAuthenticated != true)
+        public async Task<IActionResult> Profile()
         {
-            return RedirectToAction("Login");
-        }
-
-        // Get the username from query parameter or fallback to User.Identity.Name
-        string get_username = Request.Query["username"].ToString();
-        get_username = string.IsNullOrEmpty(get_username) ? User.Identity.Name : get_username;
-
-        // If username is still null or empty, redirect to the dashboard
-        if (string.IsNullOrEmpty(get_username))
-        {
-            return RedirectToAction("Dashboard");
-        }
-
-        // Find the user by their username
-        var u = await _userManager.FindByNameAsync(get_username);
-        if (u == null)
-        {
-            return RedirectToAction("Dashboard");
-        }
-
-        // Retrieve the profile for this user
-        var model = new Model_Profile();
-        var profile = await getProfile(u);
-
-        // If profile is null, redirect to the dashboard
-        if (profile == null)
-        {
-            return RedirectToAction("Dashboard");
-        }
-
-        var profileImage = _configuration["Profile:Default_ProfileImage"];
-        if (!string.IsNullOrEmpty(profile.ProfileImageUrl))
-        {
-            profileImage = profile.ProfileImageUrl;
-        }
-
-        var lastLogin = string.Empty;
-        var status = "Offline";
-
-        // Check if user is not null and get last login
-        if (u != null)
-        {
-            var llConfigured = getCurrentTimeFromUTC(profile.LastLogin).ToString("MM-dd-yyyy");
-            if (!string.IsNullOrEmpty(llConfigured))
+            try
             {
-                lastLogin = llConfigured;
-            }
-
-            // Retrieve last update data
-            var getLastUpdate = await getUserLastUpdate(u);
-            if (getLastUpdate != null)
-            {
-                var lastUpdate = getLastUpdate.LastUpdate;
-                if ((DateTime.UtcNow - lastUpdate).TotalSeconds < 300)
+                // Ensure the user is authenticated
+                if (User?.Identity?.IsAuthenticated != true)
                 {
-                    status = "Online";
+                    return RedirectToAction("Login");
                 }
+
+                // Get the username from query parameter or fallback to User.Identity.Name
+                string get_username = Request.Query["username"].ToString() ?? "";
+                get_username = string.IsNullOrEmpty(get_username) ? User?.Identity?.Name : get_username;
+
+                // If username is still null or empty, redirect to the dashboard
+                if (string.IsNullOrEmpty(get_username))
+                {
+                    return RedirectToAction("Dashboard");
+                }
+
+                var profile = await GetUserInformation(get_username);
+
+                var u = profile.User;
+                if (u == null)
+                {
+                    return RedirectToAction("Dashboard");
+                }
+
+                // If profile is null, redirect to the dashboard
+                if (profile == null)
+                {
+                    return RedirectToAction("Dashboard");
+                }
+
+                var profileImage = _configuration["Profile:Default_ProfileImage"];
+                if (string.IsNullOrEmpty(profile.ProfileImageUrl))
+                {
+                    profile.ProfileImageUrl = profileImage;
+                }
+
+                var adjustedLastLogin = getCurrentTimeFromUTC(profile.LastLogin);
+                ViewData["AdjustedLastLogin"] = adjustedLastLogin;
+
+                // Profile Online Status Check
+                ViewData["profile_online_status"] = "Offline";
+                var getLastUpdate = await getUserLastUpdate(profile.User);
+                if (getLastUpdate?.LastUpdate is DateTime lastUpdate &&
+                    (DateTime.UtcNow - lastUpdate).TotalSeconds < 300)
+                {
+                    ViewData["profile_online_status"] = "Online";
+                }
+
+                return View("~/Views/Account/Dashboard/Profile.cshtml", profile);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception and display an error page
+                _logger.LogError($"Error in Profile action: {ex.Message}");
+                return View("Error");  // Show a generic error page or message
             }
         }
 
-        model.FullName = u.FirstName + " " + u.LastName;
-        model.Username = get_username;
-        model.Email = u.Email;
-        model.ProfileImageUrl = profileImage;
-        model.LastLogin = lastLogin;
-        model.OnlineStatus = status;
-
-        return View("~/Views/Account/Dashboard/Profile.cshtml", model);
-    }
-    catch (Exception ex)
-    {
-        // Log the exception and display an error page
-        _logger.LogError($"Error in Profile action: {ex.Message}");
-        return View("Error");  // Show a generic error page or message
-    }
-}
-
-
-        public IActionResult LoadSettings(string settingsPage)
+        public async Task<IActionResult> LoadSettings(string settingsPage)
         {
             switch (settingsPage)
             {
@@ -581,6 +554,15 @@ public async Task<IActionResult> Profile()
                     return PartialView("Dashboard/Settings/_AccountSettings");
                 case "PrivacySettings":
                     return PartialView("Dashboard/Settings/_PrivacySettings");
+                case "ProfileSettings":
+
+                    var profile = await GetUserInformation();
+
+                    if (profile == null) {
+                        return RedirectToAction("Dashboard");
+                    }
+
+                    return PartialView("Dashboard/Settings/_ProfileSettings", profile);
                 default:
                     return Content("Invalid settings page.");
             }
@@ -690,4 +672,4 @@ public async Task<IActionResult> Profile()
         }
 
     }
-}
+}   

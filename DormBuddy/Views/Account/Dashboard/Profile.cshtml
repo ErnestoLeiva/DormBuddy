@@ -1,4 +1,4 @@
-@model Model_Profile
+@model DormBuddy.Models.UserProfile
 
 @{
     ViewData["Title"] = "Profile";
@@ -11,10 +11,10 @@
     </a>
 </div>
 
-@if (User?.Identity?.Name == Model.Username)
+@if (User?.Identity?.Name == Model.User.UserName)
 {
     <div class="text-right mb-4">
-        <a class="btn btn-outline-primary" href="#">Configuration</a>
+        <a class="btn btn-outline-primary" href="Settings?page=ProfileSettings">Configuration</a>
     </div>
 }
 
@@ -30,22 +30,21 @@
     <div class="row">
         <!-- Left Column: Basic Profile Information -->
         <div class="col-md-4 profile-info">
-            <h3>@Model.FullName</h3>
-            <p class="text-muted">@Model.Username</p>
-            <p>@Model.Email</p>
+            <h3>@Model.User.FirstName @Model.User.LastName</h3>
+            <p class="text-muted">@Model.User.UserName</p>
+            <p>@Model.User.Email</p>
             @{
                 var bio = Model.Bio;
 
                 if (bio == "" || bio == null) {
-                    bio = "No biography has been set";
+                    bio = Model.Bio;
                 }
             }
             
 
             @{
-                var lastlogin = Model.LastLogin;
-
-                var status = Model.OnlineStatus;
+                var lastlogin = @ViewData["AdjustedLastLogin"];
+                var status = @ViewData["profile_online_status"];
             }
 
 

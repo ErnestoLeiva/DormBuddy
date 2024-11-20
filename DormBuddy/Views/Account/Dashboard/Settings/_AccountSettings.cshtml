@@ -78,19 +78,14 @@
             <div id="verification-status"></div>
         </div>
 
-        <h3>Profile Settings</h3>
-        <label>Upload Profile Image</label>
-        <form asp-controller="Imgur" asp-action="UploadImage" method="post" enctype="multipart/form-data">
-            <input type="file" name="image" />
-            <button type="submit">Upload to Imgur</button>
-        </form>
-
+        
         @if (ViewBag.Message != null)
         {
             <div class="alert alert-info">
                 @ViewBag.Message
             </div>
         }
+        
 
         <input id="deleteaccount" type="submit" class="form-control" value="Remove Account Permanently" style="margin-top: 50px; background-color: red; color: white;" />
     </div>

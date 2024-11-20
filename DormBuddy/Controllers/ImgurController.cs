@@ -5,26 +5,36 @@ using System.Threading.Tasks;
 using DormBuddy.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-
-using System.Linq;          
+using System.Linq;
 using System.Security.Claims;
+using Microsoft.Extensions.Caching.Memory;
 
-namespace DormBuddy.Controllers {
-
-
-    public class ImgurController : Controller
+namespace DormBuddy.Controllers
+{
+    public class ImgurController : BaseController
     {
         private readonly DBContext _context;
         private readonly ImgurService _imgurService;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly ILogger<BaseController> _logger;
+        private readonly IMemoryCache _memoryCache;
 
-        public ImgurController(DBContext context, ImgurService imgurService, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+        public ImgurController(
+            DBContext context,
+            ImgurService imgurService,
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
+            ILogger<BaseController> logger,
+            IMemoryCache memoryCache
+        ) : base(userManager, signInManager, context, logger, memoryCache)
         {
             _context = context;
             _imgurService = imgurService;
             _userManager = userManager;
             _signInManager = signInManager;
+            _logger = logger;
+            _memoryCache = memoryCache;
         }
 
         [HttpPost]
@@ -32,76 +42,93 @@ namespace DormBuddy.Controllers {
         {
             if (image == null || image.Length == 0)
             {
-                return BadRequest("No file uploaded.");
+                TempData["Message"] = "No image uploaded.";
+                return RedirectToAction("Settings", "Account", new { page = "ProfileSettings" });
             }
 
-            var user = await _userManager.GetUserAsync(User);
-
-            using var memoryStream = new MemoryStream();
-            await image.CopyToAsync(memoryStream);
-            var imageUrl = await _imgurService.UploadImageAsync(memoryStream.ToArray());
-
-            var profile = await _context.UserProfiles.FirstOrDefaultAsync(p => p.UserId == user.Id);
-
+            // Get the tracked user profile
+            var profile = await GetUserInformation();
             if (profile == null)
             {
-                profile = new UserProfile
-                {
-                    UserId = user.Id,
-                    ProfileImageUrl = imageUrl
-                };
-
-                await _context.UserProfiles.AddAsync(profile);
-                await _context.SaveChangesAsync();
+                TempData["Message"] = "Profile not found.";
+                return RedirectToAction("Settings", "Account", new { page = "ProfileSettings" });
             }
 
-            profile.ProfileImageUrl = imageUrl;
-
-            // update navbar image
-
-            await UpdateProfileImageClaim(user, imageUrl);
-
-            var result = await _userManager.UpdateAsync(user);
-
-            //return Ok(new { link = imageUrl });
-            if (result.Succeeded) {
-                TempData["Message"] = "Success uploading image";
-                return RedirectToAction("Settings", "Account", new { page = "AccountSettings" });
-
-            } else {
-                TempData["Message"] = "Failure uploading image";
-                return RedirectToAction("Settings", "Account");
-            }
-        }
-
-        
-        // Method to update only the ProfileImageUrl claim
-        public async Task UpdateProfileImageClaim(ApplicationUser user, string newProfileImageUrl)
-        {
-            // Retrieve the existing claims for the user
-            var existingClaims = await _userManager.GetClaimsAsync(user);
-
-            // Find the existing ProfileImageUrl claim
-            var existingProfileImageUrlClaim = existingClaims.FirstOrDefault(c => c.Type == "ProfileImageUrl");
-
-            if (existingProfileImageUrlClaim != null)
+            // Upload image to Imgur
+            string imageUrl;
+            try
             {
-                // Remove the existing ProfileImageUrl claim
-                await _userManager.RemoveClaimAsync(user, existingProfileImageUrlClaim);
+                using var memoryStream = new MemoryStream();
+                await image.CopyToAsync(memoryStream);
+                imageUrl = await _imgurService.UploadImageAsync(memoryStream.ToArray());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error uploading image to Imgur for user {UserId}", profile.UserId);
+                TempData["Message"] = "Failed to upload image. Please try again.";
+                return RedirectToAction("Settings", "Account", new { page = "ProfileSettings" });
             }
 
-            // Add the new ProfileImageUrl claim
-            var newProfileImageUrlClaim = new Claim("ProfileImageUrl", newProfileImageUrl);
-            await _userManager.AddClaimAsync(user, newProfileImageUrlClaim);
+            // Update the profile image
+            try
+            {
+                EnsureProfileAttached(profile);
 
-            // Optional: Refresh sign-in to apply updated claims to the current session
-            await _signInManager.RefreshSignInAsync(user);
+                profile.ProfileImageUrl = imageUrl;
+
+                // Save changes to the database
+                await _context.SaveChangesAsync();
+
+                // Clear and optionally refresh cache
+                RevalidateCache(profile);
+
+                TempData["Message"] = "Image uploaded successfully.";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while updating profile image for user {UserId}", profile.UserId);
+                TempData["Message"] = "Failed to update profile. Please try again.";
+            }
+
+            return RedirectToAction("Settings", "Account", new { page = "ProfileSettings" });
         }
 
 
+        [HttpPost]
+        public async Task<IActionResult> UpdateBio(string text, UserProfile model)
+        {
+            if (string.IsNullOrWhiteSpace(model.Bio))
+            {
+                TempData["Message"] = "Bio cannot be empty!";
+                return RedirectToAction("Settings", "Account", new { page = "ProfileSettings" });
+            }
+
+            // Get the tracked user profile
+            var profile = await GetUserInformation();
+            if (profile == null)
+            {
+                TempData["Message"] = "Profile not found.";
+                return RedirectToAction("Settings", "Account", new { page = "ProfileSettings" });
+            }
+
+            // Update bio
+            
+                EnsureProfileAttached(profile);
+
+                profile.Bio = model.Bio;
+
+                // Save changes to the database
+                await _context.SaveChangesAsync();
+
+                // Clear and optionally refresh cache
+                RevalidateCache(profile);
+
+                TempData["Message"] = "Image uploaded successfully.";
+
+
+            return RedirectToAction("Settings", "Account", new { page = "ProfileSettings" });
+        }
 
 
     }
-
-
 }

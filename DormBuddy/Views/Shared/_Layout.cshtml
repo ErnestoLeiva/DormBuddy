@@ -3,6 +3,9 @@
     var SharedLocalizer = LocalizerFactory.Create("SharedResource", typeof(Program).Assembly.GetName().Name ?? "");
 }
 
+@inject NavBarInfoService NavBarInfoService
+@using System.Threading.Tasks
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -66,33 +69,39 @@
                     </ul>
                 </div>
 
-                @if (User?.Identity != null && User.Identity.IsAuthenticated) {
+                @if (User?.Identity != null && User.Identity.IsAuthenticated)
+                {
+                    string uname = User?.Identity?.Name;
 
-                
-                string firstName = User.FindFirst("FirstName")?.Value ?? "";
-                string lastName = User.FindFirst("LastName")?.Value ?? "";
-                string credits = User.FindFirst("Credits")?.Value ?? "";
-                string profileimage = User.FindFirst("ProfileImageUrl")?.Value ?? "";
+                    // Fetch user information only if the username is not null or empty
+                    if (!string.IsNullOrEmpty(uname))
+                    {
+                        var uInfo = await NavBarInfoService.GetUserInformationAsync(uname);
 
-                
-                <div class="creditsContainer">
-                    <p class="fa-solid fa-coins">  @credits</p>
-                </div>
-                <div class="dropdown">
-                    
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        // Check if user information was successfully retrieved
+                        if (uInfo != null && uInfo.User != null)
+                        {
+                            string firstName = uInfo.User.FirstName ?? "";
+                            string lastName = uInfo.User.LastName ?? "";
+                            string profileImage = uInfo.ProfileImageUrl ?? ""; // Fallback to a default image
 
-                <img class="dropdown-avatar" src="@profileimage"/> @firstName @lastName
-    </button>
 
-                    <div class="dropdown-menu dropdown-menu-right text-left">
-                        <a class="dropdown-item fas fa-user" asp-controller="Account" asp-action="Profile"> Profile</a>
-                        <a class="dropdown-item fas fa-cog" asp-controller="Account" asp-action="Settings"> Settings</a>
-                        <div class="line-divider"></div>
-                        <a class="dropdown-item fas fa-sign-out-alt" asp-controller="Account" asp-action="Logout"> Sign Out</a>
-                    </div>
-                </div>
+                            <div class="dropdown">
+                                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <img class="dropdown-avatar" src="@profileImage" alt="Profile Image" /> @firstName @lastName
+                                </button>
+
+                                <div class="dropdown-menu dropdown-menu-right text-left">
+                                    <a class="dropdown-item fas fa-user" asp-controller="Account" asp-action="Profile"> Profile</a>
+                                    <a class="dropdown-item fas fa-cog" asp-controller="Account" asp-action="Settings"> Settings</a>
+                                    <div class="line-divider"></div>
+                                    <a class="dropdown-item fas fa-sign-out-alt" asp-controller="Account" asp-action="Logout"> Sign Out</a>
+                                </div>
+                            </div>
+                        }
+                    }
                 }
+
             </div>
         </nav>
     </header>

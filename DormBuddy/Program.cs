@@ -26,7 +26,7 @@ builder.Services.AddLocalization(options => options.ResourcesPath = "Resources")
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {
     options.CheckConsentNeeded = context => true;
-    options.MinimumSameSitePolicy = SameSiteMode.None;
+    options.MinimumSameSitePolicy = SameSiteMode.Lax; // Set to Lax for session compatibility
     options.Secure = builder.Environment.IsDevelopment() 
         ? CookieSecurePolicy.SameAsRequest 
         : CookieSecurePolicy.Always;
@@ -37,6 +37,16 @@ builder.Services.AddSingleton<ImgurService>();
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 
 builder.Services.AddScoped<UserLastUpdateActionFilter>();
+builder.Services.AddScoped<NavBarInfoService>();
+
+#region SESSION CONFIGURATION
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+#endregion
 
 builder.Services.AddControllersWithViews(options => 
 {
@@ -47,7 +57,6 @@ builder.Services.AddControllersWithViews(options =>
 
 builder.Services.Configure<RequestLocalizationOptions>(options => 
 {
-
     var supportedCultures = new[]
     {
         new CultureInfo("en"),
@@ -106,15 +115,6 @@ builder.Services.Configure<IdentityOptions>(options =>
 });
 #endregion
 
-#region SESSION CONFIGURATION
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-});
-#endregion
-
 #region AUTHENTICATION AND AUTHORIZATION
 builder.Services.AddAuthentication(options =>
 {
@@ -157,7 +157,6 @@ app.UseRequestLocalization(localizationOptions);
 
 app.Use(async (context, next) =>
 {
-
     var cookieValue = context.Request.Cookies["Culture"];
     if (!string.IsNullOrEmpty(cookieValue))
     {
@@ -173,7 +172,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-app.UseSession();
+app.UseSession(); // UseSession must be before Authentication and Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 

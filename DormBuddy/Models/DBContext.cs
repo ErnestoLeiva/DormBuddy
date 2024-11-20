@@ -29,6 +29,9 @@ namespace DormBuddy.Models
         // DBSet for persistent expenses feature - Ernesto Leiva 10/27/2024
         public DbSet<ExpenseModel> Expenses { get; set; }
 
+        // DBSet for persistent peer-lending feature - Ernesto Leiva 11/04/2024
+        public DbSet<PeerLendingModel> PeerLendings {get; set; }
+
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
 
         public DbSet<UserProfile> UserProfiles { get; set; }
@@ -39,7 +42,8 @@ namespace DormBuddy.Models
         {
             if (!optionsBuilder.IsConfigured) {
                 optionsBuilder.UseMySql("Server=shportfolio.net;Database=myportfolio_dormbuddy;User=myportfolio;Password=65eyqYcPHv;", 
-                    new MySqlServerVersion(new Version(8, 0, 2)));
+                    new MySqlServerVersion(new Version(8, 0, 2)))
+                    .EnableSensitiveDataLogging();
             }
                 
         }
