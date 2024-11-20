@@ -38,7 +38,7 @@ namespace DormBuddy.Controllers
             TimeZoneService timeZoneService,
             IConfiguration configuration,
             IMemoryCache memoryCache,
-            DBContext context) : base(userManager, signInManager, context, logger, memoryCache)
+            DBContext context,  RoleManager<IdentityRole> roleManager ) : base(userManager, signInManager, context, logger, memoryCache)
         {
             _logger = logger;
             _userManager = userManager;
