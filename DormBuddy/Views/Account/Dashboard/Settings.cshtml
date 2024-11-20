@@ -1,21 +1,8 @@
 @{
     ViewData["Title"] = "Account Settings";
-}
+}   
 
-<style>
-    #navigationButtons {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 50px;
-    }
-
-    #settings-content {
-        background-color: rgb(250, 250, 250);
-        padding: 20px;
-    }
-</style>
+<link rel="stylesheet" href="~/css/settings.css" asp-append-version="true" />
 
 <!-- Return to Dashboard Button -->
 <div class="mb-4">
@@ -29,13 +16,13 @@
     <p>Update your account information and preferences.</p>
 </div>
 
-<div>
+<div class="settings-container">
     <!-- Navigation Buttons -->
     <div id="navigationButtons">
-        <button id="general-settings-btn" onclick="loadSettings('GeneralSettings')" style="background-color: rgb(89, 199, 226); color: white; border: none;">General Settings</button>
-        <button id="account-settings-btn" onclick="loadSettings('AccountSettings')" style="background-color: rgb(255, 79, 152); color: white; border: none;">Account Settings</button>
-        <button id="privacy-settings-btn" onclick="loadSettings('PrivacySettings')" style="background-color: rgb(154, 154, 240); color: white; border: none;">Privacy Settings</button>
-        <button id="profile-settings-btn" onclick="loadSettings('ProfileSettings')" style="background-color: rgb(180, 150, 100); color: white; border: none;">Profile Settings</button>
+        <button id="general-settings-btn" class="settings-btn" onclick="loadSettings('GeneralSettings')" style="background-color: rgb(89, 199, 226); color: white; border: none;">General Settings</button>
+        <button id="account-settings-btn" class="settings-btn" onclick="loadSettings('AccountSettings')" style="background-color: rgb(255, 79, 152); color: white; border: none;">Account Settings</button>
+        <button id="privacy-settings-btn" class="settings-btn" onclick="loadSettings('PrivacySettings')" style="background-color: rgb(154, 154, 240); color: white; border: none;">Privacy Settings</button>
+        <button id="profile-settings-btn" class="settings-btn" onclick="loadSettings('ProfileSettings')" style="background-color: rgb(180, 150, 100); color: white; border: none;">Profile Settings</button>
     </div>
 
     <!-- Content Area to Display the Settings -->
@@ -46,14 +33,31 @@
 
 @section Scripts {
     <script type="text/javascript">
+
+        function updateActiveButton(activeButton) {
+            $('#navigationButtons button').each(function() {
+                $(this).css('opacity', '.8'); // Reset all button colors
+            });
+            $(activeButton).css('opacity', '1.0'); // Change background for active button
+        }
         // Function to load settings dynamically
         function loadSettings(page) {
             $.ajax({
                 url: '@Url.Action("LoadSettings")',
                 type: 'GET',
                 data: { settingsPage: page },
+                cache: false,
                 success: function (data) {
                     $('#settings-content').html(data); // Load the settings view into the content area
+
+                    $(window).trigger('resize');
+                    
+
+                    let pageName = page.toLowerCase().replace("settings", "");
+
+                    //alert(pageName);
+
+                    updateActiveButton('#' + pageName + '-settings-btn');
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                     alert("Error loading settings. Status: " + textStatus + ", Error: " + errorThrown);

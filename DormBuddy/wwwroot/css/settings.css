@@ -1,0 +1,125 @@
+.settings-container body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    padding: 20px;
+}
+
+.settings-container .alert {
+    color: red;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+}
+
+.settings-container h2 {
+    margin-bottom: 20px;
+    font-size: 2em;
+}
+
+.settings-container h3 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-size: 1.5em;
+    color: #333;
+}
+
+.settings-container .section {
+    margin-bottom: 30px;
+}
+
+.settings-container .profile-image, .settings-container .banner-image {
+    max-width: 100%;
+    height: auto;
+}
+
+.settings-container .profile-image {
+    max-width: 150px;
+    border-radius: 50%;
+    display: block;
+    margin-bottom: 20px;
+}
+
+.settings-container .banner-image {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    margin-bottom: 20px;
+}
+
+.settings-container label {
+    font-size: 1.1em;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.settings-container input[type="file"],
+.settings-container input[type="url"],
+.settings-container textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1em;
+}
+
+.settings-container button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1em;
+}
+
+.settings-container button:hover {
+    background-color: #0056b3;
+}
+
+.settings-container .form-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.settings-container .form-row div {
+    flex: 1;
+}
+
+.settings-container .form-row input {
+    width: calc(100% - 20px);
+}
+
+.settings-container .bio-section textarea {
+    max-width: 100%;
+    resize: vertical;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .settings-container .form-row {
+        flex-direction: column;
+    }
+}
+
+
+.settings-container #navigationButtons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 50px;
+}
+
+.settings-container #settings-content {
+    background-color: rgb(250, 250, 250);
+    padding: 20px;
+}
+
+.settings-btn:focus {
+    border: none;
+    outline: 2px solid #007bff; /* Blue outline for accessibility */
+}

@@ -1,9 +1,13 @@
+/* Existing CSS */
+
+
 .profile-image-container {
     margin-bottom: 40px; /* Adds more space below the profile image */
     width: 100%;
     text-align: center; /* Centers the image in the container */
     border-bottom: 1px solid #ddd; /* Lighter line for a softer effect */
     padding-bottom: 20px; /* Padding below image to give space */
+    z-index: 1; /* Ensure the profile image is above the banner */
 }
 
 .profile-info {
@@ -37,7 +41,33 @@
     border: 4px solid #333;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     margin-bottom: -75px; /* Pulls the image down to hover over the border line */
-    position: relative;
-    z-index: 1; /* Ensures the image appears on top of the border */
+    
     background-color: white;
+}
+
+/* New CSS for the Banner Section */
+.banner-section {
+    background-color: #4CAF50;
+    color: white;
+    padding: 20px 0;
+    position: absolute;
+    top: 50px; /* Move banner slightly upwards */
+    left: 0;
+    right: 0;
+    z-index: -1; /* Place it behind other elements */
+    height: 270px; /* Adjust height as needed */
+}
+
+/* Banner Text Styles */
+.banner-text h2 {
+    font-size: 36px;
+    margin-bottom: 10px;
+}
+
+.banner-text p {
+    font-size: 18px;
+}
+
+.nav-tabs {
+    margin-top: 100px;
 }

@@ -546,22 +546,22 @@ namespace DormBuddy.Controllers
 
         public async Task<IActionResult> LoadSettings(string settingsPage)
         {
+
+            var profile = await GetUserInformation();
+
+            if (profile == null) {
+                return RedirectToAction("Dashboard");
+            }
+
             switch (settingsPage)
             {
                 case "GeneralSettings":
                     return PartialView("Dashboard/Settings/_GeneralSettings");
                 case "AccountSettings":
-                    return PartialView("Dashboard/Settings/_AccountSettings");
+                    return PartialView("Dashboard/Settings/_AccountSettings", profile);
                 case "PrivacySettings":
-                    return PartialView("Dashboard/Settings/_PrivacySettings");
+                    return PartialView("Dashboard/Settings/_PrivacySettings", profile);
                 case "ProfileSettings":
-
-                    var profile = await GetUserInformation();
-
-                    if (profile == null) {
-                        return RedirectToAction("Dashboard");
-                    }
-
                     return PartialView("Dashboard/Settings/_ProfileSettings", profile);
                 default:
                     return Content("Invalid settings page.");

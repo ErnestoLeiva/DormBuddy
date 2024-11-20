@@ -5,10 +5,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Account Settings</title>
-    <style>
-        .alert { color: red; }
-    </style>
+
+    <link rel="stylesheet" href="~/css/settings.css" asp-append-version="true" />
+
     <script>
         function validateImage() {
             const fileInput = document.getElementById("imageInput");
@@ -55,16 +54,101 @@
 <body>
 
 @if (User?.Identity != null && User?.Identity.IsAuthenticated == true) {
+    <div class="settings-container container mt-5">
+        <h2 class="mb-4">Profile Settings</h2>
 
-    <div>
-        <h2>Profile Settings</h2>
+        <!-- Display Current Banner Image -->
+        <div class="mb-4">
+            <h3>Current Banner</h3>
+            <img src="" alt="Current Banner" class="img-fluid banner-image" />
+        </div>
+
+        <!-- Upload Banner Image -->
+        <div class="mb-4">
+            <label class="form-label">Upload Banner Image</label>
+            <form class="" asp-controller="Imgur" asp-action="UploadBannerImage" method="post" enctype="multipart/form-data" onsubmit="return validateImage()">
+                <input type="file" name="bannerImage" id="bannerImageInput" accept=".jpg, .jpeg, .png, .gif" class="form-control mb-3" />
+                <button type="submit" class="btn btn-primary">Upload Banner</button>
+            </form>
+        </div>
 
         <!-- Profile Image Upload Section -->
-        <div>
-            <label>Upload Profile Image</label>
+        <div class="mb-4">
+            <h3>Current Profile Image</h3>
+            <img src="@Model.ProfileImageUrl" alt="Current Profile Image" class="img-fluid" style="width: 150px; height: 150px; border-radius: 50%;" />
+            
+            <label class="form-label">Upload Profile Image</label>
             <form id="uploadForm" asp-controller="Imgur" asp-action="UploadImage" method="post" enctype="multipart/form-data" onsubmit="return validateImage()">
-                <input type="file" name="image" id="imageInput" accept=".jpg, .jpeg, .png, .gif" />
-                <button type="submit">Upload</button>
+                <input type="file" name="image" id="imageInput" accept=".jpg, .jpeg, .png, .gif" class="form-control mb-3" />
+                <button type="submit" class="btn btn-primary">Upload</button>
+            </form>
+        </div>
+
+        <!-- Bio Section -->
+        <div class="mb-4">
+            <h3>Update Bio</h3>
+            <form asp-controller="Imgur" asp-action="UpdateBio" method="post">
+                <textarea name="bio" rows="4" cols="50" maxlength="250" placeholder="Write a short bio about yourself..." class="form-control">@Model.Bio</textarea>
+                <br />
+                <button type="submit" class="btn btn-primary mt-2">Save Bio</button>
+            </form>
+        </div>
+
+        <!-- Account Information Section -->
+        <div class="mb-4">
+            <h3>Account Information</h3>
+            <form asp-controller="Imgur" asp-action="UpdateAccountInformation" method="post">
+
+                <!-- Job Title -->
+                <div class="mb-3">
+                    <label for="jobTitle" class="form-label">Job Title</label>
+                    <input type="text" name="JobTitle" id="jobTitle" value="@Model.JobTitle" placeholder="Enter your job title" class="form-control" />
+                </div>
+
+                <!-- Company Name -->
+                <div class="mb-3">
+                    <label for="companyName" class="form-label">Company Name</label>
+                    <input type="text" name="CompanyName" id="companyName" value="@Model.CompanyName" placeholder="Enter your company name" class="form-control" />
+                </div>
+
+                <!-- School Name -->
+                <div class="mb-3">
+                    <label for="schoolName" class="form-label">School Name</label>
+                    <input type="text" name="SchoolName" id="schoolName" value="@Model.SchoolName" placeholder="Enter your school name" class="form-control" />
+                </div>
+
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </form>
+        </div>
+
+
+        <!-- Social Media Links Section -->
+        <div class="mb-4">
+            <h3>Update Social Media Links</h3>
+            <form asp-controller="Imgur" asp-action="UpdateSocialMedia" method="post">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="facebook" class="form-label">Facebook URL</label>
+                        <input type="url" name="FacebookUrl" id="facebook" value="@Model.FacebookUrl" placeholder="Enter your Facebook URL" class="form-control" />
+                    </div>
+                    <div class="col-md-6">
+                        <label for="twitter" class="form-label">Twitter URL</label>
+                        <input type="url" name="TwitterUrl" id="twitter" value="@Model.TwitterUrl" placeholder="Enter your Twitter URL" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="instagram" class="form-label">Instagram URL</label>
+                        <input type="url" name="InstagramUrl" id="instagram" value="@Model.InstagramUrl" placeholder="Enter your Instagram URL" class="form-control" />
+                    </div>
+                    <div class="col-md-6">
+                        <label for="linkedin" class="form-label">LinkedIn URL</label>
+                        <input type="url" name="LinkedinUrl" id="linkedin" value="@Model.LinkedInUrl" placeholder="Enter your LinkedIn URL" class="form-control" />
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Save Social Links</button>
             </form>
         </div>
 
@@ -77,18 +161,7 @@
         }
 
         
-        <!-- Bio Section -->
-        <div>
-            <h3>Update Bio</h3>
-            <form asp-controller="Imgur" asp-action="UpdateBio" method="post">
-                <textarea name="bio" rows="4" cols="50" maxlength="250" placeholder="Write a short bio about yourself...">@Model.Bio</textarea>
-                <br />
-                <button type="submit">Save Bio</button>
-            </form>
-        </div>
     </div>
-
 }
-
 </body>
 </html>

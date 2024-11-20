@@ -22,6 +22,9 @@ namespace DormBuddy.Models
 
         // Basic Profile Info
         public string? Bio { get; set; }
+        /*
+        public string? BannerImageUrl { get; set; }
+        */
         public string? ProfileImageUrl { get; set; }
         public DateTime DateOfBirth { get; set; }
 

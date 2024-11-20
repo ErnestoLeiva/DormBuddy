@@ -143,7 +143,7 @@ namespace DormBuddy.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Expenses");
+                    b.ToTable("Expenses", (string)null);
                 });
 
             modelBuilder.Entity("DormBuddy.Models.PeerLendingModel", b =>
@@ -175,7 +175,7 @@ namespace DormBuddy.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("PeerLendings");
+                    b.ToTable("PeerLendings", (string)null);
                 });
 
             modelBuilder.Entity("DormBuddy.Models.TaskModel", b =>
@@ -209,7 +209,7 @@ namespace DormBuddy.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Tasks");
+                    b.ToTable("Tasks", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

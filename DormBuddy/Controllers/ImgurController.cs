@@ -129,6 +129,122 @@ namespace DormBuddy.Controllers
             return RedirectToAction("Settings", "Account", new { page = "ProfileSettings" });
         }
 
+        [HttpPost]
+        public async Task<IActionResult> UpdateSocialMedia(UserProfile model) {
+
+            // Get the tracked user profile
+            var profile = await GetUserInformation();
+            if (profile == null)
+            {
+                TempData["Message"] = "Profile not found.";
+                return RedirectToAction("Settings", "Account", new { page = "ProfileSettings" });
+            }
+
+            // Update bio
+            
+                EnsureProfileAttached(profile);
+
+                if (!string.IsNullOrEmpty(model.FacebookUrl)) {
+                    profile.FacebookUrl = model.FacebookUrl;
+                }
+                if (!string.IsNullOrEmpty(model.TwitterUrl)) {
+                    profile.TwitterUrl = model.TwitterUrl;
+                }
+                if (!string.IsNullOrEmpty(model.InstagramUrl)) {
+                    profile.InstagramUrl = model.InstagramUrl;
+                }
+                if (!string.IsNullOrEmpty(model.LinkedInUrl)) {
+                    profile.LinkedInUrl = model.LinkedInUrl;
+                }
+
+                // Save changes to the database
+                await _context.SaveChangesAsync();
+
+                // Clear and optionally refresh cache
+                RevalidateCache(profile);
+
+                TempData["Message"] = "Social media links updated successfully.";
+
+
+            return RedirectToAction("Settings", "Account", new { page = "ProfileSettings" });
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateAccountInformation(UserProfile model) {
+
+            // Get the tracked user profile
+            var profile = await GetUserInformation();
+            if (profile == null)
+            {
+                TempData["Message"] = "Profile not found.";
+                return RedirectToAction("Settings", "Account", new { page = "ProfileSettings" });
+            }
+
+            // Update bio
+            
+            EnsureProfileAttached(profile);
+
+            // visibility of profile content if not considered a friend
+            Console.WriteLine(profile.ProfileVisibleToPublic);
+            if (model.ProfileVisibleToPublic == true) {
+                profile.ProfileVisibleToPublic = true;
+            } else {
+                profile.ProfileVisibleToPublic = false;
+            }
+
+
+            if (!string.IsNullOrEmpty(model.JobTitle)) {
+                profile.TwitterUrl = model.TwitterUrl;
+            }
+            if (!string.IsNullOrEmpty(model.CompanyName)) {
+                profile.CompanyName = model.CompanyName;
+            }
+            if (!string.IsNullOrEmpty(model.SchoolName)) {
+                profile.SchoolName = model.SchoolName;
+            }
+
+            // Save changes to the database
+            await _context.SaveChangesAsync();
+
+            // Clear and optionally refresh cache
+            RevalidateCache(profile);
+
+            TempData["Message"] = "Profile information has been updated successfully.";
+
+
+            return RedirectToAction("Settings", "Account", new { page = "ProfileSettings" });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateVisibility(UserProfile model) {
+
+            // Get the tracked user profile
+            var profile = await GetUserInformation();
+            if (profile == null)
+            {
+                TempData["Message"] = "Profile not found.";
+                return RedirectToAction("Settings", "Account", new { page = "PrivacySettings" });
+            }
+
+            // Update bio
+            
+            EnsureProfileAttached(profile);
+
+            // visibility of profile content if not considered a friend
+            profile.ProfileVisibleToPublic = model.ProfileVisibleToPublic;
+
+            // Save changes to the database
+            await _context.SaveChangesAsync();
+
+            // Clear and optionally refresh cache
+            RevalidateCache(profile);
+
+            TempData["Message"] = "Profile account visibility has been updated successfully.";
+
+
+            return RedirectToAction("Settings", "Account", new { page = "PrivacySettings" });
+        }
 
     }
 }

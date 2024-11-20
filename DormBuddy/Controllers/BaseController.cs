@@ -25,6 +25,8 @@ namespace DormBuddy.Controllers
         private readonly ILogger<BaseController> _logger;
         private readonly IMemoryCache _memoryCache;
 
+        private readonly int REVALIDATE_TIME = 30; // in minutes
+
         public BaseController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
@@ -99,7 +101,7 @@ namespace DormBuddy.Controllers
             }
 
             // Update the cache with the tracked entity
-            _memoryCache.Set(cacheKey, profile, TimeSpan.FromMinutes(5));
+            _memoryCache.Set(cacheKey, profile, TimeSpan.FromMinutes(REVALIDATE_TIME));
 
             // Return the profile
             return profile;
@@ -119,7 +121,7 @@ namespace DormBuddy.Controllers
         }
 
         protected void RevalidateCache(UserProfile profile) {
-            int time = 5; // 5 minutes
+            int time = REVALIDATE_TIME; // in minutes
             var cacheKey = $"userProfile_{profile.UserId}";
                 _memoryCache.Remove(cacheKey);
                 _memoryCache.Set(cacheKey, profile, TimeSpan.FromMinutes(time)); // Optional: refresh cache
