@@ -9,10 +9,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace DormBuddy.Controllers
 {
-    public class AccountController : Controller
+    public class AccountController : BaseController
     {
         private readonly ILogger<AccountController> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
@@ -20,6 +23,11 @@ namespace DormBuddy.Controllers
         private readonly IEmailSender _emailSender;
 
         private readonly TimeZoneService _timeZoneService;
+
+        private readonly IConfiguration _configuration;
+
+        private readonly DBContext _context;
+        private readonly IMemoryCache _memoryCache;
         private readonly RoleManager<IdentityRole> _roleManager;
 
         public AccountController(
@@ -28,13 +36,18 @@ namespace DormBuddy.Controllers
             SignInManager<ApplicationUser> signInManager,
             IEmailSender emailSender,
             TimeZoneService timeZoneService,
-            RoleManager<IdentityRole> roleManager)       
+            IConfiguration configuration,
+            IMemoryCache memoryCache,
+            DBContext context) : base(userManager, signInManager, context, logger, memoryCache)
         {
             _logger = logger;
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
             _timeZoneService = timeZoneService;
+            _configuration = configuration;
+            _context = context;
+            _memoryCache = memoryCache;
             _roleManager = roleManager;     
         }
 
@@ -102,19 +115,13 @@ namespace DormBuddy.Controllers
             if (result.Succeeded) {
                 await _userManager.ResetAccessFailedCountAsync(user);
 
+                //var profile = await getProfile(user);
+                var profile = await GetUserInformation(user.UserName);
 
-                var claims = new List<Claim>
-                {
-                    new Claim("FirstName", user.FirstName ?? ""),
-                    new Claim("LastName", user.LastName ?? ""),
-                    new Claim("Credits", user.Credits.ToString()),
-                    new Claim("Email", user.Email ?? "")
-                };
+                await _signInManager.SignInAsync(user, rememberMe);
 
-                var claimsIdentity = new ClaimsIdentity(claims, IdentityConstants.ApplicationScheme);
-
-                // Sign in the user with the new identity that includes the custom claims
-                await _signInManager.SignInWithClaimsAsync(user, rememberMe, claims);
+                profile.LastLogin = DateTime.UtcNow;
+                 _context.SaveChanges();
 
                 return RedirectToAction("Dashboard");
 
@@ -142,6 +149,42 @@ namespace DormBuddy.Controllers
         }
 
         #endregion
+
+        public async Task<UserProfile> getProfile(ApplicationUser user) {
+            /*
+            var profile = await _context.UserProfiles.FirstOrDefaultAsync(p => p.UserId == user.Id);
+
+            if (profile == null)
+            {
+                profile = new UserProfile
+                {
+                    UserId = user.Id
+                };
+
+                _context.UserProfiles.Add(profile);
+            }
+
+            return profile;
+            */
+            return await GetUserInformation(user.UserName);
+        }
+
+        public async Task<UserLastUpdate> getUserLastUpdate(ApplicationUser u) {
+            var instance = await _context.UserLastUpdate.FirstOrDefaultAsync(p => p.UserId == u.Id);
+
+            if (instance == null && u.Id == User.FindFirstValue(ClaimTypes.NameIdentifier))  
+            {
+                instance = new UserLastUpdate
+                {
+                    UserId = u.Id,
+                    LastUpdate = DateTime.UtcNow
+                };
+
+                _context.UserLastUpdate.Add(instance);
+            }
+
+            return instance;
+        }
 
         #region SIGN UP
 
@@ -424,20 +467,109 @@ namespace DormBuddy.Controllers
 
         public IActionResult Notifications() => User?.Identity?.IsAuthenticated == true ? View("~/Views/Account/Dashboard/Notifications.cshtml") : RedirectToAction("AccountForms");
 
-        public IActionResult Settings() => User?.Identity?.IsAuthenticated == true ? View("~/Views/Account/Dashboard/Settings.cshtml") : RedirectToAction("AccountForms");
 
-        public IActionResult Profile() => User?.Identity?.IsAuthenticated == true ? View("~/Views/Account/Dashboard/Profile.cshtml") : RedirectToAction("AccountForms");
+        public IActionResult Settings() {
+            if (User?.Identity?.IsAuthenticated == true) {
 
-        public IActionResult LoadSettings(string settingsPage)
+                string loadPage = Request.Query["page"].ToString() ?? "";
+
+                var allowedPages = new List<string> { "AccountSettings", "GeneralSettings", "PrivacySettings", "ProfileSettings" };
+
+                // Check if the 'page' is a valid value from the list
+                if (!allowedPages.Contains(loadPage) && !string.IsNullOrEmpty(loadPage))
+                {
+                    return BadRequest("Invalid page parameter.");
+                }
+
+                ViewBag.LoadPage = loadPage;
+                return View("~/Views/Account/Dashboard/Settings.cshtml");
+            } else {
+                return RedirectToAction("AccountForms");
+            }
+        }
+
+
+        public async Task<IActionResult> Profile()
         {
+            try
+            {
+                // Ensure the user is authenticated
+                if (User?.Identity?.IsAuthenticated != true)
+                {
+                    return RedirectToAction("Login");
+                }
+
+                // Get the username from query parameter or fallback to User.Identity.Name
+                string get_username = Request.Query["username"].ToString() ?? "";
+                get_username = string.IsNullOrEmpty(get_username) ? User?.Identity?.Name : get_username;
+
+                // If username is still null or empty, redirect to the dashboard
+                if (string.IsNullOrEmpty(get_username))
+                {
+                    return RedirectToAction("Dashboard");
+                }
+
+                var profile = await GetUserInformation(get_username);
+
+                var u = profile.User;
+                if (u == null)
+                {
+                    return RedirectToAction("Dashboard");
+                }
+
+                // If profile is null, redirect to the dashboard
+                if (profile == null)
+                {
+                    return RedirectToAction("Dashboard");
+                }
+
+                var profileImage = _configuration["Profile:Default_ProfileImage"];
+                if (string.IsNullOrEmpty(profile.ProfileImageUrl))
+                {
+                    profile.ProfileImageUrl = profileImage;
+                }
+
+                var adjustedLastLogin = getCurrentTimeFromUTC(profile.LastLogin);
+                ViewData["AdjustedLastLogin"] = adjustedLastLogin;
+
+                // Profile Online Status Check
+                ViewData["profile_online_status"] = "Offline";
+                var getLastUpdate = await getUserLastUpdate(profile.User);
+                if (getLastUpdate?.LastUpdate is DateTime lastUpdate &&
+                    (DateTime.UtcNow - lastUpdate).TotalSeconds < 300)
+                {
+                    ViewData["profile_online_status"] = "Online";
+                }
+
+                return View("~/Views/Account/Dashboard/Profile.cshtml", profile);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception and display an error page
+                _logger.LogError($"Error in Profile action: {ex.Message}");
+                return View("Error");  // Show a generic error page or message
+            }
+        }
+
+        public async Task<IActionResult> LoadSettings(string settingsPage)
+        {
+
+            var profile = await GetUserInformation();
+
+            if (profile == null) {
+                return RedirectToAction("Dashboard");
+            }
+
             switch (settingsPage)
             {
                 case "GeneralSettings":
                     return PartialView("Dashboard/Settings/_GeneralSettings");
                 case "AccountSettings":
-                    return PartialView("Dashboard/Settings/_AccountSettings");
+                    return PartialView("Dashboard/Settings/_AccountSettings", profile);
                 case "PrivacySettings":
-                    return PartialView("Dashboard/Settings/_PrivacySettings");
+                    return PartialView("Dashboard/Settings/_PrivacySettings", profile);
+                case "ProfileSettings":
+                    return PartialView("Dashboard/Settings/_ProfileSettings", profile);
                 default:
                     return Content("Invalid settings page.");
             }
@@ -534,6 +666,16 @@ namespace DormBuddy.Controllers
 
             // Return the local time as a string
             return Content(eventLocalTime.ToString("F"));
+        }
+
+        public DateTime getCurrentTimeFromUTC(DateTime date) {
+            DateTime time = date;
+
+            string userTimeZoneId = Request.Cookies["UserTimeZone"] ?? "UTC";
+
+            DateTime local = _timeZoneService.ConvertToLocal(time, userTimeZoneId);
+
+            return local;
         }
 
     }

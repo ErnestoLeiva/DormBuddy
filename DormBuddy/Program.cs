@@ -27,9 +27,9 @@ builder.Services.AddLocalization(options => options.ResourcesPath = "Resources")
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {
     options.CheckConsentNeeded = context => true;
-    options.MinimumSameSitePolicy = SameSiteMode.None;
-    options.Secure = builder.Environment.IsDevelopment()
-        ? CookieSecurePolicy.SameAsRequest
+    options.MinimumSameSitePolicy = SameSiteMode.Lax; // Set to Lax for session compatibility
+    options.Secure = builder.Environment.IsDevelopment() 
+        ? CookieSecurePolicy.SameAsRequest 
         : CookieSecurePolicy.Always;
 });
 
@@ -44,13 +44,36 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddSingleton<TimeZoneService>();
-builder.Services.AddScoped<ActivityReportService>(); // Register the ActivityReportService here
+builder.Services.AddSingleton<ImgurService>();
+builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 
-builder.Services.AddControllersWithViews().AddViewLocalization().AddDataAnnotationsLocalization();
+builder.Services.AddScoped<UserLastUpdateActionFilter>();
+builder.Services.AddScoped<NavBarInfoService>();
+
+#region SESSION CONFIGURATION
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+#endregion
+
+builder.Services.AddControllersWithViews(options => 
+{
+    options.Filters.Add<UserLastUpdateActionFilter>();
+})
+.AddViewLocalization()
+.AddDataAnnotationsLocalization();
 
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
-    var supportedCultures = new[] { new CultureInfo("en"), new CultureInfo("es") };
+    var supportedCultures = new[]
+    {
+        new CultureInfo("en"),
+        new CultureInfo("es")
+    };
+
     options.DefaultRequestCulture = new RequestCulture("en");
     options.SupportedCultures = supportedCultures;
     options.SupportedUICultures = supportedCultures;
@@ -100,15 +123,6 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequireUppercase = true;
     options.Password.RequiredLength = 6;
     options.Password.RequiredUniqueChars = 1;
-});
-#endregion
-
-#region SESSION CONFIGURATION
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
 });
 #endregion
 
@@ -171,7 +185,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-app.UseSession();
+app.UseSession(); // UseSession must be before Authentication and Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 

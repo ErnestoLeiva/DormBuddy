@@ -1,14 +1,230 @@
+@model DormBuddy.Models.UserProfile
+
 @{
     ViewData["Title"] = "Profile";
 }
 
-<!-- Return to Dashboard Button -->
-<div class="mb-4">
-    <a href="/Account/Dashboard" class="btn btn-outline-primary">
-        <i class="fa fa-chevron-left"></i> Return to Dashboard
-    </a>
+<div class="profile-top-wrapper">
+
+    <!-- Banner Section -->
+    <div class="banner-section">
+        <div class="banner-text text-center">
+            <!--<h2>Welcome to Your Profile</h2>
+            <p>Manage your settings and keep your profile up-to-date!</p>-->
+        </div>
+    </div>
+
+    <!-- Return to Dashboard Button -->
+    <div class="mb-4">
+        <a href="/Account/Dashboard" class="btn btn-primary">
+            <i class="fa fa-chevron-left"></i> Return to Dashboard
+        </a>
+    </div>
+
+    @if (User?.Identity?.Name == Model.User.UserName)
+    {
+        <div class="text-right mb-4">
+            <a class="btn btn-primary" href="Settings?page=ProfileSettings" style="height:38px;">
+                <i class="fas fa-cog"></i> Configuration
+            </a>
+        </div>
+    } else {
+        <div class="text-right mb-4">
+            <a class="btn btn-primary" href="" style="height:38px; opacity:0;">
+            </a>
+        </div>
+    }
+
+    <!-- Profile Image Section -->
+    <div class="profile-image-container text-center">
+        <div class="profile-image-border">
+            <img src="@Model.ProfileImageUrl" alt="Profile Image" class="profile-image">
+        </div>
+    </div>
+
 </div>
 
-<div class="text-center mb-4">
-    <h1 class="display-4">Profile Page</h1>
+<!-- Profile Information Section -->
+<div class="container">
+    <div class="row">
+        <!-- Left Column: Basic Profile Information -->
+        <div class="col-md-4 profile-info">
+            <h3>@Model.User.FirstName @Model.User.LastName
+                @if (Model.AccountStatus == "Verified") {
+                    <img src="https://i.imgur.com/rtkll8v.png" style="width:65px; height: 65px;" />
+                }
+            </h3>
+            <p class="text-muted">@@@Model.User.UserName</p>
+            <p>Current Status: @ViewData["profile_online_status"]</p>
+            <p>@Model.Bio</p>
+
+            @if (User?.Identity?.Name != Model.User.UserName)
+            {
+            <!-- Add/Remove/Block/Unblock buttons go here -->
+            <div style="display: flex; justify-content: left; gap: 15px; padding-left:5%;">
+                <button class="btn btn-success">Add</button>
+                <button class="btn btn-danger">Block</button>
+            </div>
+            }
+
+            <!-- Friends Section -->
+            <div class="friends-section mt-4">
+                <h4>Friends</h4>
+                <div class="friends-list" style="background-color:lightgray; width:90%; height:250px; border-radius: 10px; display: flex; justify-content: center; align-items: center;">
+                    <span style="text-align: center;">Currently no friends!</span>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Right Column: Tabs Section -->
+        <div class="col-md-8">
+
+            @if ((Model.ProfileVisibleToPublic == true && User?.Identity?.Name != Model.User.UserName) || User?.Identity?.Name == Model.User.UserName) {
+
+            <ul class="nav nav-tabs" id="profileTabs" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" id="posts-tab" data-bs-toggle="tab" data-bs-target="#posts" type="button" role="tab" aria-controls="posts" aria-selected="true">
+                        <i class="fas fa-pencil-alt"></i> Posts
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="about-tab" data-bs-toggle="tab" data-bs-target="#about" type="button" role="tab" aria-controls="about" aria-selected="false">
+                        <i class="fas fa-info-circle"></i> About
+                    </button>
+                </li>
+            </ul>
+            <div class="tab-content mt-3" id="profileTabsContent">
+                <!-- Posts Tab -->
+                <div class="tab-pane fade show active" id="posts" role="tabpanel" aria-labelledby="posts-tab">
+                    <!-- Create Post Section -->
+                    <div class="mb-3">
+                        <textarea class="form-control" id="createPostTextarea" rows="3" placeholder="What's on your mind?"></textarea>
+                        <div class="text-end mt-2">
+                            <button type="button" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i> Post
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Posts Section -->
+                    <div id="postsSection">
+                        <!-- Example Post -->
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title">@Model.User.UserName</h6>
+                                <p class="card-text">This is an example post. Posts will appear here!</p>
+                                <small class="text-muted">Posted just now</small>
+                            </div>
+                        </div>
+                        <!-- End of Example Post -->
+                    </div>
+                </div>
+
+                <!-- About Tab -->
+                <div class="tab-pane fade" id="about" role="tabpanel" aria-labelledby="about-tab">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th colspan="2" class="text-center">Personal Information</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th>Email</th>
+                                    <td>@Model.User.Email</td>
+                                </tr>
+                                <tr>
+                                    <th>Date of Birth</th>
+                                    <td>@Model.DateOfBirth.ToString("yyyy-MM-dd")</td>
+                                </tr>
+                                <tr>
+                                    <th>Preferred Language</th>
+                                    <td>@Model.Preferred_Language</td>
+                                </tr>
+                                <tr>
+                                    <th>Profile Visibility</th>
+                                    <td>@(Model.ProfileVisibleToPublic ? "Public" : "Private")</td>
+                                </tr>
+                                <tr>
+                                    <th>Biography</th>
+                                    <td>@Model.Bio</td>
+                                </tr>
+                            </tbody>
+                            <thead class="thead-light">
+                                <tr>
+                                    <th colspan="2" class="text-center">Professional Information</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th>Job Title</th>
+                                    <td>@Model.JobTitle</td>
+                                </tr>
+                                <tr>
+                                    <th>Company Name</th>
+                                    <td>@Model.CompanyName</td>
+                                </tr>
+                                <tr>
+                                    <th>School Name</th>
+                                    <td>@Model.SchoolName</td>
+                                </tr>
+                            </tbody>
+                            <thead class="thead-light">
+                                <tr>
+                                    <th colspan="2" class="text-center">Social Links</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th>Facebook</th>
+                                    <td>@(string.IsNullOrWhiteSpace(Model.FacebookUrl) ? "Not Provided" : Html.Raw($"<a href=\"{Model.FacebookUrl}\" target=\"_blank\">{Model.FacebookUrl}</a>"))</td>
+                                </tr>
+                                <tr>
+                                    <th>Twitter</th>
+                                    <td>@(string.IsNullOrWhiteSpace(Model.TwitterUrl) ? "Not Provided" : Html.Raw($"<a href=\"{Model.TwitterUrl}\" target=\"_blank\">{Model.TwitterUrl}</a>"))</td>
+                                </tr>
+                                <tr>
+                                    <th>LinkedIn</th>
+                                    <td>@(string.IsNullOrWhiteSpace(Model.LinkedInUrl) ? "Not Provided" : Html.Raw($"<a href=\"{Model.LinkedInUrl}\" target=\"_blank\">{Model.LinkedInUrl}</a>"))</td>
+                                </tr>
+                                <tr>
+                                    <th>Instagram</th>
+                                    <td>@(string.IsNullOrWhiteSpace(Model.InstagramUrl) ? "Not Provided" : Html.Raw($"<a href=\"{Model.InstagramUrl}\" target=\"_blank\">{Model.InstagramUrl}</a>"))</td>
+                                </tr>
+                            </tbody>
+                            <thead class="thead-light">
+                                <tr>
+                                    <th colspan="2" class="text-center">Account Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th>Last Login</th>
+                                    <td>@ViewData["AdjustedLastLogin"]</td>
+                                </tr>
+                                <tr>
+                                    <th>Account Status</th>
+                                    <td>@Model.AccountStatus</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            } else {
+                <h2 style="margin: 120px 0px 0px 50px;">Profile is set to not be visible to the public!</h2>
+            }
+
+            
+        </div>
+
+
+        <!-- #ENDOFTABS -->
+    </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
