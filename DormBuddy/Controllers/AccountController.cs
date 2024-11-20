@@ -12,10 +12,13 @@ using DormBuddy.Models;
 using Microsoft.EntityFrameworkCore;
 
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace DormBuddy.Controllers
 {
-    public class AccountController : Controller
+    public class AccountController : BaseController
     {
         private readonly ILogger<AccountController> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
@@ -23,6 +26,11 @@ namespace DormBuddy.Controllers
         private readonly DormBuddy.Models.IEmailSender _emailSender;
 
         private readonly TimeZoneService _timeZoneService;
+
+        private readonly IConfiguration _configuration;
+
+        private readonly DBContext _context;
+        private readonly IMemoryCache _memoryCache;
         private readonly RoleManager<IdentityRole> _roleManager;
 
         public AccountController(
@@ -31,13 +39,18 @@ namespace DormBuddy.Controllers
             SignInManager<ApplicationUser> signInManager,
             DormBuddy.Models.IEmailSender emailSender,
             TimeZoneService timeZoneService,
-            RoleManager<IdentityRole> roleManager)       
+            IConfiguration configuration,
+            IMemoryCache memoryCache,
+            DBContext context,  RoleManager<IdentityRole> roleManager ) : base(userManager, signInManager, context, logger, memoryCache)
         {
             _logger = logger;
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
             _timeZoneService = timeZoneService;
+            _configuration = configuration;
+            _context = context;
+            _memoryCache = memoryCache;
             _roleManager = roleManager;     
         }
 
@@ -116,19 +129,13 @@ namespace DormBuddy.Controllers
             if (result.Succeeded) {
                 await _userManager.ResetAccessFailedCountAsync(user);
 
+                //var profile = await getProfile(user);
+                var profile = await GetUserInformation(user.UserName);
 
-                var claims = new List<Claim>
-                {
-                    new Claim("FirstName", user.FirstName ?? ""),
-                    new Claim("LastName", user.LastName ?? ""),
-                    new Claim("Credits", user.Credits.ToString()),
-                    new Claim("Email", user.Email ?? "")
-                };
+                await _signInManager.SignInAsync(user, rememberMe);
 
-                var claimsIdentity = new ClaimsIdentity(claims, IdentityConstants.ApplicationScheme);
-
-                // Sign in the user with the new identity that includes the custom claims
-                await _signInManager.SignInWithClaimsAsync(user, rememberMe, claims);
+                profile.LastLogin = DateTime.UtcNow;
+                 _context.SaveChanges();
 
                 return RedirectToAction("Dashboard");
 
@@ -149,7 +156,42 @@ namespace DormBuddy.Controllers
 
         #endregion
 
-        #region SIGN UP
+        public async Task<UserProfile> getProfile(ApplicationUser user) {
+            /*
+            var profile = await _context.UserProfiles.FirstOrDefaultAsync(p => p.UserId == user.Id);
+
+            if (profile == null)
+            {
+                profile = new UserProfile
+                {
+                    UserId = user.Id
+                };
+
+                _context.UserProfiles.Add(profile);
+            }
+
+            return profile;
+            */
+            return await GetUserInformation(user.UserName);
+        }
+
+        public async Task<UserLastUpdate> getUserLastUpdate(ApplicationUser u) {
+            var instance = await _context.UserLastUpdate.FirstOrDefaultAsync(p => p.UserId == u.Id);
+
+            if (instance == null && u.Id == User.FindFirstValue(ClaimTypes.NameIdentifier))  
+            {
+                instance = new UserLastUpdate
+                {
+                    UserId = u.Id,
+                    LastUpdate = DateTime.UtcNow
+                };
+
+                _context.UserLastUpdate.Add(instance);
+            }
+
+            return instance;
+        }
+
         #region SIGN UP
 
         // GET: /Account/Signup
@@ -491,15 +533,30 @@ namespace DormBuddy.Controllers
         // GET: /Account/Dashboard/Notifications
         public IActionResult Notifications()
         {
-            if (User?.Identity != null && User.Identity.IsAuthenticated)
-            {
-                return View("~/Views/Account/Dashboard/Notifications.cshtml");
-            }
-            return RedirectToAction("Login");
-        }
 
-        // GET: /Account/Dashboard/Settings
-        public IActionResult Settings()
+            var profile = await GetUserInformation();
+
+            if (profile == null) {
+                return RedirectToAction("Dashboard");
+            }
+
+            switch (settingsPage)
+            {
+                case "GeneralSettings":
+                    return PartialView("Dashboard/Settings/_GeneralSettings");
+                case "AccountSettings":
+                    return PartialView("Dashboard/Settings/_AccountSettings", profile);
+                case "PrivacySettings":
+                    return PartialView("Dashboard/Settings/_PrivacySettings", profile);
+                case "ProfileSettings":
+                    return PartialView("Dashboard/Settings/_ProfileSettings", profile);
+                default:
+                    return Content("Invalid settings page.");
+            }
+        }
+        
+        [HttpPost]
+        public IActionResult VerifyUser([FromForm] string idToken)
         {
             if (User?.Identity != null && User.Identity.IsAuthenticated)
             {
@@ -593,6 +650,16 @@ namespace DormBuddy.Controllers
 
             // Return the local time as a string
             return Content(eventLocalTime.ToString("F"));
+        }
+
+        public DateTime getCurrentTimeFromUTC(DateTime date) {
+            DateTime time = date;
+
+            string userTimeZoneId = Request.Cookies["UserTimeZone"] ?? "UTC";
+
+            DateTime local = _timeZoneService.ConvertToLocal(time, userTimeZoneId);
+
+            return local;
         }
 
     }
