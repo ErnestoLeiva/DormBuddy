@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DormBuddy.Migrations
 {
     [DbContext(typeof(DBContext))]
-    [Migration("20241112075637_profiletable")]
-    partial class profiletable
+    [Migration("20241120215700_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -137,11 +137,44 @@ namespace DormBuddy.Migrations
                         .HasMaxLength(160)
                         .HasColumnType("varchar(160)");
 
+                    b.Property<bool>("isSplit")
+                        .HasColumnType("tinyint(1)");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
-
                     b.ToTable("Expenses");
+                });
+
+            modelBuilder.Entity("DormBuddy.Models.PeerLendingModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<string>("BorrowerId")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("varchar(160)");
+
+                    b.Property<DateTime>("DueDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsRepaid")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("varchar(160)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PeerLendings");
                 });
 
             modelBuilder.Entity("DormBuddy.Models.TaskModel", b =>
@@ -176,6 +209,29 @@ namespace DormBuddy.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Tasks");
+                });
+
+            modelBuilder.Entity("DormBuddy.Models.UserLastUpdate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("LastUpdate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("varchar(160)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserLastUpdate");
                 });
 
             modelBuilder.Entity("DormBuddy.Models.UserProfile", b =>
@@ -404,7 +460,7 @@ namespace DormBuddy.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("DormBuddy.Models.ExpenseModel", b =>
+            modelBuilder.Entity("DormBuddy.Models.UserLastUpdate", b =>
                 {
                     b.HasOne("DormBuddy.Models.ApplicationUser", "User")
                         .WithMany()
