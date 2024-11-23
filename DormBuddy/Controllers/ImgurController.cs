@@ -47,7 +47,7 @@ namespace DormBuddy.Controllers
             var user = await GetCurrentUserAsync();
             var friendTable = await _context.FriendsModel.Where(p => p.UserId == user.Id).ToListAsync();
 
-            var t = await friendTable.FirstOrDefaultAsync(m => (m.UserId == user.Id && m.FriendId == target.Id) || (m.UserId == target.Id && m.FriendId == user.Id));
+            var t = friendTable.FirstOrDefault(m => (m.UserId == user.Id && m.FriendId == target.Id) || (m.UserId == target.Id && m.FriendId == user.Id));
 
 
             if (t == null) {
@@ -65,7 +65,7 @@ namespace DormBuddy.Controllers
         [HttpPost]
         public async Task<IActionResult> GetAllFriends() {
             var user = await GetCurrentUserAsync();
-            var friendTable = await _context.FriendsModel.Where(p => (p.UserId == user.Id && p.blocked == false) || (p.FriendId == user.Id && p.blocked == false)).ToListAsync();
+            var friendsTable = await _context.FriendsModel.Where(p => (p.UserId == user.Id && p.blocked == false) || (p.FriendId == user.Id && p.blocked == false)).ToListAsync();
 
 
             if (friendsTable == null) {
@@ -74,7 +74,7 @@ namespace DormBuddy.Controllers
 
             var friendsDetails = new List<object>();
 
-            foreach (var friend in friendTable)
+            foreach (var friend in friendsTable)
             {
                 // Get the friend user (either UserId or FriendId based on the current user)
                 var friendId = friend.UserId == user.Id ? friend.FriendId : friend.UserId;
@@ -155,7 +155,7 @@ namespace DormBuddy.Controllers
                 return BadRequest(new { error ="You must first unblock this user!" });
             }
 
-            await fmodel.Remove(friendsAlready);
+            fmodel.Remove(friendsAlready);
 
             await _context.SaveChangesAsync();
             
@@ -205,8 +205,8 @@ namespace DormBuddy.Controllers
                     
                     // Must switch FriendId to UserId and then block
 
-                    currentUserId = friendsAlready.UserId;
-                    friendId = friendsAlready.FriendId;
+                    var currentUserId = friendsAlready.UserId;
+                    var friendId = friendsAlready.FriendId;
 
                     friendsAlready.UserId = friendId;
                     friendsAlready.FriendId = currentUserId;
@@ -261,7 +261,7 @@ namespace DormBuddy.Controllers
             if (friendsAlready.blocked == true && friendsAlready.UserId == user.Id) {
                 //return BadRequest(new { error ="You must first unblock this user!" });
 
-                await fmodel.Remove(friendsAlready);
+                fmodel.Remove(friendsAlready);
 
                 await _context.SaveChangesAsync();
 
