@@ -11,6 +11,8 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace DormBuddy.Controllers
 {
+    [ApiController]
+[Route("api/[controller]")]
     public class ImgurController : BaseController
     {
         private readonly DBContext _context;
@@ -19,6 +21,7 @@ namespace DormBuddy.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<BaseController> _logger;
         private readonly IMemoryCache _memoryCache;
+        private readonly TimeZoneService _timezoneService;
 
         public ImgurController(
             DBContext context,
@@ -26,8 +29,9 @@ namespace DormBuddy.Controllers
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             ILogger<BaseController> logger,
-            IMemoryCache memoryCache
-        ) : base(userManager, signInManager, context, logger, memoryCache)
+            IMemoryCache memoryCache,
+            TimeZoneService timezoneService
+        ) : base(userManager, signInManager, context, logger, memoryCache, timezoneService)
         {
             _context = context;
             _imgurService = imgurService;
@@ -35,7 +39,34 @@ namespace DormBuddy.Controllers
             _signInManager = signInManager;
             _logger = logger;
             _memoryCache = memoryCache;
+            _timezoneService = timezoneService;
         }
+
+        /*
+        [HttpPost]
+        public async Task<IActionResult> FriendshipStatus(ApplicationUser target) {
+            
+            
+
+            return false;
+        }*/
+
+        [HttpGet("GetDashboardMessages")]
+        public async Task<IActionResult> GetDashboadMessages([FromQuery] int type) {
+            try {
+                var response = await getDBoardMessages(type);
+                return Ok(response);
+            } catch (Exception ex) {
+                return StatusCode(500, new { error = "An error occurred while fetching messages.", details = ex.Message });
+            }
+        }
+
+        [HttpPost("SendDashboardMessage")]
+        public async Task SendDashboardMessage([FromQuery] int type, [FromQuery]  string message)
+        {
+            await sendDBoardMessage(type, message);
+        }
+
 
         [HttpPost]
         public async Task<IActionResult> UploadImage(IFormFile image)

@@ -24,6 +24,7 @@ namespace DormBuddy.Controllers
         
         private readonly ILogger<BaseController> _logger;
         private readonly IMemoryCache _memoryCache;
+        private readonly TimeZoneService _timezoneService;
 
         private readonly int REVALIDATE_TIME = 30; // in minutes
 
@@ -32,7 +33,8 @@ namespace DormBuddy.Controllers
             SignInManager<ApplicationUser> signInManager,
             DBContext context,
             ILogger<BaseController> logger,
-            IMemoryCache memoryCache
+            IMemoryCache memoryCache,
+            TimeZoneService timezoneService
         )
         {
             _userManager = userManager;
@@ -40,6 +42,7 @@ namespace DormBuddy.Controllers
             _context = context;
             _logger = logger;
             _memoryCache = memoryCache;
+            _timezoneService = timezoneService;
         }
 
         protected async Task<ApplicationUser> GetCurrentUserAsync()
@@ -160,12 +163,113 @@ namespace DormBuddy.Controllers
 
                 LastLogin = profile != null ? profile.LastLogin : DateTime.UtcNow,
 
-                AccountStatus = profile?.AccountStatus ?? "Not Verified"
+                Verified = profile != null ? profile.Verified : false
 
             };
         }
 
-        
+        public async Task<IActionResult> getDBoardMessages(int ChatType)
+        {
+            var messages = await _context.DashboardChatModel
+                .Where(m => m.type == ChatType)
+                .OrderByDescending(m => m.sent_at)
+                .Take(20)
+                .ToListAsync();
+
+            var userIds = messages.Select(m => m.UserId).Distinct().ToList();
+
+            var users = await _userManager.Users
+                .Where(u => userIds.Contains(u.Id))
+                .ToListAsync();
+
+            var response = messages
+                .OrderBy(m => m.sent_at)
+                .Select(m =>
+                {
+                    var user = users.FirstOrDefault(u => u.Id == m.UserId);
+                    if (user == null)
+                    {
+                        throw new Exception($"User not found for UserId: {m.UserId}");
+                    }
+
+                    return new
+                    {
+                        Id = m.Id,
+                        User = user,  
+                        type = m.type,
+                        sent_at = getCurrentTimeFromUTC(m.sent_at).ToString("yyyy-MM-dd HH:mm:ss tt"),
+                        message = m.message
+                    };
+                });
+
+            return Ok(new { r = response });
+        }
+
+
+        public async Task sendDBoardMessage(int ChatType, string text) {
+
+            var user = await GetCurrentUserAsync();
+
+            var message = new DashboardChatModel{
+                UserId = user.Id,
+                type =  ChatType,
+                sent_at = DateTime.UtcNow,
+                message = text
+            };
+
+            await _context.DashboardChatModel.AddAsync(message);
+
+            await _context.SaveChangesAsync();
 
         }
+
+
+
+
+                [HttpPost]
+        public async Task<IActionResult> ChangeTimeZone(string timeZone)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user != null)
+            {
+
+                Response.Cookies.Append(
+                "UserTimeZone",
+                timeZone, 
+                new CookieOptions { 
+                    Expires = DateTimeOffset.UtcNow.AddYears(1), 
+                    IsEssential = true, 
+                    SameSite = SameSiteMode.None, 
+                    Secure = true 
+                });
+            }
+
+            return Redirect(Request.Headers["Referer"].ToString());
+        }
+
+        public IActionResult GetCurrentTime()
+        {
+            DateTime utcNow = DateTime.UtcNow;
+
+            // Get the user's time zone from the cookie
+            string userTimeZoneId = Request.Cookies["UserTimeZone"] ?? "UTC";
+
+            // Convert the UTC time to the user's local time
+            DateTime eventLocalTime = _timezoneService.ConvertToLocal(utcNow, userTimeZoneId);
+
+            // Return the local time as a string
+            return Content(eventLocalTime.ToString("F"));
+        }
+
+        public DateTime getCurrentTimeFromUTC(DateTime date) {
+            DateTime time = date;
+
+            string userTimeZoneId = Request.Cookies["UserTimeZone"] ?? "UTC";
+
+            DateTime local = _timezoneService.ConvertToLocal(time, userTimeZoneId);
+
+            return local;
+        }
+
+    }
 }

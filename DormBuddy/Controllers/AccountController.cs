@@ -36,7 +36,7 @@ namespace DormBuddy.Controllers
             TimeZoneService timeZoneService,
             IConfiguration configuration,
             IMemoryCache memoryCache,
-            DBContext context) : base(userManager, signInManager, context, logger, memoryCache)
+            DBContext context) : base(userManager, signInManager, context, logger, memoryCache, timeZoneService)
         {
             _logger = logger;
             _userManager = userManager;
@@ -625,51 +625,6 @@ namespace DormBuddy.Controllers
 
 
         #endregion
-
-        [HttpPost]
-        public async Task<IActionResult> ChangeTimeZone(string timeZone)
-        {
-            var user = await _userManager.GetUserAsync(User);
-            if (user != null)
-            {
-
-                Response.Cookies.Append(
-                "UserTimeZone",
-                timeZone, 
-                new CookieOptions { 
-                    Expires = DateTimeOffset.UtcNow.AddYears(1), 
-                    IsEssential = true, 
-                    SameSite = SameSiteMode.None, 
-                    Secure = true 
-                });
-            }
-
-            return Redirect(Request.Headers["Referer"].ToString());
-        }
-
-        public IActionResult GetCurrentTime()
-        {
-            DateTime utcNow = DateTime.UtcNow;
-
-            // Get the user's time zone from the cookie
-            string userTimeZoneId = Request.Cookies["UserTimeZone"] ?? "UTC";
-
-            // Convert the UTC time to the user's local time
-            DateTime eventLocalTime = _timeZoneService.ConvertToLocal(utcNow, userTimeZoneId);
-
-            // Return the local time as a string
-            return Content(eventLocalTime.ToString("F"));
-        }
-
-        public DateTime getCurrentTimeFromUTC(DateTime date) {
-            DateTime time = date;
-
-            string userTimeZoneId = Request.Cookies["UserTimeZone"] ?? "UTC";
-
-            DateTime local = _timeZoneService.ConvertToLocal(time, userTimeZoneId);
-
-            return local;
-        }
 
     }
 }   

@@ -38,12 +38,15 @@ namespace DormBuddy.Models
 
         public DbSet<UserLastUpdate> UserLastUpdate { get; set; } // saves the last time the user updated the browser to find online status
 
+        public DbSet<DashboardChatModel> DashboardChatModel { get; set; }
+
+        public DbSet<FriendsModel> FriendsModel { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured) {
                 optionsBuilder.UseMySql("Server=shportfolio.net;Database=myportfolio_dormbuddy;User=myportfolio;Password=65eyqYcPHv;", 
-                    new MySqlServerVersion(new Version(8, 0, 2)))
-                    .EnableSensitiveDataLogging();
+                    new MySqlServerVersion(new Version(8, 0, 2)));
             }
                 
         }
