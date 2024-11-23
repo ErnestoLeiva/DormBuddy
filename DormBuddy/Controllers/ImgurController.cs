@@ -41,15 +41,238 @@ namespace DormBuddy.Controllers
             _memoryCache = memoryCache;
             _timezoneService = timezoneService;
         }
-
-        /*
+        
         [HttpPost]
         public async Task<IActionResult> FriendshipStatus(ApplicationUser target) {
-            
-            
+            var user = await GetCurrentUserAsync();
+            var friendTable = await _context.FriendsModel.Where(p => p.UserId == user.Id).ToListAsync();
 
-            return false;
-        }*/
+            var t = await friendTable.FirstOrDefaultAsync(m => (m.UserId == user.Id && m.FriendId == target.Id) || (m.UserId == target.Id && m.FriendId == user.Id));
+
+
+            if (t == null) {
+                return Ok(new { status = "not friends" });
+            }
+
+            if (t.blocked) {
+                return Ok(new { status = "blocked" });
+            } else {
+                return Ok(new { status = "friends" });
+            }
+            
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GetAllFriends() {
+            var user = await GetCurrentUserAsync();
+            var friendTable = await _context.FriendsModel.Where(p => (p.UserId == user.Id && p.blocked == false) || (p.FriendId == user.Id && p.blocked == false)).ToListAsync();
+
+
+            if (friendsTable == null) {
+                return BadRequest(new { error = "No friends!" });
+            }
+
+            var friendsDetails = new List<object>();
+
+            foreach (var friend in friendTable)
+            {
+                // Get the friend user (either UserId or FriendId based on the current user)
+                var friendId = friend.UserId == user.Id ? friend.FriendId : friend.UserId;
+
+                var friendUser = await _userManager.Users.FirstOrDefaultAsync(u => u.Id == friendId);
+
+                if (friendUser != null)
+                {
+                    friendsDetails.Add(BuildUserProfile(friendUser, null));
+                }
+            }
+
+            return Ok(new { friends = friendsDetails });
+            
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddFriend(ApplicationUser target) {
+
+            if (target == null || string.IsNullOrWhiteSpace(target.Id))
+            {
+                return BadRequest(new { error = "Invalid target user." });
+            }
+
+            var user = await GetCurrentUserAsync();
+
+            if (user == null)
+            {
+                return Unauthorized(new { error = "User is not logged in." });
+            }
+            
+            var fmodel = _context.FriendsModel;
+
+            var friendsAlready = await fmodel.FirstOrDefaultAsync(m => (m.UserId == user.Id && m.FriendId == target.Id) || (m.UserId == target.Id && m.FriendId == user.Id));
+
+            if (friendsAlready != null)
+            {
+                return BadRequest(new { error = "You are already friends or the friend request exists." });
+            }
+
+            await fmodel.AddAsync(new FriendsModel {
+                UserId = user.Id,
+                FriendId = target.Id,
+                blocked = false
+            });
+
+            await _context.SaveChangesAsync();
+            
+            return Ok(new { status = "Friend added successfully!" });
+
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RemoveFriend(ApplicationUser target) {
+
+            if (target == null || string.IsNullOrWhiteSpace(target.Id))
+            {
+                return BadRequest(new { error = "Invalid target user." });
+            }
+
+            var user = await GetCurrentUserAsync();
+
+            if (user == null)
+            {
+                return Unauthorized(new { error = "User is not logged in." });
+            }
+            
+            var fmodel = _context.FriendsModel;
+
+            var friendsAlready = await fmodel.FirstOrDefaultAsync(m => (m.UserId == user.Id && m.FriendId == target.Id) || (m.UserId == target.Id && m.FriendId == user.Id));
+
+            if (friendsAlready == null)
+            {
+                return BadRequest(new { error = "You are not friends currently!" });
+            }
+            
+            if (friendsAlready.blocked == true) {
+                return BadRequest(new { error ="You must first unblock this user!" });
+            }
+
+            await fmodel.Remove(friendsAlready);
+
+            await _context.SaveChangesAsync();
+            
+            return Ok(new { status = "Friend removed successfully!" });
+
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> BlockUser(ApplicationUser target) {
+
+            if (target == null || string.IsNullOrWhiteSpace(target.Id))
+            {
+                return BadRequest(new { error = "Invalid target user." });
+            }
+
+            var user = await GetCurrentUserAsync();
+
+            if (user == null)
+            {
+                return Unauthorized(new { error = "User is not logged in." });
+            }
+            
+            var fmodel = _context.FriendsModel;
+
+            var friendsAlready = await fmodel.FirstOrDefaultAsync(m => (m.UserId == user.Id && m.FriendId == target.Id) || (m.UserId == target.Id && m.FriendId == user.Id));
+
+            if (friendsAlready != null && friendsAlready.blocked == true)
+            {
+
+                if (friendsAlready.FriendId == target.Id) {
+                    return BadRequest(new { error = "You have already blocked this user!" });
+                } else {
+                    return BadRequest(new { error = "This user already has you blocked!" });
+                }
+                
+            }
+
+            if (friendsAlready != null && friendsAlready.blocked == false) {
+                if (friendsAlready.FriendId == target.Id) { // current user blocking friend
+                    friendsAlready.blocked = true;
+                    
+                    await _context.SaveChangesAsync();
+
+                    return Ok(new { status = "User has been blocked!" });
+
+                } else {
+                    
+                    // Must switch FriendId to UserId and then block
+
+                    currentUserId = friendsAlready.UserId;
+                    friendId = friendsAlready.FriendId;
+
+                    friendsAlready.UserId = friendId;
+                    friendsAlready.FriendId = currentUserId;
+                    friendsAlready.blocked = true;
+
+                    await _context.SaveChangesAsync();
+
+                    return Ok(new { status = "User has been blocked!" });
+                }
+            }
+
+            await fmodel.AddAsync(new FriendsModel {
+                UserId = user.Id,
+                FriendId = target.Id,
+                blocked = true
+            });
+
+            await _context.SaveChangesAsync();
+            
+            return Ok(new { status = "User blocked successfully!" });
+
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UnblockUser(ApplicationUser target) {
+
+            if (target == null || string.IsNullOrWhiteSpace(target.Id))
+            {
+                return BadRequest(new { error = "Invalid target user." });
+            }
+
+            var user = await GetCurrentUserAsync();
+
+            if (user == null)
+            {
+                return Unauthorized(new { error = "User is not logged in." });
+            }
+            
+            var fmodel = _context.FriendsModel;
+
+            var friendsAlready = await fmodel.FirstOrDefaultAsync(m => (m.UserId == user.Id && m.FriendId == target.Id) || (m.UserId == target.Id && m.FriendId == user.Id));
+
+            if (friendsAlready == null) {
+                return BadRequest(new { error = "User is not blocked!" });
+            }
+
+            if (friendsAlready != null && friendsAlready.blocked == false && friendsAlready.UserId == user.Id)
+            {
+                return BadRequest(new { error = "You do not have the user blocked currently!" });
+            }
+            
+            if (friendsAlready.blocked == true && friendsAlready.UserId == user.Id) {
+                //return BadRequest(new { error ="You must first unblock this user!" });
+
+                await fmodel.Remove(friendsAlready);
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new { status = "Friend removed successfully!" });
+            }
+
+            
+            
+            return Ok(new { error = "Unknown error unblocking user!" });
+
+        }
 
         [HttpGet("GetDashboardMessages")]
         public async Task<IActionResult> GetDashboadMessages([FromQuery] int type) {
