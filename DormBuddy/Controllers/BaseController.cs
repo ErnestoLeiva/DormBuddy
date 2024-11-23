@@ -130,7 +130,7 @@ namespace DormBuddy.Controllers
                 _memoryCache.Set(cacheKey, profile, TimeSpan.FromMinutes(time)); // Optional: refresh cache
         }
 
-        private UserProfile BuildUserProfile(ApplicationUser user, UserProfile profile) {
+        protected UserProfile BuildUserProfile(ApplicationUser user, UserProfile profile) {
             if (user == null)
             {
                 throw new ArgumentNullException(nameof(user), "User cannot be null.");
@@ -222,9 +222,6 @@ namespace DormBuddy.Controllers
             await _context.SaveChangesAsync();
 
         }
-
-
-
 
                 [HttpPost]
         public async Task<IActionResult> ChangeTimeZone(string timeZone)

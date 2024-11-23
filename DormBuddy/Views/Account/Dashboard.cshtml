@@ -304,7 +304,7 @@
                     messages.value.r.forEach(msg => {
                         const messageHtml = `
                             <div class="mb-2">
-                                <strong>${msg.user.userName}:</strong> ${msg.message}
+                                <strong><a href='profile?username=${msg.user.userName}' target='_blank'>${msg.user.userName}</a>:</strong> ${msg.message}
                                 <div class="text-muted small">${msg.sent_at}</div>
                             </div>`;
                         
