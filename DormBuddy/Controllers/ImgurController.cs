@@ -22,6 +22,7 @@ namespace DormBuddy.Controllers
         private readonly ILogger<BaseController> _logger;
         private readonly IMemoryCache _memoryCache;
         private readonly TimeZoneService _timezoneService;
+        private readonly IConfiguration _configuration;
 
         public ImgurController(
             DBContext context,
@@ -30,8 +31,9 @@ namespace DormBuddy.Controllers
             SignInManager<ApplicationUser> signInManager,
             ILogger<BaseController> logger,
             IMemoryCache memoryCache,
-            TimeZoneService timezoneService
-        ) : base(userManager, signInManager, context, logger, memoryCache, timezoneService)
+            TimeZoneService timezoneService,
+            IConfiguration configuration
+        ) : base(userManager, signInManager, context, logger, memoryCache, timezoneService, configuration)
         {
             _context = context;
             _imgurService = imgurService;
@@ -40,27 +42,7 @@ namespace DormBuddy.Controllers
             _logger = logger;
             _memoryCache = memoryCache;
             _timezoneService = timezoneService;
-        }
-
-        /*
-        [HttpPost]
-        public async Task<IActionResult> FriendshipStatus(ApplicationUser target) {
-            var user = await GetCurrentUserAsync();
-            var friendTable = await _context.FriendsModel.Where(p => p.UserId == user.Id).ToListAsync();
-
-            var t = friendTable.FirstOrDefault(m => (m.UserId == user.Id && m.FriendId == target.Id) || (m.UserId == target.Id && m.FriendId == user.Id));
-
-
-            if (t == null) {
-                return Ok(new { status = "not friends" });
-            }
-
-            if (t.blocked) {
-                return Ok(new { status = "blocked" });
-            } else {
-                return Ok(new { status = "friends" });
-            }
-            
+            _configuration = configuration;
         }
 
         [HttpPost]
@@ -92,10 +74,12 @@ namespace DormBuddy.Controllers
             
         }
 
-        [HttpPost]
-        public async Task<IActionResult> AddFriend(ApplicationUser target) {
+        [HttpGet("AddFriend")]
+        public async Task<IActionResult> AddFriend(string target) {
+            
+            var targetUser = await _context.Users.FirstOrDefaultAsync(p => p.UserName == target);
 
-            if (target == null || string.IsNullOrWhiteSpace(target.Id))
+            if (targetUser == null || string.IsNullOrWhiteSpace(targetUser.Id))
             {
                 return BadRequest(new { error = "Invalid target user." });
             }
@@ -109,7 +93,7 @@ namespace DormBuddy.Controllers
             
             var fmodel = _context.FriendsModel;
 
-            var friendsAlready = await fmodel.FirstOrDefaultAsync(m => (m.UserId == user.Id && m.FriendId == target.Id) || (m.UserId == target.Id && m.FriendId == user.Id));
+            var friendsAlready = await fmodel.FirstOrDefaultAsync(m => (m.UserId == user.Id && m.FriendId == targetUser.Id) || (m.UserId == targetUser.Id && m.FriendId == user.Id));
 
             if (friendsAlready != null)
             {
@@ -118,20 +102,23 @@ namespace DormBuddy.Controllers
 
             await fmodel.AddAsync(new FriendsModel {
                 UserId = user.Id,
-                FriendId = target.Id,
-                blocked = false
+                FriendId = targetUser.Id,
+                blocked = false,
+                pending = true
             });
 
             await _context.SaveChangesAsync();
             
-            return Ok(new { status = "Friend added successfully!" });
+            return RedirectToAction("Profile", "Account", new { username = targetUser.UserName });
 
         }
 
-        [HttpPost]
-        public async Task<IActionResult> RemoveFriend(ApplicationUser target) {
+        [HttpGet("RemoveFriend")]
+        public async Task<IActionResult> RemoveFriend(string target) {
 
-            if (target == null || string.IsNullOrWhiteSpace(target.Id))
+            var targetUser = await _context.Users.FirstOrDefaultAsync(p => p.UserName == target);
+
+            if (targetUser == null || string.IsNullOrWhiteSpace(targetUser.Id))
             {
                 return BadRequest(new { error = "Invalid target user." });
             }
@@ -145,7 +132,7 @@ namespace DormBuddy.Controllers
             
             var fmodel = _context.FriendsModel;
 
-            var friendsAlready = await fmodel.FirstOrDefaultAsync(m => (m.UserId == user.Id && m.FriendId == target.Id) || (m.UserId == target.Id && m.FriendId == user.Id));
+            var friendsAlready = await fmodel.FirstOrDefaultAsync(m => (m.UserId == user.Id && m.FriendId == targetUser.Id) || (m.UserId == targetUser.Id && m.FriendId == user.Id));
 
             if (friendsAlready == null)
             {
@@ -160,14 +147,16 @@ namespace DormBuddy.Controllers
 
             await _context.SaveChangesAsync();
             
-            return Ok(new { status = "Friend removed successfully!" });
+            return RedirectToAction("Profile", "Account", new { username = targetUser.UserName });
 
         }
 
-        [HttpPost]
-        public async Task<IActionResult> BlockUser(ApplicationUser target) {
+        [HttpGet("BlockUser")]
+        public async Task<IActionResult> BlockUser(string target) {
+            
+            var targetUser = await _context.Users.FirstOrDefaultAsync(p => p.UserName == target);
 
-            if (target == null || string.IsNullOrWhiteSpace(target.Id))
+            if (targetUser == null || string.IsNullOrWhiteSpace(targetUser.Id))
             {
                 return BadRequest(new { error = "Invalid target user." });
             }
@@ -181,12 +170,12 @@ namespace DormBuddy.Controllers
             
             var fmodel = _context.FriendsModel;
 
-            var friendsAlready = await fmodel.FirstOrDefaultAsync(m => (m.UserId == user.Id && m.FriendId == target.Id) || (m.UserId == target.Id && m.FriendId == user.Id));
+            var friendsAlready = await fmodel.FirstOrDefaultAsync(m => (m.UserId == user.Id && m.FriendId == targetUser.Id) || (m.UserId == targetUser.Id && m.FriendId == user.Id));
 
             if (friendsAlready != null && friendsAlready.blocked == true)
             {
 
-                if (friendsAlready.FriendId == target.Id) {
+                if (friendsAlready.FriendId == targetUser.Id) {
                     return BadRequest(new { error = "You have already blocked this user!" });
                 } else {
                     return BadRequest(new { error = "This user already has you blocked!" });
@@ -195,12 +184,12 @@ namespace DormBuddy.Controllers
             }
 
             if (friendsAlready != null && friendsAlready.blocked == false) {
-                if (friendsAlready.FriendId == target.Id) { // current user blocking friend
+                if (friendsAlready.FriendId == targetUser.Id) { // current user blocking friend
                     friendsAlready.blocked = true;
                     
                     await _context.SaveChangesAsync();
 
-                    return Ok(new { status = "User has been blocked!" });
+                    return RedirectToAction("Profile", "Account", new { username = targetUser.UserName });
 
                 } else {
                     
@@ -215,26 +204,28 @@ namespace DormBuddy.Controllers
 
                     await _context.SaveChangesAsync();
 
-                    return Ok(new { status = "User has been blocked!" });
+                    return RedirectToAction("Profile", "Account", new { username = targetUser.UserName });
                 }
             }
 
             await fmodel.AddAsync(new FriendsModel {
                 UserId = user.Id,
-                FriendId = target.Id,
+                FriendId = targetUser.Id,
                 blocked = true
             });
 
             await _context.SaveChangesAsync();
             
-            return Ok(new { status = "User blocked successfully!" });
+            return RedirectToAction("Profile", "Account", new { username = targetUser.UserName });
 
         }
 
-        [HttpPost]
-        public async Task<IActionResult> UnblockUser(ApplicationUser target) {
+        [HttpGet("UnblockUser")]
+        public async Task<IActionResult> UnblockUser(string target) {
 
-            if (target == null || string.IsNullOrWhiteSpace(target.Id))
+            var targetUser = await _context.Users.FirstOrDefaultAsync(p => p.UserName == target);
+
+            if (targetUser == null || string.IsNullOrWhiteSpace(targetUser.Id))
             {
                 return BadRequest(new { error = "Invalid target user." });
             }
@@ -248,7 +239,7 @@ namespace DormBuddy.Controllers
             
             var fmodel = _context.FriendsModel;
 
-            var friendsAlready = await fmodel.FirstOrDefaultAsync(m => (m.UserId == user.Id && m.FriendId == target.Id) || (m.UserId == target.Id && m.FriendId == user.Id));
+            var friendsAlready = await fmodel.FirstOrDefaultAsync(m => (m.UserId == user.Id && m.FriendId == targetUser.Id) || (m.UserId == targetUser.Id && m.FriendId == user.Id));
 
             if (friendsAlready == null) {
                 return BadRequest(new { error = "User is not blocked!" });
@@ -259,20 +250,79 @@ namespace DormBuddy.Controllers
                 return BadRequest(new { error = "You do not have the user blocked currently!" });
             }
             
-            if (friendsAlready.blocked == true && friendsAlready.UserId == user.Id) {
+            if (friendsAlready.blocked == true) {
                 //return BadRequest(new { error ="You must first unblock this user!" });
 
                 fmodel.Remove(friendsAlready);
 
                 await _context.SaveChangesAsync();
 
-                return Ok(new { status = "Friend removed successfully!" });
+                //return Ok(new { status = "Friend removed successfully!" });
+                return RedirectToAction("Profile", "Account", new { username = targetUser.UserName });
+                
             }
 
             
             
             return Ok(new { error = "Unknown error unblocking user!" });
 
+        }
+
+        [HttpGet("AcceptOrDenyPending")]
+        public async Task<IActionResult> AcceptOrDenyPending(string target, string type) { // view pending(to accept) or remove pending(to abort)
+            var targetUser = await _context.Users.FirstOrDefaultAsync(p => p.UserName == target);
+
+            if (targetUser == null || string.IsNullOrWhiteSpace(targetUser.Id))
+            {
+                return BadRequest(new { error = "Invalid target user." }); // found no user for username
+            }
+
+            var user = await GetCurrentUserAsync(); // current user
+
+            if (user == null)
+            {
+                return Unauthorized(new { error = "User is not logged in." });
+            }
+            
+            var fmodel = _context.FriendsModel;
+
+            //var friendsAlready = await fmodel.FirstOrDefaultAsync(m => (m.UserId == user.Id && m.FriendId == targetUser.Id) || (m.UserId == targetUser.Id && m.FriendId == user.Id));
+
+            // acccept or deny(UserId = target)
+            var friendAOrD = await fmodel.FirstOrDefaultAsync(m => m.UserId == targetUser.Id && m.FriendId == user.Id);
+
+            if (friendAOrD == null) { // No friend request have been sent to current user, check bi dir.
+
+                // Cancel request or Block user(UserId = currentUser)
+                var friendCOrB = await fmodel.FirstOrDefaultAsync(m => m.UserId == user.Id && m.FriendId == targetUser.Id);
+
+                if (type == "cancel") {
+                    _context.Remove(friendCOrB);
+                    await _context.SaveChangesAsync();
+                }
+
+                return RedirectToAction("Profile", "Account", new { username = targetUser.UserName });
+            } else {
+                Console.WriteLine("NOT NULL");
+                switch (type)
+                {
+                    case "accept":
+                        friendAOrD.pending = false;
+                        await _context.SaveChangesAsync();
+                    break;
+                    case "deny":
+                        _context.Remove(friendAOrD);
+                        await _context.SaveChangesAsync();
+                    break;
+                    default:
+                        BadRequest(new { error = "Neither 'accept' nor 'deny' has been passed as the type." });
+                    break;
+                }
+
+                return RedirectToAction("Profile", "Account", new { username = targetUser.UserName });
+            }
+
+            return BadRequest(new { error = "No friend request found to process." });
         }
 
         [HttpGet("GetDashboardMessages")]

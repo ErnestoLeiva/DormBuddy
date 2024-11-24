@@ -199,6 +199,9 @@ namespace DormBuddy.Migrations
                     b.Property<bool>("blocked")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<bool>("pending")
+                        .HasColumnType("tinyint(1)");
+
                     b.HasKey("Id");
 
                     b.ToTable("FriendsModel");

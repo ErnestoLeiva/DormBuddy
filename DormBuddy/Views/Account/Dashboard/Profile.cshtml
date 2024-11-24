@@ -8,8 +8,10 @@
 
     <!-- Banner Section -->
     <div class="banner-section">
-        <img src="@Model.BannerImageUrl" alt="Banner Image" class="banner-image"/>
-        
+        <div class="banner-text text-center">
+            <!--<h2>Welcome to Your Profile</h2>
+            <p>Manage your settings and keep your profile up-to-date!</p>-->
+        </div>
     </div>
 
     <!-- Return to Dashboard Button -->
@@ -25,7 +27,11 @@
             <a class="btn btn-primary" href="Settings?page=ProfileSettings" style="height:38px;">
                 <i class="fas fa-cog"></i> Configuration
             </a>
-            <a class="btn btn-primary" href="" style="height:30px; opacity:0;"></a>
+        </div>
+    } else {
+        <div class="text-right mb-4">
+            <a class="btn btn-primary" href="" style="height:38px; opacity:0;">
+            </a>
         </div>
     }
 
@@ -39,7 +45,7 @@
 </div>
 
 <!-- Profile Information Section -->
-<div class="container" style="padding-top:300px;">
+<div class="container">
     <div class="row">
         <!-- Left Column: Basic Profile Information -->
         <div class="col-md-4 profile-info">
@@ -54,9 +60,9 @@
                 <p>@Model.Bio</p>
             }
 
-            @if (User?.Identity?.Name != Model.User.UserName )
+            @if (User?.Identity?.Name != Model.User.UserName)
             {
-                var fstatus = (string)@ViewData["FriendshipStatus"];
+                var fstatus = @ViewData["FriendshipStatus"];
             <!-- Add/Remove/Block/Unblock buttons go here -->
             <div style="display: flex; justify-content: left; gap: 15px; padding-left:5%;">
                 
@@ -64,7 +70,7 @@
 
                 @if (fstatus == "blocked") {
                     <button class="btn btn-success"
-                        data-url="@Url.Action("UnblockUser", "imgur", new { target = Model.User.UserName })"
+                        data-url="@Url.Action("UnblockUser", "imgur", new { target = @Model.User.UserName })"
                         onclick="navigateToFriendAction(this)">
                         Unblock
                     </button>
@@ -75,34 +81,40 @@
                         Unfriend
                     </button>
                    <button class="btn btn-success"
-                        data-url="@Url.Action("BlockUser", "imgur", new { target = Model.User.UserName })"
+                        data-url="@Url.Action("BlockUser", "imgur", new { target = @Model.User.UserName })"
                         onclick="navigateToFriendAction(this)">
                         Block
                     </button>
                 } else if (fstatus == "not friends") {
                     <button class="btn btn-success"
-                        data-url="@Url.Action("AddFriend", "imgur", new { target = Model.User.UserName })"
+                        data-url="@Url.Action("AddFriend", "imgur", new { target = @Model.User.UserName })"
                         onclick="navigateToFriendAction(this)">
                         Add
                     </button>
                     <button class="btn btn-success"
-                        data-url="@Url.Action("BlockUser", "imgur", new { target = Model.User.UserName })"
+                        data-url="@Url.Action("BlockUser", "imgur", new { target = @Model.User.UserName })"
                         onclick="navigateToFriendAction(this)">
                         Block
                     </button>
                 } else if (fstatus == "pending_accept") {
-                    <form action="@Url.Action("AcceptOrDenyPending", "imgur", new { target = Model.User.UserName, type="accept", targetCtrl = "Profile" })", method="post">
-                        <button type="submit" class="btn btn-success">Accept</button>
-                    </form>
-                    <form action="@Url.Action("AcceptOrDenyPending", "imgur", new { target = Model.User.UserName, type="deny", targetCtrl = "Profile" })", method="post">
-                        <button type="submit" class="btn btn-success">Deny</button>
-                    </form>
-                } else if (fstatus == "pending_other") {
-                    <form action="@Url.Action("AcceptOrDenyPending", "imgur", new { target = Model.User.UserName, type="cancel", targetCtrl = "Profile" })", method="post">
-                        <button type="submit" class="btn btn-success">Remove Req.</button>
-                    </form>
                     <button class="btn btn-success"
-                        data-url="@Url.Action("BlockUser", "imgur", new { target = Model.User.UserName })"
+                        data-url="@Url.Action("AcceptOrDenyPending", "imgur", new { target = @Model.User.UserName, type="accept" })"
+                        onclick="navigateToFriendAction(this)">
+                        Accept
+                    </button>
+                    <button class="btn btn-success"
+                        data-url="@Url.Action("AcceptOrDenyPending", "imgur", new { target = @Model.User.UserName, type="deny" })"
+                        onclick="navigateToFriendAction(this)">
+                        Deny
+                    </button>
+                } else if (fstatus == "pending_other") {
+                    <button class="btn btn-success"
+                        data-url="@Url.Action("AcceptOrDenyPending", "imgur", new { target = @Model.User.UserName, type="cancel" })"
+                        onclick="navigateToFriendAction(this)">
+                        Cancel Req.
+                    </button>
+                    <button class="btn btn-success"
+                        data-url="@Url.Action("BlockUser", "imgur", new { target = @Model.User.UserName })"
                         onclick="navigateToFriendAction(this)">
                         Block
                     </button>

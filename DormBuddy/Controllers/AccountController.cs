@@ -41,7 +41,7 @@ namespace DormBuddy.Controllers
             TimeZoneService timeZoneService,
             IConfiguration configuration,
             IMemoryCache memoryCache,
-            DBContext context) : base(userManager, signInManager, context, logger, memoryCache, timeZoneService)
+            DBContext context) : base(userManager, signInManager, context, logger, memoryCache, timeZoneService, configuration)
         {
             _logger = logger;
             _userManager = userManager;
@@ -520,12 +520,58 @@ namespace DormBuddy.Controllers
             return RedirectToAction("Login");
         }
 
-        // GET: /Account/Dashboard/Lending
-        public IActionResult Lending()
-        {
-            if (User?.Identity != null && User.Identity.IsAuthenticated)
-            {
-                return View("~/Views/Account/Dashboard/Lending.cshtml");
+                // Get the username from query parameter or fallback to User.Identity.Name
+                string get_username = Request.Query["username"].ToString() ?? "";
+                get_username = string.IsNullOrEmpty(get_username) ? User?.Identity?.Name : get_username;
+
+                // If username is still null or empty, redirect to the dashboard
+                if (string.IsNullOrEmpty(get_username))
+                {
+                    return RedirectToAction("Dashboard");
+                }
+
+                var profile = await GetUserInformation(get_username);
+
+                var u = profile.User;
+                if (u == null)
+                {
+                    return RedirectToAction("Dashboard");
+                }
+
+                // If profile is null, redirect to the dashboard
+                if (profile == null)
+                {
+                    return RedirectToAction("Dashboard");
+                }
+
+                var profileImage = _configuration["Profile:Default_ProfileImage"];
+                if (string.IsNullOrEmpty(profile.ProfileImageUrl))
+                {
+                    profile.ProfileImageUrl = profileImage;
+                }
+
+                var adjustedLastLogin = getCurrentTimeFromUTC(profile.LastLogin);
+                ViewData["AdjustedLastLogin"] = adjustedLastLogin;
+
+                // Profile Online Status Check
+                ViewData["profile_online_status"] = "Offline";
+                var getLastUpdate = await getUserLastUpdate(profile.User);
+                if (getLastUpdate?.LastUpdate is DateTime lastUpdate &&
+                    (DateTime.UtcNow - lastUpdate).TotalSeconds < 300)
+                {
+                    ViewData["profile_online_status"] = "Online";
+                }
+
+                if (profile.User.UserName != User?.Identity?.Name) {
+                    var fstatus = await FriendshipStatus(profile.User);
+                    ViewData["FriendshipStatus"] = fstatus;
+                }
+
+                ViewData["FriendCount"] = await GetFriendCount(get_username);
+
+                ViewData["Friends"] = await GetAllFriends(get_username);
+
+                return View("~/Views/Account/Dashboard/Profile.cshtml", profile);
             }
             return RedirectToAction("Login");
         }
