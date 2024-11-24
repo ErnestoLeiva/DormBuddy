@@ -10,7 +10,6 @@ namespace DormBuddy.Models
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public bool RememberMe { get; set; }
-        public string? TimeZone { get; set; }
         public int TotalLogins { get; set; }  // Tracks the number of logins
         public DateTime? LastLoginDate { get; set; }  // Tracks the last login time
 
@@ -31,13 +30,20 @@ namespace DormBuddy.Models
         public DbSet<ExpenseModel> Expenses { get; set; }
         public DbSet<PeerLendingModel> PeerLendings { get; set; }
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
+
+        public DbSet<UserProfile> UserProfiles { get; set; }
+
+        public DbSet<UserLastUpdate> UserLastUpdate { get; set; } // saves the last time the user updated the browser to find online status
         public DbSet<GroupModel> Groups { get; set; }
+
+        public DbSet<DashboardChatModel> DashboardChatModel { get; set; }
+
+        public DbSet<FriendsModel> FriendsModel { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            if (!optionsBuilder.IsConfigured)
-            {
-                optionsBuilder.UseMySql("Server=shportfolio.net;Database=myportfolio_dormbuddy;User=myportfolio;Password=65eyqYcPHv;",
+            if (!optionsBuilder.IsConfigured) {
+                optionsBuilder.UseMySql("Server=shportfolio.net;Database=myportfolio_dormbuddy;User=myportfolio;Password=65eyqYcPHv;", 
                     new MySqlServerVersion(new Version(8, 0, 2)));
             }
         }

@@ -26,8 +26,6 @@ namespace DormBuddy.Controllers
         private readonly IMemoryCache _memoryCache;
         private readonly TimeZoneService _timezoneService;
 
-        private readonly IConfiguration _configuration;
-
         private readonly int REVALIDATE_TIME = 30; // in minutes
 
         public BaseController(
@@ -36,8 +34,7 @@ namespace DormBuddy.Controllers
             DBContext context,
             ILogger<BaseController> logger,
             IMemoryCache memoryCache,
-            TimeZoneService timezoneService,
-            IConfiguration configuration
+            TimeZoneService timezoneService
         )
         {
             _userManager = userManager;
@@ -46,7 +43,6 @@ namespace DormBuddy.Controllers
             _logger = logger;
             _memoryCache = memoryCache;
             _timezoneService = timezoneService;
-            _configuration = configuration;
         }
 
         protected async Task<ApplicationUser> GetCurrentUserAsync()
@@ -60,7 +56,7 @@ namespace DormBuddy.Controllers
 
             if (!string.IsNullOrEmpty(uname))
             {
-                user = await _context.Users.FirstOrDefaultAsync(m => m.UserName == uname || m.Email == uname);
+                user = await _userManager.FindByNameAsync(uname);
             }
 
             if (user == null)
@@ -134,7 +130,7 @@ namespace DormBuddy.Controllers
                 _memoryCache.Set(cacheKey, profile, TimeSpan.FromMinutes(time)); // Optional: refresh cache
         }
 
-        protected UserProfile BuildUserProfile(ApplicationUser user, UserProfile profile) {
+        private UserProfile BuildUserProfile(ApplicationUser user, UserProfile profile) {
             if (user == null)
             {
                 throw new ArgumentNullException(nameof(user), "User cannot be null.");
@@ -149,7 +145,6 @@ namespace DormBuddy.Controllers
 
                 Bio = profile?.Bio,
                 ProfileImageUrl = profile?.ProfileImageUrl ?? string.Empty,
-                BannerImageUrl = profile?.BannerImageUrl ?? string.Empty,
                 DateOfBirth = profile != null ? profile.DateOfBirth : DateTime.MinValue,
 
                 FacebookUrl = profile?.FacebookUrl ?? string.Empty,
@@ -202,7 +197,7 @@ namespace DormBuddy.Controllers
                         Id = m.Id,
                         User = user,  
                         type = m.type,
-                        sent_at = getCurrentTimeFromUTC(m.sent_at).ToString("yyyy-MM-dd hh:mm:ss tt"),
+                        sent_at = getCurrentTimeFromUTC(m.sent_at).ToString("yyyy-MM-dd HH:mm:ss tt"),
                         message = m.message
                     };
                 });
@@ -227,6 +222,9 @@ namespace DormBuddy.Controllers
             await _context.SaveChangesAsync();
 
         }
+
+
+
 
                 [HttpPost]
         public async Task<IActionResult> ChangeTimeZone(string timeZone)
@@ -271,128 +269,6 @@ namespace DormBuddy.Controllers
             DateTime local = _timezoneService.ConvertToLocal(time, userTimeZoneId);
 
             return local;
-        }
-
-        [HttpPost]
-        public async Task<string> FriendshipStatus(ApplicationUser target) {
-            var user = await GetCurrentUserAsync();
-            var friendTable = await _context.FriendsModel.Where(p => p.UserId == user.Id || p.UserId == target.Id).ToListAsync();
-
-            var t = friendTable.FirstOrDefault(m => (m.UserId == user.Id && m.FriendId == target.Id) || (m.UserId == target.Id && m.FriendId == user.Id));
-
-
-            if (t == null) {
-                //return Ok(new { status = "not friends" });
-                return "not friends";
-            }
-
-            if (t.blocked) {
-                //return Ok(new { status = "blocked" });
-                if (user.Id == t.FriendId) {
-                    return "blocked_me";
-                } else {
-                    return "blocked";
-                }
-            } else {
-                //return Ok(new { status = "friends" });
-                if (t.pending) {
-                    var toAcceptOrDeny = (t.UserId == target.Id && t.FriendId == user.Id) ? true : false;
-
-                    if (toAcceptOrDeny) {
-                        return "pending_accept";
-                    } else {
-                        return "pending_other";
-                    }
-                } else {
-                    return "friends";
-                }
-            }
-            
-        }
-
-        [HttpGet("GetFriendCount")]
-        public async Task<int> GetFriendCount(string username) {
-            var targetUser = await _context.Users.FirstOrDefaultAsync(p => p.UserName == username);
-
-            if (targetUser == null) {
-                throw new Exception("User not found");
-            }
-
-            var friends = await _context.FriendsModel
-            .Where(p => (p.UserId == targetUser.Id && p.pending != true && p.blocked != true) || (p.FriendId == targetUser.Id && p.pending != true && p.blocked != true))
-            .Select(p => new { p.UserId, p.FriendId })
-            .Distinct()
-            .ToListAsync();
-
-            return friends.Count;
-
-            
-        }
-
-        [HttpGet("GetAllFriends")]
-        public async Task<List<UserProfile>> GetAllFriends(string username) {
-            var targetUser = await _context.Users.FirstOrDefaultAsync(p => p.UserName == username);
-            
-
-            if (targetUser == null) {
-                throw new Exception("User not found");
-            }
-
-            var user = await GetCurrentUserAsync();
-
-            if (user == null) {
-                throw new Exception("Current signed in user could not be found!");
-            }
-
-            var friends = await _context.FriendsModel.Where(p => (p.UserId == targetUser.Id && p.FriendId != targetUser.Id && p.pending != true && p.blocked != true) || (p.FriendId == targetUser.Id && p.UserId != targetUser.Id && p.pending != true && p.blocked != true))
-            
-            .ToListAsync();
-
-
-
-            List<UserProfile> list = new List<UserProfile>();
-
-            if (!friends.Any())
-            {
-                return list;
-            }
-
-            // 3 possibilities, viewing own profile. uid = current, friendid = current
-            //                  viewing other profile with uid = current, friendid = target
-            //                                             uid = target, friendid = current
-
-            foreach (var up in friends) {
-                var friendId = up.UserId;
-                if (friendId == targetUser.Id)
-                {
-                    friendId = up.FriendId;
-                }
-
-                var targetEntity = await _context.Users.FirstOrDefaultAsync(p => p.Id == friendId);
-
-
-                if (targetEntity == null) {
-                    continue;
-                }
-
-                var foundU = await GetUserInformation(targetEntity.UserName);   
-
-                var img = foundU.ProfileImageUrl;
-
-                if (string.IsNullOrEmpty(img)) {
-                    img = _configuration["Profile:Default_ProfileImage"];
-                }
-
-                var pr = new UserProfile{
-                    User = foundU.User,
-                    ProfileImageUrl = img
-                };
-                list.Add(pr);
-            }
-
-            list = list.DistinctBy(profile => profile.User.Id).ToList();
-
-            return list;
         }
 
     }
