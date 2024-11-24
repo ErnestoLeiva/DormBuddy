@@ -13,6 +13,7 @@ namespace DormBuddy.Models
         public string? TimeZone { get; set; }
         public int TotalLogins { get; set; }  // Tracks the number of logins
         public DateTime? LastLoginDate { get; set; }  // Tracks the last login time
+        public string TemporaryProperty { get; set; }  // TEST migration detection
 
         // Navigation property for many-to-many relationship with GroupModel
         public ICollection<GroupModel>? Groups { get; set; }
@@ -31,6 +32,10 @@ namespace DormBuddy.Models
         public DbSet<PeerLendingModel> PeerLendings { get; set; }
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<GroupModel> Groups { get; set; }
+        public DbSet<UserProfile> UserProfiles { get; set; }
+        public DbSet<UserLastUpdate> UserLastUpdate { get; set; }
+        public DbSet<FriendsModel> FriendsModel { get; set; }
+        public DbSet<DashboardChatModel> DashboardChatModel { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

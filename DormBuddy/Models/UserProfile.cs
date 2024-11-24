@@ -11,7 +11,7 @@ namespace DormBuddy.Models
         public string? UserId { get; set; }
 
         [ForeignKey("UserId")] 
-        public ApplicationUser User { get; set; }
+        public ApplicationUser? User { get; set; }
 
         /*
         // Account infomration
@@ -25,7 +25,7 @@ namespace DormBuddy.Models
         public string? Bio { get; set; }
         public string? BannerImageUrl { get; set; }
         public string? ProfileImageUrl { get; set; }
-        public DateTime DateOfBirth { get; set; }
+        public DateTime? DateOfBirth { get; set; }
 
         // Social Media Links
         public string? FacebookUrl { get; set; }

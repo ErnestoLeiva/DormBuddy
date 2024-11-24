@@ -237,9 +237,10 @@
                                     <td>@Model.User.Email</td>
                                 </tr>
                                 <tr>
-                                    <th>Date of Birth</th>
-                                    <td>@Model.DateOfBirth.ToString("yyyy-MM-dd")</td>
+                                <th>Date of Birth</th>
+                                    <td>@(Model.DateOfBirth.HasValue ? Model.DateOfBirth.Value.ToString("yyyy-MM-dd") : "Not Provided")</td>
                                 </tr>
+
                                 <tr>
                                     <th>Preferred Language</th>
                                     <td>@Model.Preferred_Language</td>

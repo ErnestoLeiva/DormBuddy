@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -7,12 +6,12 @@ namespace DormBuddy.Models
 {
     public class ExpenseModel
     {
-
         [Key]
         public int Id { get; set; }
-        
-        [Required, StringLength(100)]
-        public string ExpenseName { get; set; } = string.Empty; // Initialized to avoid null issues
+
+        [Required]
+        [StringLength(100)]
+        public string? ExpenseName { get; set; }
 
         [Required]
         [Range(0.01, double.MaxValue, ErrorMessage = "Amount must be greater than 0.")]
@@ -27,14 +26,7 @@ namespace DormBuddy.Models
         [Required]
         public string? UserId { get; set; }
 
-        [ForeignKey("UserId")]
-        public ApplicationUser? CreatedBy { get; set; }
-
         [Required]
         public bool isSplit { get; set; }
-        
-
-
     }
-
 }
