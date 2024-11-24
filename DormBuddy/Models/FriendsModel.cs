@@ -13,5 +13,6 @@ namespace DormBuddy.Models
         public string? FriendId { get; set; }
 
         public bool blocked { get; set; }
+        public bool pending { get; set; }
     }
 }
