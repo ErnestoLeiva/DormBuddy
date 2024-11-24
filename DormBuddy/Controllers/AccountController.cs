@@ -1,6 +1,4 @@
 using System.Diagnostics;
-using System.Globalization;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using DormBuddy.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -57,6 +55,21 @@ namespace DormBuddy.Controllers
             if (User?.Identity?.IsAuthenticated == true)
                 return RedirectToAction("Dashboard");
 
+            return View();
+        }
+
+        #endregion
+        }
+
+        #region ACCOUNT FORMS
+
+        // GET: /Account/AccountForms
+        public IActionResult AccountForms()
+        {
+            if (User?.Identity != null && User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Dashboard");
+            }
             return View();
         }
 
@@ -130,7 +143,7 @@ namespace DormBuddy.Controllers
                     var lockoutTime = await _userManager.GetLockoutEndDateAsync(user);
                     var timeRemaining = lockoutTime.Value - DateTimeOffset.Now;
                     ViewBag.ErrorMessage = "Account is locked out!\nRemaining: " + timeRemaining.Minutes + " minutes, " + timeRemaining.Seconds + " seconds.";
-                    return View("AccountForms");
+                    return View("AccountForms""AccountForms");
                 }
 
                 await _userManager.AccessFailedAsync(user);
@@ -144,7 +157,7 @@ namespace DormBuddy.Controllers
             }
 
             
-            return View("AccountForms");
+            return View("AccountForms""AccountForms");
         }
 
         #endregion
@@ -205,21 +218,21 @@ namespace DormBuddy.Controllers
             {
                 ModelState.AddModelError(string.Empty, "Passwords do not match.");
                 ViewBag.ErrorMessage = "Passwords do not match!";
-                return View("AccountForms");
+                return View("AccountForms""AccountForms");
             }
 
             if (await _userManager.FindByNameAsync(username) != null)
             {
                 ModelState.AddModelError(string.Empty, "Username is already taken.");
                 ViewBag.ErrorMessage = "Username is already taken!";
-                return View("AccountForms");
+                return View("AccountForms""AccountForms");
             }
 
             if (await _userManager.FindByEmailAsync(email) != null)
             {
                 ModelState.AddModelError(string.Empty, "Email is already registered.");
                 ViewBag.ErrorMessage = "Email is already registered!";
-                return View("AccountForms");
+                return View("AccountForms""AccountForms");
             }
 
             var passwordValidator = new PasswordValidator<ApplicationUser>();
@@ -232,7 +245,7 @@ namespace DormBuddy.Controllers
                     ModelState.AddModelError(string.Empty, error.Description);
 
                 ViewBag.ErrorMessage = "Password does not meet the requirements!";
-                return View("AccountForms");
+                return View("AccountForms""AccountForms");
             }
 
             var user = new ApplicationUser
@@ -410,6 +423,23 @@ namespace DormBuddy.Controllers
             }
 
             return View("~/Views/Account/Password/ResetPassword.cshtml", model);
+                if (result.Succeeded)
+                {
+                    // Assign "User" role to the new account
+                    await _userManager.AddToRoleAsync(user, "User");
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    return RedirectToAction("Dashboard");
+                }
+
+                // Log errors if user creation failed
+                foreach (var error in result.Errors)
+                {
+                    Console.WriteLine($"Error Code: {error.Code}, Description: {error.Description}");
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+            }
+
+            return View("AccountForms");
         }
 
         #endregion
