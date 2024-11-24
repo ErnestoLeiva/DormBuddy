@@ -12,8 +12,13 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DormBuddy.Migrations
 {
     [DbContext(typeof(DBContext))]
+<<<<<<<< HEAD:migrations_backup/20241120215700_InitialMigration.Designer.cs
     [Migration("20241120215700_InitialMigration")]
     partial class InitialMigration
+========
+    [Migration("20241124210517_UpdateSnapshot")]
+    partial class UpdateSnapshot
+>>>>>>>> fc97bdd (Add Sync Changes and Update Migration Files):DormBuddy/Migrations/20241124210517_UpdateSnapshot.Designer.cs
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -53,6 +58,9 @@ namespace DormBuddy.Migrations
                         .HasMaxLength(160)
                         .HasColumnType("varchar(160)");
 
+                    b.Property<DateTime?>("LastLoginDate")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("LastName")
                         .HasMaxLength(160)
                         .HasColumnType("varchar(160)");
@@ -89,6 +97,16 @@ namespace DormBuddy.Migrations
                         .HasMaxLength(160)
                         .HasColumnType("varchar(160)");
 
+<<<<<<<< HEAD:migrations_backup/20241120215700_InitialMigration.Designer.cs
+========
+                    b.Property<string>("TimeZone")
+                        .HasMaxLength(160)
+                        .HasColumnType("varchar(160)");
+
+                    b.Property<int>("TotalLogins")
+                        .HasColumnType("int");
+
+>>>>>>>> fc97bdd (Add Sync Changes and Update Migration Files):DormBuddy/Migrations/20241124210517_UpdateSnapshot.Designer.cs
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("tinyint(1)");
 
@@ -105,7 +123,39 @@ namespace DormBuddy.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
 
-                    b.ToTable("AspNetUsers", (string)null);
+                    b.ToTable("AspNetUsers", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+                });
+
+            modelBuilder.Entity("DormBuddy.Models.DashboardChatModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("UserId")
+                        .HasMaxLength(160)
+                        .HasColumnType("varchar(160)");
+
+                    b.Property<string>("message")
+                        .HasMaxLength(160)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("sent_at")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("type")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("DashboardChatModel");
                 });
 
             modelBuilder.Entity("DormBuddy.Models.ExpenseModel", b =>
@@ -139,10 +189,79 @@ namespace DormBuddy.Migrations
 
                     b.Property<bool>("isSplit")
                         .HasColumnType("tinyint(1)");
+<<<<<<<< HEAD:migrations_backup/20241120215700_InitialMigration.Designer.cs
 
                     b.HasKey("Id");
 
                     b.ToTable("Expenses");
+                });
+
+            modelBuilder.Entity("DormBuddy.Models.PeerLendingModel", b =>
+========
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Expenses");
+                });
+
+            modelBuilder.Entity("DormBuddy.Models.FriendsModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("FriendId")
+                        .HasMaxLength(160)
+                        .HasColumnType("varchar(160)");
+
+                    b.Property<string>("UserId")
+                        .HasMaxLength(160)
+                        .HasColumnType("varchar(160)");
+
+                    b.Property<bool>("blocked")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("pending")
+                        .HasColumnType("tinyint(1)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("FriendsModel");
+                });
+
+            modelBuilder.Entity("DormBuddy.Models.GroupModel", b =>
+>>>>>>>> fc97bdd (Add Sync Changes and Update Migration Files):DormBuddy/Migrations/20241124210517_UpdateSnapshot.Designer.cs
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<string>("BorrowerId")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("varchar(160)");
+
+                    b.Property<DateTime>("DueDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsRepaid")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("varchar(160)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PeerLendings");
                 });
 
             modelBuilder.Entity("DormBuddy.Models.PeerLendingModel", b =>
@@ -242,19 +361,31 @@ namespace DormBuddy.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
+<<<<<<<< HEAD:migrations_backup/20241120215700_InitialMigration.Designer.cs
                     b.Property<string>("AccountStatus")
+========
+                    b.Property<string>("BannerImageUrl")
+>>>>>>>> fc97bdd (Add Sync Changes and Update Migration Files):DormBuddy/Migrations/20241124210517_UpdateSnapshot.Designer.cs
                         .HasMaxLength(160)
                         .HasColumnType("varchar(160)");
 
                     b.Property<string>("Bio")
                         .HasMaxLength(160)
+<<<<<<<< HEAD:migrations_backup/20241120215700_InitialMigration.Designer.cs
                         .HasColumnType("varchar(160)");
+========
+                        .HasColumnType("TEXT");
+>>>>>>>> fc97bdd (Add Sync Changes and Update Migration Files):DormBuddy/Migrations/20241124210517_UpdateSnapshot.Designer.cs
 
                     b.Property<string>("CompanyName")
                         .HasMaxLength(160)
                         .HasColumnType("varchar(160)");
 
+<<<<<<<< HEAD:migrations_backup/20241120215700_InitialMigration.Designer.cs
                     b.Property<DateTime>("DateOfBirth")
+========
+                    b.Property<DateTime?>("DateOfBirth")
+>>>>>>>> fc97bdd (Add Sync Changes and Update Migration Files):DormBuddy/Migrations/20241124210517_UpdateSnapshot.Designer.cs
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("FacebookUrl")
@@ -299,10 +430,19 @@ namespace DormBuddy.Migrations
                         .HasColumnType("varchar(160)");
 
                     b.Property<string>("UserId")
+<<<<<<<< HEAD:migrations_backup/20241120215700_InitialMigration.Designer.cs
                         .IsRequired()
                         .HasMaxLength(160)
                         .HasColumnType("varchar(160)");
 
+========
+                        .HasMaxLength(160)
+                        .HasColumnType("varchar(160)");
+
+                    b.Property<bool>("Verified")
+                        .HasColumnType("tinyint(1)");
+
+>>>>>>>> fc97bdd (Add Sync Changes and Update Migration Files):DormBuddy/Migrations/20241124210517_UpdateSnapshot.Designer.cs
                     b.HasKey("Id");
 
                     b.HasIndex("UserId");
@@ -335,7 +475,10 @@ namespace DormBuddy.Migrations
                         .IsUnique()
                         .HasDatabaseName("RoleNameIndex");
 
-                    b.ToTable("AspNetRoles", (string)null);
+                    b.ToTable("AspNetRoles", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -363,7 +506,10 @@ namespace DormBuddy.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("AspNetRoleClaims", (string)null);
+                    b.ToTable("AspNetRoleClaims", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -391,7 +537,10 @@ namespace DormBuddy.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AspNetUserClaims", (string)null);
+                    b.ToTable("AspNetUserClaims", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
@@ -417,7 +566,10 @@ namespace DormBuddy.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AspNetUserLogins", (string)null);
+                    b.ToTable("AspNetUserLogins", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
@@ -434,7 +586,10 @@ namespace DormBuddy.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("AspNetUserRoles", (string)null);
+                    b.ToTable("AspNetUserRoles", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
@@ -457,10 +612,37 @@ namespace DormBuddy.Migrations
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
-                    b.ToTable("AspNetUserTokens", (string)null);
+                    b.ToTable("AspNetUserTokens", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("DormBuddy.Models.UserLastUpdate", b =>
+                {
+                    b.HasOne("DormBuddy.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+<<<<<<<< HEAD:migrations_backup/20241120215700_InitialMigration.Designer.cs
+            modelBuilder.Entity("DormBuddy.Models.UserProfile", b =>
+========
+            modelBuilder.Entity("DormBuddy.Models.DashboardChatModel", b =>
+                {
+                    b.HasOne("DormBuddy.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DormBuddy.Models.UserLastUpdate", b =>
+>>>>>>>> fc97bdd (Add Sync Changes and Update Migration Files):DormBuddy/Migrations/20241124210517_UpdateSnapshot.Designer.cs
                 {
                     b.HasOne("DormBuddy.Models.ApplicationUser", "User")
                         .WithMany()
@@ -475,9 +657,7 @@ namespace DormBuddy.Migrations
                 {
                     b.HasOne("DormBuddy.Models.ApplicationUser", "User")
                         .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
 
                     b.Navigation("User");
                 });
