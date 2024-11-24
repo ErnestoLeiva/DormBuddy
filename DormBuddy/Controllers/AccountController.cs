@@ -36,7 +36,7 @@ namespace DormBuddy.Controllers
             TimeZoneService timeZoneService,
             IConfiguration configuration,
             IMemoryCache memoryCache,
-            DBContext context) : base(userManager, signInManager, context, logger, memoryCache, timeZoneService)
+            DBContext context) : base(userManager, signInManager, context, logger, memoryCache, timeZoneService, configuration)
         {
             _logger = logger;
             _userManager = userManager;
@@ -533,6 +533,15 @@ namespace DormBuddy.Controllers
                 {
                     ViewData["profile_online_status"] = "Online";
                 }
+
+                if (profile.User.UserName != User?.Identity?.Name) {
+                    var fstatus = await FriendshipStatus(profile.User);
+                    ViewData["FriendshipStatus"] = fstatus;
+                }
+
+                ViewData["FriendCount"] = await GetFriendCount(get_username);
+
+                ViewData["Friends"] = await GetAllFriends(get_username);
 
                 return View("~/Views/Account/Dashboard/Profile.cshtml", profile);
             }
