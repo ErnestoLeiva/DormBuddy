@@ -21,10 +21,9 @@ namespace DormBuddy.Models
         */
 
         // Basic Profile Info
+        [Column(TypeName = "TEXT")]
         public string? Bio { get; set; }
-        /*
         public string? BannerImageUrl { get; set; }
-        */
         public string? ProfileImageUrl { get; set; }
         public DateTime DateOfBirth { get; set; }
 
@@ -47,6 +46,6 @@ namespace DormBuddy.Models
 
         // Status/Activity
         public DateTime LastLogin { get; set; }
-        public string? AccountStatus { get; set; }
+        public bool Verified { get; set; }
     }
 }

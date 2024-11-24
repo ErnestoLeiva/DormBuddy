@@ -50,7 +50,7 @@
         <!-- Left Column: Basic Profile Information -->
         <div class="col-md-4 profile-info">
             <h3>@Model.User.FirstName @Model.User.LastName
-                @if (Model.AccountStatus == "Verified") {
+                @if (Model.Verified) {
                     <img src="https://i.imgur.com/rtkll8v.png" style="width:65px; height: 65px;" />
                 }
             </h3>
@@ -206,7 +206,7 @@
                                 </tr>
                                 <tr>
                                     <th>Account Status</th>
-                                    <td>@Model.AccountStatus</td>
+                                    <td>@Model.Verified</td>
                                 </tr>
                             </tbody>
                         </table>

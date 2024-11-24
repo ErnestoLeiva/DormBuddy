@@ -51,6 +51,13 @@ builder.Services.AddScoped<UserLastUpdateActionFilter>();
 builder.Services.AddScoped<NavBarInfoService>();
 builder.Services.AddScoped<ActivityReportService>(); 
 
+builder.Services.AddCors(options => {
+    options.AddDefaultPolicy(policy =>
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader());
+});
+
 #region SESSION CONFIGURATION
 builder.Services.AddSession(options =>
 {
