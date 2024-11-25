@@ -149,6 +149,7 @@ namespace DormBuddy.Controllers
 
                 Bio = profile?.Bio,
                 ProfileImageUrl = profile?.ProfileImageUrl ?? string.Empty,
+                BannerImageUrl = profile?.BannerImageUrl ?? string.Empty,
                 DateOfBirth = profile != null ? profile.DateOfBirth : DateTime.MinValue,
 
                 FacebookUrl = profile?.FacebookUrl ?? string.Empty,

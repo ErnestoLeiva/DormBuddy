@@ -8,6 +8,10 @@
     border-bottom: 1px solid #ddd; /* Lighter line for a softer effect */
     padding-bottom: 20px; /* Padding below image to give space */
     z-index: 1; /* Ensure the profile image is above the banner */
+
+    position: absolute;
+    top: 370px;
+    left: 0;
 }
 
 .profile-info {
@@ -47,25 +51,25 @@
 
 /* New CSS for the Banner Section */
 .banner-section {
-    background-color: #4CAF50;
+    background-color: none;
     color: white;
-    padding: 20px 0;
+    padding: 0px 0;
     position: absolute;
     top: 50px; /* Move banner slightly upwards */
     left: 0;
-    right: 0;
+    right: 0;   
     z-index: -1; /* Place it behind other elements */
-    height: 270px; /* Adjust height as needed */
+    height: 415px; /* Adjust height as needed  + (15px)*/
 }
 
-/* Banner Text Styles */
-.banner-text h2 {
-    font-size: 36px;
-    margin-bottom: 10px;
-}
-
-.banner-text p {
-    font-size: 18px;
+.banner-section .banner-image {
+    width: 80%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 10%;
+    right: 20%;
+    bottom: 0;
 }
 
 .nav-tabs {

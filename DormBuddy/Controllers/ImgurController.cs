@@ -342,8 +342,15 @@ namespace DormBuddy.Controllers
         }
 
 
+        public enum ImageType 
+        {
+            Banner,
+            Profile
+        };
+
+
         [HttpPost]
-        public async Task<IActionResult> UploadImage(IFormFile image)
+        public async Task<IActionResult> UploadImage(IFormFile image, ImageType type)
         {
             if (image == null || image.Length == 0)
             {
@@ -379,7 +386,17 @@ namespace DormBuddy.Controllers
             {
                 EnsureProfileAttached(profile);
 
-                profile.ProfileImageUrl = imageUrl;
+                switch (type)
+                {
+                    case ImageType.Banner:
+                        profile.BannerImageUrl = imageUrl;
+                    break;
+                    case ImageType.Profile:
+                        profile.ProfileImageUrl = imageUrl;
+                    break;
+                    default:
+                        return BadRequest( new { error = "No image type found!" } );
+                }
 
                 // Save changes to the database
                 await _context.SaveChangesAsync();
@@ -391,7 +408,7 @@ namespace DormBuddy.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error while updating profile image for user {UserId}", profile.UserId);
+                _logger.LogError(ex, "Error while updating image for user {UserId}", profile.UserId);
                 TempData["Message"] = "Failed to update profile. Please try again.";
             }
 
@@ -399,8 +416,8 @@ namespace DormBuddy.Controllers
         }
 
 
-        [HttpPost]
-        public async Task<IActionResult> UpdateBio(string text, UserProfile model)
+        [HttpPost("UpdateBio")]
+        public async Task<IActionResult> UpdateBio( [FromForm] UserProfile model)
         {
             if (string.IsNullOrWhiteSpace(model.Bio))
             {

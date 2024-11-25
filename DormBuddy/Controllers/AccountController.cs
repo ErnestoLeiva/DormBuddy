@@ -522,6 +522,12 @@ namespace DormBuddy.Controllers
                     return RedirectToAction("Dashboard");
                 }
 
+                var bannerImage = _configuration["Profile:Default_BannerImage"];
+                if (string.IsNullOrEmpty(profile.BannerImageUrl))
+                {
+                    profile.BannerImageUrl = bannerImage;
+                }
+
                 var profileImage = _configuration["Profile:Default_ProfileImage"];
                 if (string.IsNullOrEmpty(profile.ProfileImageUrl))
                 {
