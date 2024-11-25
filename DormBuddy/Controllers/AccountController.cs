@@ -112,13 +112,13 @@ namespace DormBuddy.Controllers
             if (result.Succeeded) {
                 await _userManager.ResetAccessFailedCountAsync(user);
 
-                //var profile = await getProfile(user);
-                var profile = await GetUserInformation(user.UserName);
+                var profile = await GetUserInformation(username);
 
                 await _signInManager.SignInAsync(user, rememberMe);
 
                 profile.LastLogin = DateTime.UtcNow;
-                 _context.SaveChanges();
+
+                _context.SaveChanges();
 
                 return RedirectToAction("Dashboard");
 
