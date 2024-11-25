@@ -8,10 +8,8 @@
 
     <!-- Banner Section -->
     <div class="banner-section">
-        <div class="banner-text text-center">
-            <!--<h2>Welcome to Your Profile</h2>
-            <p>Manage your settings and keep your profile up-to-date!</p>-->
-        </div>
+        <img src="@Model.BannerImageUrl" alt="Banner Image" class="banner-image"/>
+        
     </div>
 
     <!-- Return to Dashboard Button -->
@@ -27,11 +25,7 @@
             <a class="btn btn-primary" href="Settings?page=ProfileSettings" style="height:38px;">
                 <i class="fas fa-cog"></i> Configuration
             </a>
-        </div>
-    } else {
-        <div class="text-right mb-4">
-            <a class="btn btn-primary" href="" style="height:38px; opacity:0;">
-            </a>
+            <a class="btn btn-primary" href="" style="height:30px; opacity:0;"></a>
         </div>
     }
 
@@ -45,7 +39,7 @@
 </div>
 
 <!-- Profile Information Section -->
-<div class="container">
+<div class="container" style="padding-top:300px;">
     <div class="row">
         <!-- Left Column: Basic Profile Information -->
         <div class="col-md-4 profile-info">
