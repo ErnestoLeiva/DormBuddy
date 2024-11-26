@@ -42,10 +42,21 @@
         }
         // Function to load settings dynamically
         function loadSettings(page) {
+
+            var urlParams = new URLSearchParams(window.location.search);
+
+            // Default empty string for errorMessage
+            var errorMessage = "";
+
+            // Check if 'errorMessage' exists in the query string
+            if (urlParams.has('errorMessage')) {
+                errorMessage = urlParams.get('errorMessage');
+            }
+
             $.ajax({
                 url: '@Url.Action("LoadSettings")',
                 type: 'GET',
-                data: { settingsPage: page },
+                data: { settingsPage: page, errorMessage: errorMessage },
                 cache: false,
                 success: function (data) {
                     $('#settings-content').html(data); // Load the settings view into the content area

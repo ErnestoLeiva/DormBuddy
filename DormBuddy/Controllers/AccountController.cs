@@ -461,25 +461,32 @@ namespace DormBuddy.Controllers
         public IActionResult Notifications() => User?.Identity?.IsAuthenticated == true ? View("~/Views/Account/Dashboard/Notifications.cshtml") : RedirectToAction("AccountForms");
 
 
-        public IActionResult Settings() {
-            if (User?.Identity?.IsAuthenticated == true) {
+public IActionResult Settings()
+{
+    if (User?.Identity?.IsAuthenticated == true)
+    {
+        // Retrieve 'page' query parameter, default to empty string if not provided
+        string loadPage = Request.Query["page"].ToString();
 
-                string loadPage = Request.Query["page"].ToString() ?? "";
+        // Define allowed pages
+        var allowedPages = new HashSet<string> { "AccountSettings", "GeneralSettings", "PrivacySettings", "ProfileSettings" };
 
-                var allowedPages = new List<string> { "AccountSettings", "GeneralSettings", "PrivacySettings", "ProfileSettings" };
-
-                // Check if the 'page' is a valid value from the list
-                if (!allowedPages.Contains(loadPage) && !string.IsNullOrEmpty(loadPage))
-                {
-                    return BadRequest("Invalid page parameter.");
-                }
-
-                ViewBag.LoadPage = loadPage;
-                return View("~/Views/Account/Dashboard/Settings.cshtml");
-            } else {
-                return RedirectToAction("AccountForms");
-            }
+        // Validate the 'page' parameter
+        if (!string.IsNullOrEmpty(loadPage) && !allowedPages.Contains(loadPage))
+        {
+            // Redirect to a default page or return a friendly error message if invalid
+            return RedirectToAction(nameof(Settings), new { page = "GeneralSettings" });
         }
+
+        // Pass the page to the view
+        ViewBag.LoadPage = string.IsNullOrEmpty(loadPage) ? "GeneralSettings" : loadPage;
+        return View("~/Views/Account/Dashboard/Settings.cshtml");
+    }
+
+    // Redirect unauthenticated users to the account forms
+    return RedirectToAction("AccountForms");
+}
+
 
 
         public async Task<IActionResult> Profile()
@@ -559,7 +566,8 @@ namespace DormBuddy.Controllers
             }
         }
 
-        public async Task<IActionResult> LoadSettings(string settingsPage)
+
+        public async Task<IActionResult> LoadSettings(string settingsPage, string errorMessage = "")
         {
 
             var profile = await GetUserInformation();
@@ -573,6 +581,10 @@ namespace DormBuddy.Controllers
                 case "GeneralSettings":
                     return PartialView("Dashboard/Settings/_GeneralSettings");
                 case "AccountSettings":
+                    if (!string.IsNullOrEmpty(errorMessage)) {
+                        ViewBag.ErrorMessage = errorMessage;
+                    }
+                    
                     return PartialView("Dashboard/Settings/_AccountSettings", profile);
                 case "PrivacySettings":
                     return PartialView("Dashboard/Settings/_PrivacySettings", profile);
