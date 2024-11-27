@@ -2,8 +2,8 @@
 for details on configuring this project to bundle and minify static web assets. */
 
 a.navbar-brand {
-  color: #0077cc;
-  background-color: #040303;
+  color: #3385bf;
+  background-color: #faf0f0;
   white-space: normal;
   text-align: center;
   word-break: break-all;
@@ -21,8 +21,8 @@ a {
 }
 
 .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
-  color: #010101;
-  background-color: #0b0c0c;
+  color: #be7a7a;
+  background-color: #73cbcb;
   border-color: #546271;
 }
 

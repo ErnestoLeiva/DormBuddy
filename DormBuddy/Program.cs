@@ -50,6 +50,8 @@ builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 builder.Services.AddScoped<UserLastUpdateActionFilter>();
 builder.Services.AddScoped<NavBarInfoService>();
 builder.Services.AddScoped<ActivityReportService>(); 
+builder.Services.AddScoped<LogService>(); // LogService
+
 
 #region SESSION CONFIGURATION
 builder.Services.AddSession(options =>

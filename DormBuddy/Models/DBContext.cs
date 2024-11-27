@@ -36,6 +36,8 @@ namespace DormBuddy.Models
         public DbSet<UserLastUpdate> UserLastUpdate { get; set; }
         public DbSet<FriendsModel> FriendsModel { get; set; }
         public DbSet<DashboardChatModel> DashboardChatModel { get; set; }
+        public DbSet<LogModel> Logs { get; set; }
+
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -99,6 +101,14 @@ namespace DormBuddy.Models
                 entity.Property(t => t.TaskName).HasMaxLength(160).IsRequired();
                 entity.Property(t => t.AssignedTo).HasMaxLength(160).IsRequired();
             });
+            //Log Configuration
+            builder.Entity<LogModel>(entity =>
+            {
+                entity.Property(e => e.Action).IsRequired().HasMaxLength(160);
+                entity.Property(e => e.Username).IsRequired().HasMaxLength(160);
+                entity.Property(e => e.Details).HasMaxLength(500);
+            });
+
         }
     }
 }

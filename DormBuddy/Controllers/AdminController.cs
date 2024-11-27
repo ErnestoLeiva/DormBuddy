@@ -1,12 +1,13 @@
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using DormBuddy.Models;
+using DormBuddy.Services;
+using DormBuddy.ViewModels;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using DormBuddy.Services;
-using System.Text;
 
 namespace DormBuddy.Controllers
 {
@@ -25,25 +26,41 @@ namespace DormBuddy.Controllers
         }
 
         // Admin Dashboard
-        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AdminDashboard()
         {
-            // Get the currently logged-in user
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
+                return RedirectToAction("Login", "Account");
+
+            ViewBag.Username = $"{user.FirstName} {user.LastName}";
+            var logs = await _activityReportService.GetSystemLogs();
+            var monthlyReport = await _activityReportService.GenerateMonthlyActivityReport();
+            var users = await _userManager.Users.ToListAsync();
+
+            var model = new AdminDashboardViewModel
             {
-                return RedirectToAction("Login", "Account"); // Redirect to login if the user is not logged in
+                Logs = logs,
+                MonthlyReport = monthlyReport,
+                Users = users
+            };
+
+            return View("~/Views/Administration/AdminDashboard.cshtml", model);
+        }
+        // GET: /Admin/ExportMonthlyReport (CSV Download)
+        [HttpGet]
+        public async Task<IActionResult> ExportMonthlyReport()
+        {
+            var report = await _activityReportService.GenerateMonthlyActivityReport();
+            var csv = new StringBuilder();
+            csv.AppendLine("User,Total Logins,Last Login,Groups Joined,Tasks Created,Expenses Added");
+
+            foreach (var user in report)
+            {
+                csv.AppendLine($"{user.FullName},{user.TotalLogins},{user.LastLoginDate},{user.GroupsJoined},{user.TasksCreated},{user.ExpensesAdded}");
             }
 
-            // Set the username in ViewBag for use in the view
-            ViewBag.Username = $"{user.FirstName} {user.LastName}";
-            ViewBag.TotalUsers = _userManager.Users.Count();
-            ViewBag.TotalReports = 10;
-            ViewBag.ActiveSessions = 5;
-
-            return View("~/Views/Administration/AdminDashboard.cshtml");
+            return File(Encoding.UTF8.GetBytes(csv.ToString()), "text/csv", "MonthlyReport.csv");
         }
-
         // GET: /Admin/Index
         public async Task<IActionResult> Index()
         {
@@ -85,22 +102,13 @@ namespace DormBuddy.Controllers
             var report = await _activityReportService.GenerateMonthlyActivityReport();
             return View("~/Views/Admin/MonthlyReport.cshtml", report);
         }
+  
 
-        // GET: /Admin/ExportMonthlyReport (CSV Download)
-        [HttpGet]
-        public async Task<IActionResult> ExportMonthlyReport()
+        // View activity logs
+        public async Task<IActionResult> Logs()
         {
-            var report = await _activityReportService.GenerateMonthlyActivityReport();
-
-            var csv = new StringBuilder();
-            csv.AppendLine("User,Total Logins,Last Login,Groups Joined,Tasks Created,Expenses Added");
-
-            foreach (var user in report)
-            {
-                csv.AppendLine($"{user.FullName},{user.TotalLogins},{user.LastLoginDate},{user.GroupsJoined},{user.TasksCreated},{user.ExpensesAdded}");
-            }
-
-            return File(Encoding.UTF8.GetBytes(csv.ToString()), "text/csv", "MonthlyReport.csv");
+            var logs = await _activityReportService.GetSystemLogs(); // Assuming this method exists in your service
+            return View("~/Views/Admin/Logs.cshtml", logs);
         }
     }
 }

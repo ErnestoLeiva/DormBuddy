@@ -1,0 +1,38 @@
+.navbar-light .navbar-nav .nav-link {
+    color: #0f0707 !important; /* Replace with your desired color */
+}
+.navbar-light .navbar-nav .nav-link.text-dark {
+    color: #161515 !important; /* Replace with your desired color */
+}
+.navbar-light .navbar-nav .nav-link {
+    background-color: transparent !important; /* Replace #ff5733 with your desired color */
+    color: #ffffff !important; /* Ensures the text is readable */
+    border-radius: 5px; /* Optional: Add some rounding to the background */
+    margin-right: 5px; /* Optional: Adds spacing between links */
+}
+
+.navbar-light .navbar-nav .nav-link:hover {
+    background-color: #c70039 !important; /* Change hover background color */
+}
+.btn-primary {
+    background-color: transparent !important; /* Makes the background transparent */
+    border: none !important; /* Removes the border if needed */
+    color: #007bff !important; /* Adjust text color if needed */
+}
+
+.btn-primary:hover {
+    background-color: rgba(0, 0, 0, 0.1) !important; /* Optional: Light transparent hover effect */
+    color: #0056b3 !important; /* Adjust hover text color */
+}
+
+
+a[href="/Home/Privacy"] {
+    background-color: transparent !important; /* Make the background transparent */
+    text-decoration: none; /* Optional: Remove underline */
+    color: #007bff !important; /* Set text color */
+}
+
+a[href="/Home/Privacy"]:hover {
+    background-color: rgba(0, 0, 0, 0.1) !important; /* Optional hover effect */
+    color: #0056b3 !important; /* Adjust hover text color */
+}

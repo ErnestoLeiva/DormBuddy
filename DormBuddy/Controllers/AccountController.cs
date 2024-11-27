@@ -109,41 +109,47 @@ namespace DormBuddy.Controllers
 
             var result = await _signInManager.PasswordSignInAsync(user, password, false, false);
 
-            if (result.Succeeded) {
+            if (result.Succeeded)
+            {
+                // Reset failed login attempts
                 await _userManager.ResetAccessFailedCountAsync(user);
 
-                //var profile = await getProfile(user);
-                var profile = await GetUserInformation(user.UserName);
+                // Update LastLoginDate and TotalLogins
+                user.LastLoginDate = DateTime.UtcNow;
+                user.TotalLogins += 1;
 
+                _context.Update(user); // Mark the user entity as updated
+                await _context.SaveChangesAsync(); // Save all changes
+
+                // Sign in the user
                 await _signInManager.SignInAsync(user, rememberMe);
 
-                profile.LastLogin = DateTime.UtcNow;
-                 _context.SaveChanges();
-
                 return RedirectToAction("Dashboard");
-
-            } else {
-                if (result.IsLockedOut) {
-                    // send message of time left and return
+            }
+            else
+            {
+                if (result.IsLockedOut)
+                {
+                    // Send lockout information
                     var lockoutTime = await _userManager.GetLockoutEndDateAsync(user);
                     var timeRemaining = lockoutTime.Value - DateTimeOffset.Now;
-                    ViewBag.ErrorMessage = "Account is locked out!\nRemaining: " + timeRemaining.Minutes + " minutes, " + timeRemaining.Seconds + " seconds.";
+                    ViewBag.ErrorMessage = $"Account is locked out!\nRemaining: {timeRemaining.Minutes} minutes, {timeRemaining.Seconds} seconds.";
                     return View("AccountForms");
                 }
 
-                await _userManager.AccessFailedAsync(user);
+                await _userManager.AccessFailedAsync(user); // Increment failed login attempts
 
                 var failed = await _userManager.GetAccessFailedCountAsync(user);
                 var max = _userManager.Options.Lockout.MaxFailedAccessAttempts;
-
                 var remaining = max - failed;
 
-                ViewBag.ErrorMessage = "Invalid credentials, try again!\nRemaining attempts: " + remaining;
+                ViewBag.ErrorMessage = $"Invalid credentials, try again!\nRemaining attempts: {remaining}";
             }
 
-            
             return View("AccountForms");
         }
+
+
 
         #endregion
 

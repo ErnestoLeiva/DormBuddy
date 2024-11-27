@@ -1,0 +1,88 @@
+@inject Microsoft.Extensions.Localization.IStringLocalizerFactory LocalizerFactory
+@{
+    var SharedLocalizer = LocalizerFactory.Create("SharedResource", typeof(Program).Assembly.GetName().Name ?? "");
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - DormBuddy Admin</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
+    
+    <!-- Admin-specific CSS -->
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> -->
+
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <header>
+         <div class="container-fluid">
+                <a class="navbar-brand" href="/Admin/AdminDashboard">
+                    <i class="fas fa-user-shield"></i> DormBuddy Admin
+                </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <!-- Navigation links -->
+                    <ul class="navbar-nav">
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Admin/AdminDashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Admin/UserManagement"><i class="fas fa-users"></i> User Management</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Admin/Reports"><i class="fas fa-chart-line"></i> Reports</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Admin/Logs"><i class="fas fa-file-alt"></i> Logs</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Admin/MonthlyReport"><i class="fas fa-calendar-alt"></i> Monthly Report</a>
+                        </li>
+                    </ul>
+
+                    <!-- Logout button -->
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Account/Logout">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main content area -->
+    <div class="container-fluid mt-4">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4">
+        <div class="container text-center">
+            &copy; 2024 DormBuddy Admin | All rights reserved.
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/admin.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
