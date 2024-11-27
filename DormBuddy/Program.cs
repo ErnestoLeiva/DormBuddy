@@ -26,15 +26,41 @@ builder.Services.AddLocalization(options => options.ResourcesPath = "Resources")
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {
     options.CheckConsentNeeded = context => true;
-    options.MinimumSameSitePolicy = SameSiteMode.None;
+    options.MinimumSameSitePolicy = SameSiteMode.Lax; // Set to Lax for session compatibility
     options.Secure = builder.Environment.IsDevelopment() 
         ? CookieSecurePolicy.SameAsRequest 
         : CookieSecurePolicy.Always;
 });
 
 builder.Services.AddSingleton<TimeZoneService>();
+builder.Services.AddSingleton<ImgurService>();
+builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 
-builder.Services.AddControllersWithViews().AddViewLocalization().AddDataAnnotationsLocalization();
+builder.Services.AddScoped<UserLastUpdateActionFilter>();
+builder.Services.AddScoped<NavBarInfoService>();
+
+builder.Services.AddCors(options => {
+    options.AddDefaultPolicy(policy =>
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader());
+});
+
+#region SESSION CONFIGURATION
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+#endregion
+
+builder.Services.AddControllersWithViews(options => 
+{
+    options.Filters.Add<UserLastUpdateActionFilter>();
+})
+.AddViewLocalization()
+.AddDataAnnotationsLocalization();
 
 builder.Services.Configure<RequestLocalizationOptions>(options => 
 {
@@ -66,7 +92,7 @@ FirebaseApp.Create(new AppOptions()
 #region DATABASE CONFIGURATION
 builder.Services.AddDbContext<DBContext>(options =>
     options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
-    new MySqlServerVersion(new Version(8, 0, 2))));
+    new MySqlServerVersion(new Version(8, 0, 2)))); 
 #endregion
 
 #region IDENTITY CONFIGURATION
@@ -94,15 +120,6 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequireUppercase = true;
     options.Password.RequiredLength = 6;
     options.Password.RequiredUniqueChars = 1;
-});
-#endregion
-
-#region SESSION CONFIGURATION
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
 });
 #endregion
 
@@ -148,7 +165,6 @@ app.UseRequestLocalization(localizationOptions);
 
 app.Use(async (context, next) =>
 {
-
     var cookieValue = context.Request.Cookies["Culture"];
     if (!string.IsNullOrEmpty(cookieValue))
     {
@@ -164,7 +180,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-app.UseSession();
+app.UseSession(); // UseSession must be before Authentication and Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -178,24 +194,60 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=HomeLogin}/{id?}");
 #endregion
 
+// Call InitializeRolesAndAdminUser to create roles and the default admin user
 await InitializeRolesAndAdminUser(app);
 
 app.Run();
 
-#region ROLE INITIALIZATION
+#region ROLE AND ADMIN INITIALIZATION
 static async Task InitializeRolesAndAdminUser(WebApplication app)
 {
     using (var scope = app.Services.CreateScope())
     {
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
+        // Define roles
         string[] roles = { Roles.Admin, Roles.Moderator, Roles.User };
 
+        // Create roles if they don't exist
         foreach (var role in roles)
         {
             if (!await roleManager.RoleExistsAsync(role))
             {
                 await roleManager.CreateAsync(new IdentityRole(role));
+            }
+        }
+
+        // Create the default admin user if it doesn't exist
+        var defaultAdminEmail = "admin@dormbuddy.com"; // Use a real email
+        var defaultAdminUsername = "admin";
+        var defaultAdminPassword = "Adminpass123!"; // Use a secure password
+
+        var adminUser = await userManager.FindByEmailAsync(defaultAdminEmail);
+
+        if (adminUser == null)
+        {
+            adminUser = new ApplicationUser
+            {
+                UserName = defaultAdminUsername,
+                Email = defaultAdminEmail
+            };
+
+            var createUserResult = await userManager.CreateAsync(adminUser, defaultAdminPassword);
+
+            if (createUserResult.Succeeded)
+            {
+                // Assign the Admin role to the user
+                await userManager.AddToRoleAsync(adminUser, Roles.Admin);
+            }
+            else
+            {
+                // Log any errors or handle them as needed
+                foreach (var error in createUserResult.Errors)
+                {
+                    Console.WriteLine($"Error creating admin user: {error.Description}");
+                }
             }
         }
     }

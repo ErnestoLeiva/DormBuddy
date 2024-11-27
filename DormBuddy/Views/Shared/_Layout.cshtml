@@ -3,6 +3,9 @@
     var SharedLocalizer = LocalizerFactory.Create("SharedResource", typeof(Program).Assembly.GetName().Name ?? "");
 }
 
+@inject NavBarInfoService NavBarInfoService
+@using System.Threading.Tasks
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,10 +26,13 @@
     <link rel="stylesheet" href="~/css/tasks.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/expenses.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/settings.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/profile.css" asp-append-version="true" />
     
     <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
@@ -69,38 +75,39 @@
                     </ul>
                 </div>
 
-                @if (User?.Identity != null && User.Identity.IsAuthenticated) {
+                @if (User?.Identity != null && User.Identity.IsAuthenticated)
+                {
+                    string uname = User?.Identity?.Name;
 
-                
-                string firstName = User.FindFirst("FirstName")?.Value ?? "";
-                string lastName = User.FindFirst("LastName")?.Value ?? "";
-                string credits = User.FindFirst("Credits")?.Value ?? "";
+                    // Fetch user information only if the username is not null or empty
+                    if (!string.IsNullOrEmpty(uname))
+                    {
+                        var uInfo = await NavBarInfoService.GetUserInformationAsync(uname);
 
-                
-                <div class="creditsContainer">
-                    <p class="fa-solid fa-coins">  @credits</p>
-                </div>
-                <div class="dropdown">
-                    
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                
-                <img class="dropdown-avatar" src="#"/> @firstName @lastName
-    </button>
+                        // Check if user information was successfully retrieved
+                        if (uInfo != null && uInfo.User != null)
+                        {
+                            string firstName = uInfo.User.FirstName ?? "";
+                            string lastName = uInfo.User.LastName ?? "";
+                            string profileImage = uInfo.ProfileImageUrl ?? ""; // Fallback to a default image
 
-                    <div class="dropdown-menu dropdown-menu-right text-left">
-                        <a class="dropdown-item" asp-controller="Account" asp-action="Profile">
-                            <i class="fas fa-user"></i> Profile
-                        </a>
-                        <a class="dropdown-item" asp-controller="Account" asp-action="Settings">
-                            <i class="fas fa-cog"></i> Settings
-                        </a>
-                        <div class="line-divider"></div>
-                        <a class="dropdown-item" asp-controller="Account" asp-action="Logout">
-                            <i class="fas fa-sign-out-alt"></i> Sign Out
-                        </a>
-                    </div>
-                </div>
+
+                            <div class="dropdown">
+                                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <img class="dropdown-avatar" src="@profileImage" alt="Profile Image" /> @firstName @lastName
+                                </button>
+
+                                <div class="dropdown-menu dropdown-menu-right text-left">
+                                    <a class="dropdown-item fas fa-user" asp-controller="Account" asp-action="Profile"> Profile</a>
+                                    <a class="dropdown-item fas fa-cog" asp-controller="Account" asp-action="Settings"> Settings</a>
+                                    <div class="line-divider"></div>
+                                    <a class="dropdown-item fas fa-sign-out-alt" asp-controller="Account" asp-action="Logout"> Sign Out</a>
+                                </div>
+                            </div>
+                        }
+                    }
                 }
+
             </div>
         </nav>
     </header>

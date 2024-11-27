@@ -5,31 +5,29 @@
 namespace DormBuddy.Migrations
 {
     /// <inheritdoc />
-    public partial class NameAdditionIdentityUpdate2 : Migration
+    public partial class ChangeToFriendsTable : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<string>(
-                name: "LastName",
-                table: "AspNetUsers",
+                name: "UserId",
+                table: "FriendsModel",
                 type: "varchar(160)",
                 maxLength: 160,
                 nullable: true,
                 oldClrType: typeof(int),
-                oldType: "int",
-                oldMaxLength: 160)
+                oldType: "int")
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.AlterColumn<string>(
-                name: "FirstName",
-                table: "AspNetUsers",
+                name: "FriendId",
+                table: "FriendsModel",
                 type: "varchar(160)",
                 maxLength: 160,
                 nullable: true,
                 oldClrType: typeof(int),
-                oldType: "int",
-                oldMaxLength: 160)
+                oldType: "int")
                 .Annotation("MySql:CharSet", "utf8mb4");
         }
 
@@ -37,10 +35,9 @@ namespace DormBuddy.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<int>(
-                name: "LastName",
-                table: "AspNetUsers",
+                name: "UserId",
+                table: "FriendsModel",
                 type: "int",
-                maxLength: 160,
                 nullable: false,
                 defaultValue: 0,
                 oldClrType: typeof(string),
@@ -50,10 +47,9 @@ namespace DormBuddy.Migrations
                 .OldAnnotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.AlterColumn<int>(
-                name: "FirstName",
-                table: "AspNetUsers",
+                name: "FriendId",
+                table: "FriendsModel",
                 type: "int",
-                maxLength: 160,
                 nullable: false,
                 defaultValue: 0,
                 oldClrType: typeof(string),

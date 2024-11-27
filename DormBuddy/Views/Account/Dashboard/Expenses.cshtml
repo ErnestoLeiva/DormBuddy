@@ -164,7 +164,54 @@
     </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
+<!-- Expense Table -->
+<div class="table-responsive">
+    <table class="table table-striped table-bordered" id="expenseTable">
+        <thead class="thead-dark">
+            <tr>
+                <th>Expense Name</th>
+                <th>Amount</th>
+                <th>Shared With</th>
+                <th>Split?</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="expenseTableBody">
+            @if (!expenses.Any())
+            {
+                <tr id="noExpensesMessage">
+                    <td colspan="5" class="text-center">No current expenses...</td>
+                </tr>
+            }
+            else
+            {
+                foreach (var expense in expenses)
+                {
+                    <tr>
+                        <td>@expense.ExpenseName</td>
+                        <td class="amount-cell" data-amount="@expense.Amount">@expense.Amount</td>
+                        <td>@expense.SharedWith</td>
+                        <td class="text-center">
+                            <span class="badge @(expense.isSplit ? "bg-success" : "bg-danger")">
+                                <i class="fa @(expense.isSplit ? "fa-check" : "fa-times")" aria-hidden="true"></i>
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn @(expense.isSplit ? "btn-warning" : "btn-success") btn-sm"
+                                onclick="toggleExpenseStatus(this, @expense.Id)">
+                                Toggle Status
+                            </button>
+                            <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteConfirmationModal" 
+                                onclick="setExpenseToDelete('@expense.ExpenseName', '@expense.Id')">Delete</button>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Bootstrap Modal for Confirming Expense Deletion -->
 <div class="modal fade" id="deleteConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -223,6 +270,42 @@
             document.getElementById('expenseToDeleteId').value = expenseId;
         }
         
+        function toggleExpenseStatus(button, expenseId) {
+            console.log("Expense ID to toggle: " + expenseId);
+
+            const row = button.closest('tr');
+            const statusCell = row.cells[3];
+            const isSplit = statusCell.querySelector('i').classList.contains('fa-check'); // Check current status
+
+            $.ajax({
+                url: '/Expenses/ToggleStatus',
+                type: 'POST',
+                data: {
+                    expenseId: expenseId
+                },
+                success: function(response) {
+                    console.log(response);
+                    if (response.success) {
+                        if (isSplit) {
+                            statusCell.innerHTML = '<span class="badge bg-danger"><i class="fa fa-times" aria-hidden="true"></i></span>';
+                            button.classList.remove('btn-warning');
+                            button.classList.add('btn-success');
+                        } else {
+                            statusCell.innerHTML = '<span class="badge bg-success"><i class="fa fa-check" aria-hidden="true"></i></span>';
+                            button.classList.remove('btn-success');
+                            button.classList.add('btn-warning');
+                        }
+                    } else {
+                        alert('Failed to update expense status: ' + response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', status, error);
+                    alert('Error while updating expense status.');
+                }
+            });
+        }
+
         // Format currency dynamically based on user's locale
         document.addEventListener("DOMContentLoaded", function() {
             document.querySelectorAll(".amount-cell").forEach(function(cell) {
@@ -233,12 +316,10 @@
             });
         });
 
-        // Validate Amount field to ensure it has only up to two decimal places
         document.getElementById("amount").addEventListener("input", function (event) {
             const value = event.target.value;
             const decimalPattern = /^\d+(\.\d{0,2})?$/;
             if (!decimalPattern.test(value)) {
-                // Remove extra decimal places if present
                 event.target.value = parseFloat(value).toFixed(2);
             }
         });

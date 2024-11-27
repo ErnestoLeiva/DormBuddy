@@ -14,7 +14,6 @@ namespace DormBuddy.Models
 
         public bool RememberMe { get; set; }
 
-        public string? TimeZone { get; set; }
     }
 
     public class DBContext : IdentityDbContext<ApplicationUser, IdentityRole, string>
@@ -30,7 +29,18 @@ namespace DormBuddy.Models
         // DBSet for persistent expenses feature - Ernesto Leiva 10/27/2024
         public DbSet<ExpenseModel> Expenses { get; set; }
 
+        // DBSet for persistent peer-lending feature - Ernesto Leiva 11/04/2024
+        public DbSet<PeerLendingModel> PeerLendings {get; set; }
+
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
+
+        public DbSet<UserProfile> UserProfiles { get; set; }
+
+        public DbSet<UserLastUpdate> UserLastUpdate { get; set; } // saves the last time the user updated the browser to find online status
+
+        public DbSet<DashboardChatModel> DashboardChatModel { get; set; }
+
+        public DbSet<FriendsModel> FriendsModel { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

@@ -1,42 +1,33 @@
 @{
     ViewData["Title"] = "Account Settings";
-}
+}   
 
-<div class="settings-container">
-    <!-- Return Button -->
-    <a href="/Account/Dashboard" class="return-button">
+<link rel="stylesheet" href="~/css/settings.css" asp-append-version="true" />
+
+<!-- Return to Dashboard Button -->
+<div class="mb-4">
+    <a href="/Account/Dashboard" class="btn btn-outline-primary">
         <i class="fa fa-chevron-left"></i> Return to Dashboard
     </a>
-    <!-- Enhanced Header -->
-    <div class="settings-header">
-        <h1>Account Settings</h1>
-        <p>Customize your experience and manage your account preferences</p>
+</div>
+
+<div class="text-center mb-4">
+    <h1 class="display-4">Account Settings</h1>
+    <p>Update your account information and preferences.</p>
+</div>
+
+<div class="settings-container">
+    <!-- Navigation Buttons -->
+    <div id="navigationButtons">
+        <button id="general-settings-btn" class="settings-btn" onclick="loadSettings('GeneralSettings')" style="background-color: rgb(89, 199, 226); color: white; border: none;">General Settings</button>
+        <button id="account-settings-btn" class="settings-btn" onclick="loadSettings('AccountSettings')" style="background-color: rgb(255, 79, 152); color: white; border: none;">Account Settings</button>
+        <button id="privacy-settings-btn" class="settings-btn" onclick="loadSettings('PrivacySettings')" style="background-color: rgb(154, 154, 240); color: white; border: none;">Privacy Settings</button>
+        <button id="profile-settings-btn" class="settings-btn" onclick="loadSettings('ProfileSettings')" style="background-color: rgb(180, 150, 100); color: white; border: none;">Profile Settings</button>
     </div>
 
-    <!-- Navigation Tabs -->
-    <div class="settings-tabs">
-        <button id="general-settings-btn" 
-                onclick="loadSettings('GeneralSettings')" 
-                class="tab-button tab-general">
-            <i class="fas fa-cog me-2"></i>
-            General Settings
-        </button>
-        <button id="account-settings-btn" 
-                onclick="loadSettings('AccountSettings')" 
-                class="tab-button tab-account">
-            <i class="fas fa-user me-2"></i>
-            Account Settings
-        </button>
-        <button id="privacy-settings-btn" 
-                onclick="loadSettings('PrivacySettings')" 
-                class="tab-button tab-privacy">
-            <i class="fas fa-shield-alt me-2"></i>
-            Privacy Settings
-        </button>
-    </div>
-
-    <!-- Content Area -->
-    <div class="settings-content" id="settings-content">
+    <!-- Content Area to Display the Settings -->
+    <div id="settings-content">
+        <!-- Default to 'GeneralSettings' content load -->
     </div>
 </div>
 
@@ -46,37 +37,45 @@
             loadSettings('GeneralSettings');
         });
 
-        function loadSettings(page) {
-            // Build the button ID correctly
-            const buttonId = page.toLowerCase().replace('settings', '-settings') + '-btn';
-            
-            // Update active button state
-            document.querySelectorAll('.tab-button').forEach(btn => {
-                btn.style.opacity = '0.8';
-                btn.classList.remove('active');
+        function updateActiveButton(activeButton) {
+            $('#navigationButtons button').each(function() {
+                $(this).css('opacity', '.8'); // Reset all button colors
             });
-            
-            const activeButton = document.getElementById(buttonId);
-            if (activeButton) {
-                activeButton.style.opacity = '1';
-                activeButton.classList.add('active');
-            }
+            $(activeButton).css('opacity', '1.0'); // Change background for active button
+        }
+        // Function to load settings dynamically
+        function loadSettings(page) {
+            $.ajax({
+                url: '@Url.Action("LoadSettings")',
+                type: 'GET',
+                data: { settingsPage: page },
+                cache: false,
+                success: function (data) {
+                    $('#settings-content').html(data); // Load the settings view into the content area
 
-            // Simple fade out
-            $('#settings-content').fadeOut(200, function() {
-                // Load new content
-                $.ajax({
-                    url: '/Account/LoadSettings',
-                    type: 'GET',
-                    data: { settingsPage: page },
-                    success: function(data) {
-                        $('#settings-content').html(data).fadeIn(200);
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error loading settings:', error);
-                    }
-                });
+                    $(window).trigger('resize');
+                    
+
+                    let pageName = page.toLowerCase().replace("settings", "");
+
+                    //alert(pageName);
+
+                    updateActiveButton('#' + pageName + '-settings-btn');
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    alert("Error loading settings. Status: " + textStatus + ", Error: " + errorThrown);
+                }
             });
         }
+
+        // Initially load settings based on ViewBag.LoadPage
+        $(document).ready(function() {
+            var initialPage = '@ViewBag.LoadPage';
+            if (initialPage) {
+                loadSettings(initialPage);
+            } else {
+                loadSettings('GeneralSettings'); // Default to general settings
+            }
+        });
     </script>
 }

@@ -5,14 +5,14 @@
 namespace DormBuddy.Migrations
 {
     /// <inheritdoc />
-    public partial class AddRememberMeToApplicationUser : Migration
+    public partial class FriendPendingColumn : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<bool>(
-                name: "RememberMe",
-                table: "AspNetUsers",
+                name: "pending",
+                table: "FriendsModel",
                 type: "tinyint(1)",
                 nullable: false,
                 defaultValue: false);
@@ -22,8 +22,8 @@ namespace DormBuddy.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "RememberMe",
-                table: "AspNetUsers");
+                name: "pending",
+                table: "FriendsModel");
         }
     }
 }
