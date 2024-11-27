@@ -1,0 +1,208 @@
+@model Tuple<List<DormBuddy.Models.GroupModel>, DormBuddy.Models.GroupMemberModel>
+
+@{
+    ViewData["Title"] = "Manage Groups";
+    var users = ViewBag.Users as List<DormBuddy.Models.ApplicationUser>;
+    var groups = Model.Item1; // All groups 
+    var userGroup = Model.Item2; // Current user's group
+}
+
+<!-- Return to Dashboard Button -->
+<div class="mb-4">
+    <a href="/Account/Dashboard" class="btn btn-outline-primary">
+        <i class="fa fa-chevron-left"></i> Return to Dashboard
+    </a>
+</div>
+
+<!-- Header -->
+<div class="text-center mb-4">
+    <h1><i class="fas fa-users fa-lg"></i></h1>
+    <h1 class="display-4">Manage Groups</h1>
+    <p>Create or join a group to collaborate with your dormmates.</p>
+</div>
+
+<!-- Display success message if it exists -->
+@if (TempData["message"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["message"]
+    </div>
+}
+
+<!-- Display error message if it exists -->
+@if (TempData["error"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["error"]
+    </div>
+}
+
+<!-- User's Current Group -->
+@if (userGroup != null)
+{
+    <hr class="my-4">
+    <h4>Your Group Information</h4>
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Group Name</th>
+                    <th>Members</th>
+                    <th>Created By</th>
+                    <th>Invitation Code</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>@userGroup.Group.Name</td>
+                    <td>@userGroup.Group.Members.Count / @userGroup.Group.MaxMembers</td>
+                    <td>
+                        @{
+                            var createdByUser = users?.FirstOrDefault(u => u.Id == userGroup.Group.CreatedByUserId);
+                            var createdByName = createdByUser != null ? $"{createdByUser.FirstName} {createdByUser.LastName}" : "Unknown";
+                        }
+                        @createdByName
+                    </td>
+                    <td>@userGroup.Group.InvitationCode</td>
+                    <td>
+                        <!-- Only non-admins see this -->
+                        @if (!userGroup.IsAdmin) 
+                        {
+                            <form method="post" asp-action="LeaveGroup" asp-controller="Groups" class="d-inline">
+                                <input type="hidden" name="groupId" value="@userGroup.GroupId" />
+                                <button type="submit" class="btn btn-danger btn-sm">Leave Group</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Admin cannot leave the group</span>
+                        }
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Additional Features for Admins -->
+    @if (userGroup.IsAdmin) 
+    {
+        <h4 class="mt-5">(ADMIN VIEW) - Group Members</h4>
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Member Name</th>
+                        <th>Email</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var member in userGroup.Group.Members)
+                    {
+                        var memberUser = users?.FirstOrDefault(u => u.Id == member.UserId);
+                        <tr>
+                            <td>@(memberUser != null ? $"{memberUser.FirstName} {memberUser.LastName}" : "Unknown")</td>
+                            <td>@memberUser?.Email</td>
+                            <td>
+                                <!-- Prevent Admin from Being Kicked -->
+                                @if (member.UserId != userGroup.Group.CreatedByUserId) 
+                                {
+                                    <form method="post" asp-action="KickMember" asp-controller="Groups" class="d-inline">
+                                        <input type="hidden" name="groupId" value="@userGroup.Group.Id" />
+                                        <input type="hidden" name="userId" value="@member.UserId" />
+                                        <button type="submit" class="btn btn-warning btn-sm">Kick</button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Cannot kick the admin</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <form method="post" asp-action="DeleteGroup" asp-controller="Groups">
+            <input type="hidden" name="groupId" value="@userGroup.Group.Id" />
+            <button type="submit" class="btn btn-danger mt-3">Delete Group</button>
+        </form>
+    }
+}
+else
+{
+    <div class="alert alert-warning">
+        You are not currently in any group.
+    </div>
+
+    <div class="row">
+        <!-- Join Group Section -->
+        <div class="col-md-6">
+            <h4>Join a Group</h4>
+            <form method="post" asp-action="JoinGroup" asp-controller="Groups">
+                <div class="form-group">
+                    <label for="invitationCode">Invitation Code</label>
+                    <input type="text" class="form-control" id="invitationCode" name="invitationCode" placeholder="Enter invitation code" required />
+                </div>
+                <button type="submit" class="btn btn-primary">Join Group</button>
+            </form>
+        </div>
+
+        <!-- Create Group Section -->
+        <div class="col-md-6">
+            <h4>Create a New Group</h4>
+            <form method="post" asp-action="CreateGroup" asp-controller="Groups">
+                <div class="form-group">
+                    <label for="groupName">Group Name</label>
+                    <input type="text" class="form-control" id="groupName" name="Name" placeholder="Enter group name" required />
+                </div>
+                <div class="form-group">
+                    <label for="maxMembers">Maximum Members</label>
+                    <input type="number" class="form-control" id="maxMembers" name="MaxMembers" min="2" max="4" value="4" required />
+                </div>
+                <button type="submit" class="btn btn-success">Create Group</button>
+            </form>
+        </div>
+    </div>
+}
+
+
+@* !! THIS WOULD NOT BE SCALEABLE WITHOUT PAGINATION !!
+<!-- Admin-Only: Display All Groups -->
+@if (User.IsInRole("Admin"))
+{
+    <hr class="my-4">
+    <h4 class="mt-5">(ADMIN VIEW) - All Groups</h4>
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Group Name</th>
+                    <th>Members</th>
+                    <th>Created By</th>
+                    <th>Invitation Code</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var group in groups)
+                {
+                    <tr>
+                        <td>@group.Name</td>
+                        <td>@group.Members.Count / @group.MaxMembers</td>
+                        <td>
+                            @{
+                                var createdByUser = users?.FirstOrDefault(u => u.Id == group.CreatedByUserId);
+                                var createdByUsername = createdByUser != null ? createdByUser.UserName : "Unknown";
+                            }
+                            @createdByUsername
+                        </td>
+                        <td>@group.InvitationCode</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+*@
