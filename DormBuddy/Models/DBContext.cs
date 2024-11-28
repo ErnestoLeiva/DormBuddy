@@ -1,22 +1,19 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace DormBuddy.Models
 {
+
     public class ApplicationUser : IdentityUser
     {
         public int Credits { get; set; }
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
-        public bool RememberMe { get; set; }
-        public string? TimeZone { get; set; }
-        public int TotalLogins { get; set; }  // Tracks the number of logins
-        public DateTime? LastLoginDate { get; set; }  // Tracks the last login time
-        public string TemporaryProperty { get; set; }  // TEST migration detection
 
-        // Navigation property for many-to-many relationship with GroupModel
-        public ICollection<GroupModel>? Groups { get; set; }
+        public bool RememberMe { get; set; }
+
     }
 
     public class DBContext : IdentityDbContext<ApplicationUser, IdentityRole, string>
@@ -26,39 +23,42 @@ namespace DormBuddy.Models
         {
         }
 
-        // DBSet for persistent features
+        // DBSet for persistent tasks feature - Ernesto Leiva 10/04/2024
         public DbSet<TaskModel> Tasks { get; set; }
+        
+        // DBSet for persistent expenses feature - Ernesto Leiva 10/27/2024
         public DbSet<ExpenseModel> Expenses { get; set; }
-        public DbSet<PeerLendingModel> PeerLendings { get; set; }
-        public DbSet<ApplicationUser> ApplicationUsers { get; set; }
-        public DbSet<GroupModel> Groups { get; set; }
-        public DbSet<UserProfile> UserProfiles { get; set; }
-        public DbSet<UserLastUpdate> UserLastUpdate { get; set; }
-        public DbSet<FriendsModel> FriendsModel { get; set; }
-        public DbSet<DashboardChatModel> DashboardChatModel { get; set; }
-        public DbSet<LogModel> Logs { get; set; }
 
+        // DBSet for persistent peer-lending feature - Ernesto Leiva 11/04/2024
+        public DbSet<PeerLendingModel> PeerLendings {get; set; }
+
+        // DBSet for the group/party system - Ernesto Leiva 11/27/24
+        public DbSet<GroupModel> Groups { get; set; }
+        public DbSet<GroupMemberModel> GroupMembers { get; set; }
+
+        public DbSet<ApplicationUser> ApplicationUsers { get; set; }
+
+        public DbSet<UserProfile> UserProfiles { get; set; }
+
+        public DbSet<UserLastUpdate> UserLastUpdate { get; set; } // saves the last time the user updated the browser to find online status
+
+        public DbSet<DashboardChatModel> DashboardChatModel { get; set; }
+
+        public DbSet<FriendsModel> FriendsModel { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            if (!optionsBuilder.IsConfigured)
-            {
-                optionsBuilder.UseMySql("Server=shportfolio.net;Database=myportfolio_dormbuddy;User=myportfolio;Password=65eyqYcPHv;",
+            if (!optionsBuilder.IsConfigured) {
+                optionsBuilder.UseMySql("Server=shportfolio.net;Database=myportfolio_dormbuddy;User=myportfolio;Password=65eyqYcPHv;", 
                     new MySqlServerVersion(new Version(8, 0, 2)));
             }
+                
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
-            // Many-to-Many Relationship: ApplicationUser <-> GroupModel
-            builder.Entity<GroupModel>()
-                .HasMany(g => g.Members)
-                .WithMany(u => u.Groups)
-                .UsingEntity(j => j.ToTable("UserGroups"));
-
-            // Configure default string lengths and other properties
             foreach (var entity in builder.Model.GetEntityTypes())
             {
                 foreach (var property in entity.GetProperties())
@@ -70,7 +70,27 @@ namespace DormBuddy.Models
                 }
             }
 
-            // Configure Identity tables
+            builder.Entity<GroupModel>(entity =>
+            {
+                entity.ToTable("Groups");
+                entity.Property(g => g.Name).IsRequired().HasMaxLength(100);
+                entity.Property(g => g.InvitationCode).IsRequired().HasMaxLength(8);
+                entity.Property(g => g.CreatedByUserId).IsRequired();
+                entity.HasMany(g => g.Members)
+                    .WithOne(m => m.Group)
+                    .HasForeignKey(m => m.GroupId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+            builder.Entity<GroupMemberModel>(entity =>
+            {
+                entity.ToTable("GroupMembers");
+                entity.Property(m => m.UserId).IsRequired();
+                entity.Property(m => m.GroupId).IsRequired();
+                entity.Property(m => m.IsAdmin).IsRequired();
+            });
+                
+                
+            // Apply specific maximum length configurations for Identity tables
             builder.Entity<ApplicationUser>(entity =>
             {
                 entity.Property(m => m.Email).HasMaxLength(160);
@@ -79,6 +99,7 @@ namespace DormBuddy.Models
                 entity.Property(m => m.NormalizedUserName).HasMaxLength(160);
                 entity.Property(m => m.FirstName).HasMaxLength(160);
                 entity.Property(m => m.LastName).HasMaxLength(160);
+
             });
 
             builder.Entity<IdentityRole>(entity =>
@@ -87,7 +108,7 @@ namespace DormBuddy.Models
                 entity.Property(m => m.NormalizedName).HasMaxLength(160);
             });
 
-            // Configure IdentityUserLogin
+            // Specific configuration for IdentityUserLogin
             builder.Entity<IdentityUserLogin<string>>(entity =>
             {
                 entity.Property(e => e.LoginProvider).HasMaxLength(160);
@@ -95,20 +116,14 @@ namespace DormBuddy.Models
                 entity.Property(e => e.ProviderDisplayName).HasMaxLength(160);
             });
 
-            // Task configuration
+            // Tasks configuratiobns for the requirments of string lengths
             builder.Entity<TaskModel>(entity =>
             {
                 entity.Property(t => t.TaskName).HasMaxLength(160).IsRequired();
                 entity.Property(t => t.AssignedTo).HasMaxLength(160).IsRequired();
             });
-            //Log Configuration
-            builder.Entity<LogModel>(entity =>
-            {
-                entity.Property(e => e.Action).IsRequired().HasMaxLength(160);
-                entity.Property(e => e.Username).IsRequired().HasMaxLength(160);
-                entity.Property(e => e.Details).HasMaxLength(500);
-            });
-
         }
+
+
     }
 }
