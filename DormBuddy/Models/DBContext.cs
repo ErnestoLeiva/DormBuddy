@@ -48,6 +48,8 @@ namespace DormBuddy.Models
 
         public DbSet<Notifications> Notifications { get; set; }
 
+        public DbSet<Profile_PostsModel> Profile_Posts { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured) {
