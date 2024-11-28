@@ -114,11 +114,25 @@ namespace DormBuddy.Controllers
 
                 var profile = await GetUserInformation(username);
 
+                if (profile == null) {
+                    return BadRequest("User profile could not be found on login");
+                }
+
                 await _signInManager.SignInAsync(user, rememberMe);
 
                 profile.LastLogin = DateTime.UtcNow;
 
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
+
+
+                /*
+                _context.Add(new Notifications {
+                    UserId = profile.UserId,
+                    MessageType = 1, // FOR REGULAR MESSAGE
+                    CreatedAt = DateTime.UtcNow,
+                    Message = profile?.User?.UserName + "..... WELCOME!"
+                });
+                */
 
                 return RedirectToAction("Dashboard");
 
@@ -458,8 +472,7 @@ namespace DormBuddy.Controllers
 
         public IActionResult Lending() => User?.Identity?.IsAuthenticated == true ? View("~/Views/Account/Dashboard/Lending.cshtml") : RedirectToAction("AccountForms");
 
-        public IActionResult Notifications() => User?.Identity?.IsAuthenticated == true ? View("~/Views/Account/Dashboard/Notifications.cshtml") : RedirectToAction("AccountForms");
-
+        //public IActionResult Notifications() => User?.Identity?.IsAuthenticated == true ? View("~/Views/Account/Dashboard/Notifications.cshtml", new List<Notifications>()) : RedirectToAction("AccountForms");
 
 public IActionResult Settings()
 {

@@ -60,7 +60,7 @@ namespace DormBuddy.Controllers
 
             if (!string.IsNullOrEmpty(uname))
             {
-                user = await _userManager.FindByNameAsync(uname);
+                user = await _context.Users.FirstOrDefaultAsync(m => m.UserName == uname || m.Email == uname);
             }
 
             if (user == null)
@@ -202,7 +202,7 @@ namespace DormBuddy.Controllers
                         Id = m.Id,
                         User = user,  
                         type = m.type,
-                        sent_at = getCurrentTimeFromUTC(m.sent_at).ToString("yyyy-MM-dd HH:mm:ss tt"),
+                        sent_at = getCurrentTimeFromUTC(m.sent_at).ToString("yyyy-MM-dd hh:mm:ss tt"),
                         message = m.message
                     };
                 });

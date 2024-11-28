@@ -42,6 +42,8 @@ namespace DormBuddy.Models
 
         public DbSet<FriendsModel> FriendsModel { get; set; }
 
+        public DbSet<Notifications> Notifications { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured) {
