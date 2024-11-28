@@ -32,6 +32,10 @@ namespace DormBuddy.Models
         // DBSet for persistent peer-lending feature - Ernesto Leiva 11/04/2024
         public DbSet<PeerLendingModel> PeerLendings {get; set; }
 
+        // DBSet for the group/party system - Ernesto Leiva 11/27/24
+        public DbSet<GroupModel> Groups { get; set; }
+        public DbSet<GroupMemberModel> GroupMembers { get; set; }
+
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
 
         public DbSet<UserProfile> UserProfiles { get; set; }
@@ -57,19 +61,37 @@ namespace DormBuddy.Models
         {
             base.OnModelCreating(builder);
 
-            // Ensure the maximum length is set for all string properties
             foreach (var entity in builder.Model.GetEntityTypes())
             {
                 foreach (var property in entity.GetProperties())
                 {
                     if (property.ClrType == typeof(string) && property.GetMaxLength() == null)
                     {
-                        // Apply a default maximum length to avoid key length issues
                         property.SetMaxLength(160);
                     }
                 }
             }
 
+            builder.Entity<GroupModel>(entity =>
+            {
+                entity.ToTable("Groups");
+                entity.Property(g => g.Name).IsRequired().HasMaxLength(100);
+                entity.Property(g => g.InvitationCode).IsRequired().HasMaxLength(8);
+                entity.Property(g => g.CreatedByUserId).IsRequired();
+                entity.HasMany(g => g.Members)
+                    .WithOne(m => m.Group)
+                    .HasForeignKey(m => m.GroupId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+            builder.Entity<GroupMemberModel>(entity =>
+            {
+                entity.ToTable("GroupMembers");
+                entity.Property(m => m.UserId).IsRequired();
+                entity.Property(m => m.GroupId).IsRequired();
+                entity.Property(m => m.IsAdmin).IsRequired();
+            });
+                
+                
             // Apply specific maximum length configurations for Identity tables
             builder.Entity<ApplicationUser>(entity =>
             {
