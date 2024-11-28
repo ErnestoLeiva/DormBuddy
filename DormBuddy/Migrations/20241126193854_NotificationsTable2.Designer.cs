@@ -4,6 +4,7 @@ using DormBuddy.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,32 +12,18 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DormBuddy.Migrations
 {
     [DbContext(typeof(DBContext))]
-    partial class DBContextModelSnapshot : ModelSnapshot
+    [Migration("20241126193854_NotificationsTable2")]
+    partial class NotificationsTable2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.10")
+                .HasAnnotation("ProductVersion", "8.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
-
-            modelBuilder.Entity("ApplicationUserGroupModel", b =>
-                {
-                    b.Property<int>("GroupsId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("MembersId")
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
-
-                    b.HasKey("GroupsId", "MembersId");
-
-                    b.HasIndex("MembersId");
-
-                    b.ToTable("UserGroups", (string)null);
-                });
 
             modelBuilder.Entity("DormBuddy.Models.ApplicationUser", b =>
                 {
@@ -65,9 +52,6 @@ namespace DormBuddy.Migrations
                     b.Property<string>("FirstName")
                         .HasMaxLength(160)
                         .HasColumnType("varchar(160)");
-
-                    b.Property<DateTime?>("LastLoginDate")
-                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("LastName")
                         .HasMaxLength(160)
@@ -104,18 +88,6 @@ namespace DormBuddy.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasMaxLength(160)
                         .HasColumnType("varchar(160)");
-
-                    b.Property<string>("TemporaryProperty")
-                        .IsRequired()
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
-
-                    b.Property<string>("TimeZone")
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)");
-
-                    b.Property<int>("TotalLogins")
-                        .HasColumnType("int");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("tinyint(1)");
@@ -237,17 +209,18 @@ namespace DormBuddy.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
                     b.Property<string>("Message")
+                        .IsRequired()
                         .HasMaxLength(160)
                         .HasColumnType("varchar(160)");
 
-                    b.Property<int>("MessageType")
-                        .HasColumnType("int");
+                    b.Property<string>("MessageType")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("varchar(160)");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasMaxLength(160)
                         .HasColumnType("varchar(160)");
 
@@ -367,7 +340,7 @@ namespace DormBuddy.Migrations
                         .HasMaxLength(160)
                         .HasColumnType("varchar(160)");
 
-                    b.Property<DateTime?>("DateOfBirth")
+                    b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("FacebookUrl")
@@ -575,21 +548,6 @@ namespace DormBuddy.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("ApplicationUserGroupModel", b =>
-                {
-                    b.HasOne("DormBuddy.Models.GroupModel", null)
-                        .WithMany()
-                        .HasForeignKey("GroupsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DormBuddy.Models.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("MembersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("DormBuddy.Models.DashboardChatModel", b =>
                 {
                     b.HasOne("DormBuddy.Models.ApplicationUser", "User")
@@ -603,7 +561,9 @@ namespace DormBuddy.Migrations
                 {
                     b.HasOne("DormBuddy.Models.ApplicationUser", "User")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });

@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Security.Claims;
 using Microsoft.Extensions.Caching.Memory;
+using FirebaseAdmin.Messaging;
 
 namespace DormBuddy.Controllers
 {
@@ -225,6 +226,23 @@ namespace DormBuddy.Controllers
                 pending = true
             });
 
+            // Check if the notification already exists
+            var existingNotification = await _context.Notifications
+                .FirstOrDefaultAsync(n => n.UserId == user.Id && n.Message == targetUser.Id && n.MessageType == 2);
+
+            if (existingNotification == null)
+            {
+                // Notification doesn't exist, so add a new one
+                await _context.Notifications.AddAsync(new Notifications
+                {
+                    UserId = targetUser.Id,
+                    Message = user.Id,
+                    MessageType = 2,
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
+
+
             await _context.SaveChangesAsync();
             
             return RedirectToAction("Profile", "Account", new { username = targetUser.UserName });
@@ -386,8 +404,8 @@ namespace DormBuddy.Controllers
 
         }
 
-        [HttpGet("AcceptOrDenyPending")]
-        public async Task<IActionResult> AcceptOrDenyPending(string target, string type) { // view pending(to accept) or remove pending(to abort)
+        [HttpPost("AcceptOrDenyPending")]
+        public async Task<IActionResult> AcceptOrDenyPending(string target, string type, string targetCtrl) { // view pending(to accept) or remove pending(to abort)
             var targetUser = await _context.Users.FirstOrDefaultAsync(p => p.UserName == target);
 
             if (targetUser == null || string.IsNullOrWhiteSpace(targetUser.Id))
@@ -421,15 +439,27 @@ namespace DormBuddy.Controllers
 
                 return RedirectToAction("Profile", "Account", new { username = targetUser.UserName });
             } else {
-                Console.WriteLine("NOT NULL");
+                var notification = await _context.Notifications.FirstOrDefaultAsync(p=>p.UserId == friendAOrD.FriendId && p.Message == friendAOrD.UserId && friendAOrD.pending == true);
+                
                 switch (type)
                 {
                     case "accept":
                         friendAOrD.pending = false;
+
+                        try {
+                            _context.Remove(notification);
+                            Console.WriteLine("notification has been removed");
+                        } catch (Exception ex) {Console.WriteLine(ex.Message);}
+
                         await _context.SaveChangesAsync();
                     break;
                     case "deny":
                         _context.Remove(friendAOrD);
+
+                        try {
+                            _context.Remove(notification);
+                        } catch (Exception ex) {Console.WriteLine(ex.Message);}
+
                         await _context.SaveChangesAsync();
                     break;
                     default:
@@ -437,7 +467,18 @@ namespace DormBuddy.Controllers
                     break;
                 }
 
-                return RedirectToAction("Profile", "Account", new { username = targetUser.UserName });
+                switch (targetCtrl) {
+                    case "Profile":
+                    return RedirectToAction("Profile", "Account", new { username = targetUser.UserName });
+                    
+                    case "Notification":
+                    return RedirectToAction("Index", "Notifications");
+
+                    default:
+                    return BadRequest("Controller could not be found!");
+
+                    
+                }
             }
 
             return BadRequest(new { error = "No friend request found to process." });
@@ -626,7 +667,6 @@ namespace DormBuddy.Controllers
             EnsureProfileAttached(profile);
 
             // visibility of profile content if not considered a friend
-            Console.WriteLine(profile.ProfileVisibleToPublic);
             if (model.ProfileVisibleToPublic == true) {
                 profile.ProfileVisibleToPublic = true;
             } else {
