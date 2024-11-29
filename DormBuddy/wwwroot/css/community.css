@@ -15,11 +15,13 @@
     align-items: center; 
 }
 .post-heading h1{
-    font-size: 2.2rem;
+    /*font-size: 2.2rem;*/
+    font-size: 1rem;
     font-weight: 500;
     background-color: #202020;
     color: #fff;
     padding: 10px 20px;
+    cursor: pointer;
 }
 .post-heading span{
     font-size: 1.3rem;
