@@ -45,6 +45,124 @@ namespace DormBuddy.Controllers
             _configuration = configuration;
         }
 
+        [HttpPost("UppdateEUFLInformation")]
+        public async Task<IActionResult> UpdateEUFLInformation([FromForm] UserProfile model, [FromForm] string Email, [FromForm] string Username, [FromForm] string FirstName, [FromForm] string LastName) {
+
+            // Get the tracked user profile
+            var profile = await GetUserInformation();
+            if (profile == null)
+            {
+                TempData["Message"] = "Profile not found.";
+                return RedirectToAction("Settings", "Account", new { page = "AccountSettings" });
+            }
+
+            EnsureProfileAttached(profile);
+
+            if (!string.IsNullOrEmpty(Email) && Email != profile.User.Email) {
+                profile.User.Email = Email;
+                profile.User.NormalizedEmail = Email.ToUpper();
+
+                // send email to check for new email verification
+            }
+            if (!string.IsNullOrEmpty(Username) && Username != profile.User.UserName) {
+                profile.User.UserName = Username;
+                profile.User.NormalizedUserName = Username.ToUpper();
+            }
+            if (!string.IsNullOrEmpty(FirstName) && FirstName != profile.User.FirstName) {
+                profile.User.FirstName = FirstName;
+            }
+            if (!string.IsNullOrEmpty(LastName) && LastName != profile.User.LastName) {
+                profile.User.LastName = LastName;
+            }
+
+            // Save changes to the database
+            await _context.SaveChangesAsync();
+
+            // Clear and optionally refresh cache
+            RevalidateCache(profile);
+
+            TempData["Message"] = "Account information has been updated successfully.";
+
+
+            return RedirectToAction("Settings", "Account", new { page = "AccountSettings" });
+
+        }
+
+        [HttpPost("UpdateAccountPassword")]
+        public async Task<IActionResult> UpdateAccountPassword([FromForm] UserProfile model, [FromForm] string NewPassword, [FromForm] string ReEnteredPassword, [FromForm] string OldPassword)
+        {
+
+
+            if (string.IsNullOrEmpty(NewPassword) ||
+            string.IsNullOrEmpty(ReEnteredPassword) ||
+            string.IsNullOrEmpty(OldPassword))
+            {
+                return RedirectToAction("Settings", "Account", new { page = "AccountSettings", errorMessage = "One or more fields are empty!" });
+                
+            }
+
+            if (NewPassword != ReEnteredPassword)
+            {
+                return RedirectToAction("Settings", "Account", new { page = "AccountSettings", errorMessage = "New and re-entered passwords do not match!" });
+            }
+
+            // check if passwords match parameters
+
+            var user = await _context.Users.FirstOrDefaultAsync(p => p.UserName == User.Identity.Name);
+            
+            if (user == null) {
+                return BadRequest( new { error = "User not found!" } );
+            }
+
+            if (!(await _userManager.CheckPasswordAsync(user, OldPassword)))
+            {
+                return RedirectToAction("Settings", "Account", new { page = "AccountSettings", errorMessage = "Old password is not correct!" });
+            }
+
+            if (OldPassword == NewPassword)
+            {
+                return RedirectToAction("Settings", "Account", new { page = "AccountSettings", errorMessage = "New password must be different from the old one!" });
+            }
+
+            // change password
+
+            var result = await _userManager.ChangePasswordAsync(user, OldPassword, NewPassword);
+
+            try {
+
+            if ( model == null || model.User == null )
+            {
+                UserProfile up = await GetUserInformation(user.UserName);
+
+                if (up == null)
+                {
+                    return BadRequest(new { error = "Failed to fetch user model" });
+                }
+
+                model = up;
+            }
+
+            if (!result.Succeeded) {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+
+                ModelState.AddModelError(string.Empty, errors);
+
+                return RedirectToAction("Settings", "Account", new { page = "AccountSettings", errorMessage = errors });
+                
+            } else {
+                return RedirectToAction("Settings", "Account", new { page = "AccountSettings", errorMessage = "Password changed successfully!" });
+            }
+
+            //// send email confirming password change
+
+            //return Ok( new { message = "New password has been set!" } );
+            } catch (Exception e) {
+                Console.WriteLine(e.Message);
+                return BadRequest(new{Error = "Failed to reset password!"});
+            }
+            return BadRequest(new{Error = "Failed to reset password!"});
+        }
+
         [HttpPost]
         public async Task<IActionResult> GetAllFriends() {
             var user = await GetCurrentUserAsync();
