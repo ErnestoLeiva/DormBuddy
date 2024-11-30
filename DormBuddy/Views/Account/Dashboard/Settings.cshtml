@@ -1,33 +1,47 @@
 @{
-    ViewData["Title"] = "Account Settings";
+    ViewData["Title"] = "Settings";
 }   
 
 <link rel="stylesheet" href="~/css/settings.css" asp-append-version="true" />
 
-<!-- Return to Dashboard Button -->
-<div class="mb-4">
-    <a href="/Account/Dashboard" class="btn btn-outline-primary">
-        <i class="fa fa-chevron-left"></i> Return to Dashboard
-    </a>
-</div>
-
-<div class="text-center mb-4">
-    <h1 class="display-4">Account Settings</h1>
-    <p>Update your account information and preferences.</p>
-</div>
-
-<div class="settings-container">
-    <!-- Navigation Buttons -->
-    <div id="navigationButtons">
-        <button id="general-settings-btn" class="settings-btn" onclick="loadSettings('GeneralSettings')" style="background-color: rgb(89, 199, 226); color: white; border: none;">General Settings</button>
-        <button id="account-settings-btn" class="settings-btn" onclick="loadSettings('AccountSettings')" style="background-color: rgb(255, 79, 152); color: white; border: none;">Account Settings</button>
-        <button id="privacy-settings-btn" class="settings-btn" onclick="loadSettings('PrivacySettings')" style="background-color: rgb(154, 154, 240); color: white; border: none;">Privacy Settings</button>
-        <button id="profile-settings-btn" class="settings-btn" onclick="loadSettings('ProfileSettings')" style="background-color: rgb(180, 150, 100); color: white; border: none;">Profile Settings</button>
+<div class="settings-container fade-in">
+    <div class="settings-header text-center mb-4">
+        <h1><i class="fas fa-cog"></i></h1>
+        <h1 class="display-4">Settings</h1>
+        <p>Update your account information and preferences.</p>
     </div>
 
-    <!-- Content Area to Display the Settings -->
+    <!-- Navigation Buttons -->
+    <div id="navigationButtons">
+        <button id="general-settings-btn" 
+                class="settings-btn" 
+                onclick="loadSettings('GeneralSettings')">
+            <i class="fas fa-sliders-h me-2"></i>
+            General Settings
+        </button>
+        <button id="account-settings-btn" 
+                class="settings-btn" 
+                onclick="loadSettings('AccountSettings')">
+            <i class="fas fa-user-cog me-2"></i>
+            Account Settings
+        </button>
+        <button id="privacy-settings-btn" 
+                class="settings-btn" 
+                onclick="loadSettings('PrivacySettings')">
+            <i class="fas fa-shield-alt me-2"></i>
+            Privacy Settings
+        </button>
+        <button id="profile-settings-btn" 
+                class="settings-btn" 
+                onclick="loadSettings('ProfileSettings')">
+            <i class="fas fa-id-card me-2"></i>
+            Profile Settings
+        </button>
+    </div>
+
+    <!-- Content Area -  -->
     <div id="settings-content">
-        <!-- Default to 'GeneralSettings' content load -->
+        
     </div>
 </div>
 
@@ -35,15 +49,36 @@
     <script type="text/javascript">
         document.addEventListener('DOMContentLoaded', function() {
             loadSettings('GeneralSettings');
+            
+            
+            setButtonStyles();
         });
+
+        function setButtonStyles() {
+            const buttonStyles = {
+                'general-settings-btn': 'rgb(89, 199, 226)',
+                'account-settings-btn': 'rgb(255, 79, 152)',
+                'privacy-settings-btn': 'rgb(154, 154, 240)',
+                'profile-settings-btn': 'rgb(180, 150, 100)'
+            };
+
+            Object.entries(buttonStyles).forEach(([buttonId, color]) => {
+                const button = document.getElementById(buttonId);
+                if (button) {
+                    button.style.backgroundColor = color;
+                    button.style.color = 'white';
+                    button.style.border = 'none';
+                }
+            });
+        }
 
         function updateActiveButton(activeButton) {
             $('#navigationButtons button').each(function() {
-                $(this).css('opacity', '.8'); // Reset all button colors
+                $(this).css('opacity', '.8'); 
             });
-            $(activeButton).css('opacity', '1.0'); // Change background for active button
+            $(activeButton).css('opacity', '1.0'); 
         }
-        // Function to load settings dynamically
+
         function loadSettings(page) {
             $.ajax({
                 url: '@Url.Action("LoadSettings")',
@@ -51,15 +86,10 @@
                 data: { settingsPage: page },
                 cache: false,
                 success: function (data) {
-                    $('#settings-content').html(data); // Load the settings view into the content area
-
+                    $('#settings-content').html(data);
                     $(window).trigger('resize');
                     
-
                     let pageName = page.toLowerCase().replace("settings", "");
-
-                    //alert(pageName);
-
                     updateActiveButton('#' + pageName + '-settings-btn');
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
@@ -74,7 +104,7 @@
             if (initialPage) {
                 loadSettings(initialPage);
             } else {
-                loadSettings('GeneralSettings'); // Default to general settings
+                loadSettings('GeneralSettings');
             }
         });
     </script>

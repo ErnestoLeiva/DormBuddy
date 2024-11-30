@@ -6,150 +6,167 @@
     var newLoan = Model?.Item2 ?? new DormBuddy.Models.PeerLendingModel();
 }
 
-<!-- Status toggle icons styling -->
-<style>
-    .badge.bg-success {
-        background-color: #28a745;
-        padding: 5px;
-        font-size: 0.9em;
-    }
-
-    .badge.bg-danger {
-        background-color: #dc3545;
-        font-size: 1.05em;
-    }
-</style>
-
-
-
-
-<!-- Return to dashboard button -->
-<div class="mb-4">
-    <a href="/Account/Dashboard" class="btn btn-outline-primary">
-        <i class="fa fa-chevron-left"></i> Return to Dashboard
-    </a>
-</div>
-
-<!-- Peer-Lending Header -->
-<div class="text-center mb-4">
-    <h1><i class="fas fa-handshake fa-lg"></i></h1>
-    <h1 class="display-4">Peer Lending</h1>
-    <p>Manage peer-to-peer loans and track repayment status.</p>
-</div>
-
-<!-- Display success message if it exists -->
-@if (TempData["message"] != null)
-{
-    <div class="alert alert-success">@TempData["message"]</div>
-}
-
-<!-- Display error message if it exists -->
-@if (TempData["error"] != null)
-{
-    <div class="alert alert-danger">@TempData["error"]</div>
-}
-
-<!-- Display validation errors -->
-@if (!ViewData.ModelState.IsValid)
-{
-    <div class="alert alert-danger">
-        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-        {
-            <p>@error.ErrorMessage</p>
-        }
+<div class="lending-container fade-in">
+   
+    <!-- Header Section -->
+    <div class="lending-header text-center mb-4">
+        <h1><i class="fas fa-handshake"></i></h1>
+        <h1 class="display-4">Peer Lending</h1>
+        <p>Manage peer-to-peer loans and track repayment status.</p>
     </div>
-}
 
+    <div class="stats-row">
+    <div class="stat-card">
+        <div class="stat-icon" style="background: #4e95d1;">
+            <i class="fas fa-money-bill-wave"></i>
+        </div>
+        <div class="stat-info">
+            <h3>@(((decimal?)ViewData["TotalLent"] ?? 0m).ToString("C"))</h3>
+            <p>Total Lent</p>
+        </div>
+    </div>
 
-<!-- Lending Form to Add New Peer Lend -->
-<div class="container mb-4">
-    <h4>Add New Loan</h4>
-    <form method="post" asp-action="AddLoan" asp-controller="PeerLending">
-        <input type="hidden" id="UserId" name="UserId" value="@newLoan.UserId" />
+    <div class="stat-card">
+        <div class="stat-icon" style="background: #4caf50;">
+            <i class="fas fa-handshake"></i>
+        </div>
+        <div class="stat-info">
+            <h3>@(ViewData["ActiveLoans"] ?? 0)</h3>
+            <p>Active Loans</p>
+        </div>
+    </div>
 
-        <div class="form-group">
-            <label for="borrowerId">Borrower</label>
-            <input type="text" class="form-control" id="borrowerId" name="BorrowerId" placeholder="Enter borrower name" required />
+    <div class="stat-card">
+        <div class="stat-icon" style="background: #f44336;">
+            <i class="fas fa-exclamation-circle"></i>
         </div>
-        <div class="form-group">
-            <label for="amount">Amount</label>
-            <input type="number" step="0.01" min="0.01" class="form-control" id="amount" name="Amount" placeholder="Enter amount" required />
+        <div class="stat-info">
+            <h3>@(ViewData["OverdueLoans"] ?? 0)</h3>
+            <p>Overdue</p>
         </div>
-        <div class="form-group">
-            <label for="dueDate">Due Date</label>
-            <input type="date" class="form-control" id="dueDate" name="DueDate" required />
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon" style="background: #ff9800;">
+            <i class="fas fa-clock"></i>
         </div>
-        <div class="form-group">
-            <label for="dueTime">Due Time</label>
-            <div class="d-flex">
-                <select class="form-control mr-2" name="DueTimeHour">
-                    @for (int i = 1; i <= 12; i++)
-                    {
-                        <option>@i</option>
-                    }
-                </select>
-                <select class="form-control mr-2" name="DueTimeMinute">
-                    @for (int i = 0; i < 60; i += 5) { <option>@i.ToString("D2")</option> }
-                </select>
-                <select class="form-control" name="DueTimeAMPM">
-                    <option>AM</option>
-                    <option>PM</option>
-                </select>
-            </div>
+        <div class="stat-info">
+            <h3>@(ViewData["DueSoonLoans"] ?? 0)</h3>
+            <p>Due Soon</p>
         </div>
-        
-        <button type="submit" class="btn btn-primary">Add Loan</button>
-    </form>
+    </div>
 </div>
 
-<!-- Lendings Table-->
-<div class="table-responsive">
-    <table class="table table-striped table-bordered" id="loanTable">
-        <thead class="thead-dark">
-            <tr>
-                <th>Borrower</th>
-                <th>Amount</th>
-                <th>Due Date</th>
-                <th>Repaid?</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody id="loanTableBody">
-            @if (!loans.Any())
+
+    <!-- Messages Section -->
+    @if (TempData["message"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["message"]
+        </div>
+    }
+    @if (TempData["error"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["error"]
+        </div>
+    }
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger">
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
             {
-                <tr>
-                    <td colspan="5" class="text-center">No current loans...</td>
-                </tr>
+                <p>@error.ErrorMessage</p>
             }
-            else
-            {
-                foreach (var loan in loans)
+        </div>
+    }
+
+    <!-- Add Loan Form -->
+    <div class="add-loan-section">
+        <h4>Add New Loan</h4>
+        <form method="post" asp-action="AddLoan" asp-controller="PeerLending">
+            <input type="hidden" id="UserId" name="UserId" value="@newLoan.UserId" />
+            
+            <div class="form-group">
+                <label for="borrowerId">Borrower</label>
+                <input type="text" class="form-control" id="borrowerId" name="BorrowerId" placeholder="Enter borrower name" required />
+            </div>
+            <div class="form-group">
+                <label for="amount">Amount</label>
+                <input type="number" step="0.01" min="0.01" class="form-control" id="amount" name="Amount" placeholder="Enter amount" required />
+            </div>
+            <div class="form-group">
+                <label for="dueDate">Due Date</label>
+                <input type="date" class="form-control" id="dueDate" name="DueDate" required />
+            </div>
+            <div class="form-group">
+                <label for="dueTime">Due Time</label>
+                <div class="time-select-group">
+                    <select class="form-control" name="DueTimeHour">
+                        @for (int i = 1; i <= 12; i++) { <option>@i</option> }
+                    </select>
+                    <select class="form-control" name="DueTimeMinute">
+                        @for (int i = 0; i < 60; i += 5) { <option>@i.ToString("D2")</option> }
+                    </select>
+                    <select class="form-control" name="DueTimeAMPM">
+                        <option>AM</option>
+                        <option>PM</option>
+                    </select>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Loan</button>
+        </form>
+    </div>
+
+    <!-- Loans Table -->
+    <div class="table-container">
+        <table class="table" id="taskTable">
+            <thead>
+                <tr>
+                    <th>Borrower</th>
+                    <th>Amount</th>
+                    <th>Due Date</th>
+                    <th>Repaid?</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!loans.Any())
                 {
                     <tr>
-                        <td>@loan.BorrowerId</td>
-                        <td class="amount-cell" data-amount="@loan.Amount">@loan.Amount</td>
-                        <td>@loan.DueDate.ToString("MM/dd/yyyy hh:mm tt")</td>
-                        <td class="text-center">
-                            <span class="badge @(loan.IsRepaid ? "bg-success" : "bg-danger")">
-                                <i class="fa @(loan.IsRepaid ? "fa-check" : "fa-times")" aria-hidden="true"></i>
-                            </span>
-                        </td>
-                        <td>
-                            <button class="btn @(loan.IsRepaid ? "btn-warning" : "btn-success") btn-sm"
-                                onclick="toggleLoanStatus(this, @loan.Id)">
-                                Toggle Status
-                            </button>
-                            <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteConfirmationModal" 
-                                onclick="setLoanToDelete('@loan.Id')">Delete</button>
-                        </td>
+                        <td colspan="5" class="text-center">No current loans...</td>
                     </tr>
                 }
-            }
-        </tbody>
-    </table>
+                else
+                {
+                    foreach (var loan in loans)
+                    {
+                        <tr>
+                            <td>@loan.BorrowerId</td>
+                            <td class="amount-cell" data-amount="@loan.Amount">@loan.Amount</td>
+                            <td>@loan.DueDate.ToString("MM/dd/yyyy hh:mm tt")</td>
+                            <td class="text-center">
+                                <span class="badge @(loan.IsRepaid ? "bg-success" : "bg-danger")">
+                                    <i class="fa @(loan.IsRepaid ? "fa-check" : "fa-times")"></i>
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn @(loan.IsRepaid ? "btn-warning" : "btn-success") btn-sm"
+                                    onclick="toggleLoanStatus(this, @loan.Id)">
+                                    Toggle Status
+                                </button>
+                                <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteConfirmationModal" 
+                                    onclick="setLoanToDelete('@loan.Id')">Delete</button>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
 </div>
 
-<!-- Bootstrap Modal for Confirming Lendings Deletion -->
+<!-- Delete Confirmation Modal -->
 <div class="modal fade" id="deleteConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -172,7 +189,7 @@
         </div>
     </div>
 </div>
-
+</div>
 @section Scripts {
     <script>
         window.onload = function() {

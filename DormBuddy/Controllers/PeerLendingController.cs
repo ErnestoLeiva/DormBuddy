@@ -36,6 +36,14 @@ namespace DormBuddy.Controllers
                     .ToListAsync();
 
                 var newLoan = new PeerLendingModel { UserId = user.Id };
+
+                ViewData["TotalLent"] = loans.Any() ? loans.Sum(l => l.Amount) : 0m;
+                ViewData["ActiveLoans"] = loans.Count(l => !l.IsRepaid);
+                ViewData["OverdueLoans"] = loans.Count(l => !l.IsRepaid && l.DueDate < DateTime.Now);
+                ViewData["DueSoonLoans"] = loans.Count(l => !l.IsRepaid && 
+                    l.DueDate > DateTime.Now && 
+                    l.DueDate <= DateTime.Now.AddDays(3));
+
                 return View("~/Views/Account/Dashboard/Lending.cshtml", Tuple.Create(loans, newLoan));
             }
 

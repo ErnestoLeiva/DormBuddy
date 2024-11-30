@@ -11,15 +11,12 @@
     var overdueTasks = tasks.Count(t => !t.IsCompleted && t.DueDate < DateTime.Now);
     var dueTodayTasks = tasks.Count(t => !t.IsCompleted && t.DueDate.Date == DateTime.Today);
 }
-
-<div class="tasks-container">
-    <!-- Return Button -->
-    <a href="/Account/Dashboard" class="return-button">
-        <i class="fa fa-chevron-left"></i> Return to Dashboard
-    </a>
-    <div class="settings-header">
-        <h1>Task Management</h1>
-        <p>Manage your dorm-related tasks and track progress</p>
+<div class="tasks-container fade-in">
+    
+    <div class="tasks-header text-center mb-4">
+        <h1><i class="fas fa-tasks"></i></h1>
+        <h1 class="display-4">Task Management</h1>
+        <p>Manage your dorm-related tasks and track progress.</p>
     </div>
     <!-- Stats Cards -->
     <div class="stats-container">

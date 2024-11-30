@@ -26,7 +26,6 @@ namespace DormBuddy.Controllers
 
         private readonly IConfiguration _configuration;
 
-        private readonly DBContext _context;
         private readonly IMemoryCache _memoryCache;
 
         public AccountController(
@@ -435,7 +434,8 @@ namespace DormBuddy.Controllers
         if (user != null)
         {
             ViewBag.Username = $"{user.FirstName} {user.LastName}";
-            ViewBag.UserRoles = string.Join(", ", await _userManager.GetRolesAsync(user));
+            var roleList = await _userManager.GetRolesAsync(user);
+            ViewBag.UserRoles = roleList;
 
             // Count incomplete tasks
             ViewBag.TaskCount = await _context.Tasks

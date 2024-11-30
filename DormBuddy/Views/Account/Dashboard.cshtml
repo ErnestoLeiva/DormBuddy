@@ -2,148 +2,174 @@
 @{
     var SharedLocalizer = LocalizerFactory.Create("SharedResource", typeof(Program).Assembly.GetName().Name ?? "");
     ViewData["Title"] = "Dashboard";
+    var roles = (ViewBag.UserRoles as IList<string>)?.ToArray() ?? Array.Empty<string>();
 }
 
-<div class="dashboard-header text-center">
-    <h1 class="display-4">@SharedLocalizer["UserDashboard"]</h1>
-    <p>@SharedLocalizer["Welcome"] @ViewBag.Username</p>
+<div class="welcome-overlay">
+    <div class="welcome-content">
+        <img src="~/images/shared-housing.png" alt="DormBuddy Logo" class="welcome-logo" />
+        <h1 style="margin-top: 20px;">Welcome to DormBuddy</h1>
+    </div>
+</div>
+  <div class="dashboard-container" style="opacity: 0;">
+    <img src="/images/postit1.png" class="decorative-postit postit-1" alt="" />
+    <img src="/images/postit2.png" class="decorative-postit postit-2" alt="" />
+    <img src="/images/postit3.png" class="decorative-postit postit-3" alt="" />
+
+   
+    <div class="dashboard-header text-center">
+    <div class="writing-container">
+        <h1 id="welcomeText" class="writing-text">Welcome @(ViewBag.Username)!</h1>
+        <img src="~/images/pencil-icon.png" class="pencil-icon" id="pencil" alt="pencil" />
+    </div>
     <p id="eventDetails"></p>
 </div>
 
-<div class="dashboard-grid">
+    <div class="dashboard-grid">
     <!-- Task Management -->
-    <div class="dashboard-card">
-        <div class="card-status">
-            <div class="status-icon">
-                <i class="fas fa-tasks"></i>
-            </div>
-            <span class="status-badge">@ViewBag.TaskCount Tasks</span>
+    <div class="dashboard-card video-card">
+        <div class="video-wrapper">
+            <video class="card-video" muted loop>
+                <source src="~/images/TaskManagement.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        <div class="card-title-wrapper">
+            <h3 class="card-title">
+                Task Management
+                <i class="fas fa-tasks card-icon"></i>
+            </h3>
         </div>
         <div class="card-content">
-            <h3 class="card-title">@SharedLocalizer["TaskManagement"]</h3>
-            <p class="card-description">@SharedLocalizer["TaskManagementDescription"]</p>
-            <a href="/Tasks/Index" class="card-button">@SharedLocalizer["ViewTasks"]</a>
+            <p class="card-description">Manage your dorm-related tasks and track progress.</p>
+            <a href="/Tasks/Index" class="card-button">View Tasks</a>
         </div>
     </div>
 
     <!-- Expense Splitting -->
-    <div class="dashboard-card">
-        <div class="card-status">
-            <div class="status-icon">
-                <i class="fas fa-money-bill-wave"></i>
-            </div>
-            <span class="status-badge">@ViewBag.PendingExpenses Pending</span>
+    <div class="dashboard-card video-card">
+        <div class="video-wrapper">
+            <video class="card-video" muted loop>
+                <source src="~/images/expenses.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        <div class="card-title-wrapper">
+            <h3 class="card-title">
+                Expense Splitting
+                <i class="fas fa-money-bill-wave card-icon"></i>
+            </h3>
         </div>
         <div class="card-content">
-            <h3 class="card-title">@SharedLocalizer["ExpenseSplitting"]</h3>
-            <p class="card-description">@SharedLocalizer["ExpenseSplittingDescription"]</p>
-            <a href="/Expenses/Index" class="card-button">@SharedLocalizer["ViewExpenses"]</a>
+            <p class="card-description">Track shared expenses and manage balance with your dormmates.</p>
+            <a href="/Expenses/Index" class="card-button">View Expenses</a>
         </div>
     </div>
 
-    <!-- P2P Lending -->
-    <div class="dashboard-card">
-        <div class="card-status">
-            <div class="status-icon">
-                <i class="fas fa-handshake"></i>
-            </div>
-            <span class="status-badge">@ViewBag.LoanStatus</span>
+    <!-- Peer-to-Peer Lending -->
+    <div class="dashboard-card video-card">
+        <div class="video-wrapper">
+            <video class="card-video" muted loop>
+                <source src="~/images/lendings.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        <div class="card-title-wrapper">
+            <h3 class="card-title">
+                Peer-to-Peer Lending
+                <i class="fas fa-handshake card-icon"></i>
+            </h3>
         </div>
         <div class="card-content">
-            <h3 class="card-title">@SharedLocalizer["PeerToPeerLending"]</h3>
-            <p class="card-description">@SharedLocalizer["PeerToPeerLendingDescription"]</p>
-            <a href="/Account/Lending" class="card-button">@SharedLocalizer["ViewLending"]</a>
+            <p class="card-description">Manage loans and transactions with your dormmates.</p>
+            <a href="/Account/Lending" class="card-button">View Lending</a>
         </div>
     </div>
 
     <!-- Account Settings -->
-    <div class="dashboard-card">
-        <div class="card-status">
-            <div class="status-icon">
-                <i class="fas fa-user-cog"></i>
-            </div>
-            <div class="status-badge"></div>
+    <div class="dashboard-card video-card">
+        <div class="video-wrapper">
+            <video class="card-video" muted loop>
+                <source src="~/images/settings.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        <div class="card-title-wrapper">
+            <h3 class="card-title">
+                Account Settings
+                <i class="fas fa-user-cog card-icon"></i>
+            </h3>
         </div>
         <div class="card-content">
-            <h3 class="card-title">@SharedLocalizer["AccountSettings"]</h3>
-            <p class="card-description">@SharedLocalizer["AccountSettingsDescription"]</p>
-            <a href="/Account/Settings" class="card-button">@SharedLocalizer["ManageAccount"]</a>
+            <p class="card-description">Update your account information and preferences.</p>
+            <a href="/Account/Settings" class="card-button">Manage Account</a>
         </div>
     </div>
 
     <!-- Notifications -->
-    <div class="dashboard-card">
-        <div class="card-status">
-            <div class="status-icon">
-                <i class="fas fa-bell"></i>
-            </div>
-            <span class="status-badge">@ViewBag.NewNotifications New</span>
+    <div class="dashboard-card notifications-card video-card">
+        <div class="video-wrapper">
+            <video class="card-video" muted loop>
+                <source src="~/images/notifications.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        <div class="card-title-wrapper">
+            <h3 class="card-title">
+                Notifications
+                <i class="fas fa-bell card-icon"></i>
+            </h3>
         </div>
         <div class="card-content">
-            <h3 class="card-title">@SharedLocalizer["Notifications"]</h3>
-            <p class="card-description">@SharedLocalizer["NotificationsDescription"]</p>
-            <a href="/Account/Notifications" class="card-button">@SharedLocalizer["ViewNotifications"]</a>
+            <p class="card-description">Check new notifications from your dormmates.</p>
+            <a href="/Account/Notifications" class="card-button">View Notifications</a>
         </div>
     </div>
 
     <!-- Help & Support -->
-    <div class="dashboard-card">
-        <div class="card-status">
-            <div class="status-icon">
-                <i class="fas fa-question-circle"></i>
-            </div>
-            <div class="status-badge"></div>
+    <div class="dashboard-card video-card">
+        <div class="video-wrapper">
+            <video class="card-video" muted loop>
+                <source src="~/images/helping.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        <div class="card-title-wrapper">
+            <h3 class="card-title">
+                Help & Support
+                <i class="fas fa-question-circle card-icon"></i>
+            </h3>
         </div>
         <div class="card-content">
-            <h3 class="card-title">@SharedLocalizer["HelpAndSupport"]</h3>
-            <p class="card-description">@SharedLocalizer["HelpAndSupportDescription"]</p>
-            <a href="/Home/ContactUs" class="card-button">@SharedLocalizer["GetHelp"]</a>
+            <p class="card-description">Need assistance? Reach out for help with any issues.</p>
+            <a href="/Home/ContactUs" class="card-button">Get Help</a>
         </div>
     </div>
 
-    <!-- Admin Panel - Only shown for admin users -->
-    @if (ViewBag.UserRoles.Contains("Admin"))
-    {
-        <div class="admin-card-container">
-            <div class="dashboard-card admin-card">
-                <div class="card-status">
-                    <div class="status-icon">
-                        <i class="fas fa-shield-alt"></i>
+        <!-- Admin Panel - Only shown for admin users -->
+        @if (ViewBag.UserRoles.Contains("Admin"))
+        {
+            <div class="admin-card-container">
+                <div class="dashboard-card admin-card">
+                    <div class="card-status">
+                        <div class="status-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <span class="status-badge">Admin</span>
                     </div>
-                    <span class="status-badge">Admin</span>
-                </div>
-                <div class="card-content">
-                    <h3 class="card-title">Admin Panel</h3>
-                    <p class="card-description">Manage site-wide settings and users.</p>
-                    <a href="/Administration/AdminPanel" class="card-button">Go to Admin Panel</a>
+                    <div class="card-content">
+                        <h3 class="card-title">Admin Panel</h3>
+                        <p class="card-description">Manage site-wide settings and users.</p>
+                        <a href="/Administration/AdminPanel" class="card-button">Go to Admin Panel</a>
+                    </div>
                 </div>
             </div>
-        </div>
-    }
-</div>
+        }
+    </div>
 
-    <p>@SharedLocalizer["Welcome"] <b>@ViewBag.Username</b>!
-
-    <!-- SCRIPT TO DISPLAY CURRENT TIME. UPDATES EVERY SECOND-->
-    <div id="eventDetails"></div>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            function updateEventTime() {
-                $.get('@Url.Action("GetCurrentTime", "Account")', {}, function(data) {
-                    $('#eventDetails').html(data);
-                });
-            }
-            setInterval(updateEventTime, 5000);
-            updateEventTime();
-        });
-    </script>
-
-
-    @if (roles.Length > 1) // ONLY SHOW IF THERES MORE ROLES THAN JUST "USER"
+    @if (roles.Length > 1)
     {
         var roleLabel = "Roles";
-
         <p>[@roleLabel: 
         @{
             for (int i = 0; i < roles.Length; i++)
@@ -153,13 +179,13 @@
 
                 var roleColor = role switch
                 {
-                    "Admin" => "color: #B026FF; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;",     // neon-purple
-                    "Moderator" => "color: #39FF14; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;", // neon-green
-                    "User" => "color: #1F51FF; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;",      // neon-blue
-                    _ => "color: black;" // default color
+                    "Admin" => "color: #B026FF; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;",
+                    "Moderator" => "color: #39FF14; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;",
+                    "User" => "color: #1F51FF; text-shadow: 0.5px 0.5px 0 #000, -0.5px 0.5px 0 #000;",
+                    _ => "color: black;"
                 };
 
-                if (i == roles.Length - 1) // Don't add comma for the last role
+                if (i == roles.Length - 1)
                 {
                     conditionalComma = null; 
                 }
@@ -168,249 +194,191 @@
             }
         }]</p>
     }
-</div>
-<hr class="my-4">
 
+   <div class="chat-container" id="chatContainer">
+    <!-- Chat Tabs -->
+    <div class="chat-tabs" id="chatTabs">
+        <button id="globalChatBtn" class="chat-tab active">Dorm Notes</button>
+        <button id="dormChatBtn" class="chat-tab">Room Notes</button>
+    </div>
 
-    <div class="chat-container container mt-4">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between">
-                <div>
-                    <button id="globalChatBtn" class="btn btn-primary btn-sm">Global Chat</button>
-                    <button id="dormChatBtn" class="btn btn-outline-primary btn-sm">Dorm Chat</button>
-                </div>
-            </div>
-            <div class="card-body" style="height: 400px; overflow-y: auto;" id="messageArea">
-                <!-- Messages will load here -->
-            </div>
-            <div class="card-footer">
-                <div class="input-group">
-                    <textarea id="messageInput" class="form-control" placeholder="Type your message..." style="resize: none;"></textarea>
-                    <button id="sendMessageBtn" class="btn btn-primary">Send</button>
-                </div>
-            </div>
+    <!-- Chat Body -->
+    <div class="chat-body" id="chatBody">
+        <div id="messageArea">
+            <!-- Messages will be populated here -->
         </div>
     </div>
 
-<!-- DASHBOARD PANEL CARDS -->
-<div class="container">
-<hr class="my-4">
-
-    <div style="display: flex; align-items: center; justify-content: center; margin:150px 0 50px 0;">
-        <h1 class="display-4"><strong>Shortcuts</strong></h1>
+    <!-- Chat Footer -->
+    <div class="chat-footer" id="chatFooter">
+        <textarea id="messageInput" class="chat-input" placeholder="Write your note..."></textarea>
+        <button id="sendMessageBtn" class="chat-send-btn">Stick it!</button>
     </div>
-
-    <div class="row">
-        <!-- Task Management Card -->
-        <div class="col-md-4">
-            <div class="card text-center mb-4">
-                <div class="card-header bg-primary text-white">
-                    <i class="fas fa-tasks fa-lg"></i>
-                    @SharedLocalizer["TaskManagement"]
-                </div>
-                <div class="card-body">
-                    <p>@SharedLocalizer["TaskManagementDescription"]</p>
-                    <a href="/Tasks/Index" class="btn btn-primary">@SharedLocalizer["ViewTasks"]</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Expense Splitting Card -->
-        <div class="col-md-4">
-            <div class="card text-center mb-4">
-                <div class="card-header bg-success text-white">
-                    <i class="fas fa-money-bill-wave fa-lg"></i>
-                    @SharedLocalizer["ExpenseSplitting"]
-                </div>
-                <div class="card-body">
-                    <p>@SharedLocalizer["ExpenseSplittingDescription"]</p>
-                    <a href="/Expenses/Index" class="btn btn-success">@SharedLocalizer["ViewExpenses"]</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- P2P Lending Card -->
-        <div class="col-md-4">
-            <div class="card text-center mb-4">
-                <div class="card-header bg-warning text-white">
-                    <i class="fas fa-handshake fa-lg"></i>
-                    @SharedLocalizer["PeerToPeerLending"]
-                </div>
-                <div class="card-body">
-                    <p>@SharedLocalizer["PeerToPeerLendingDescription"]</p>
-                    <a href="/PeerLending/Index" class="btn btn-warning" style="color: white;">@SharedLocalizer["ViewLending"]</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <!-- Account Settings Card -->
-        <div class="col-md-4">
-            <div class="card text-center mb-4">
-                <div class="card-header bg-info text-white">
-                    <i class="fas fa-user-cog fa-lg"></i>
-                    @SharedLocalizer["AccountSettings"]
-                </div>
-                <div class="card-body">
-                    <p>@SharedLocalizer["AccountSettingsDescription"]</p>
-                    <a href="/Account/Settings" class="btn btn-info">@SharedLocalizer["ManageAccount"]</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Notifications Card -->
-        <div class="col-md-4">
-            <div class="card text-center mb-4">
-                <div class="card-header bg-danger text-white">
-                    <i class="fas fa-bell fa-lg"></i>
-                    @SharedLocalizer["Notifications"]
-                </div>
-                <div class="card-body">
-                    <p>@SharedLocalizer["NotificationsDescription"]</p>
-                    <a href="/Account/Notifications" class="btn btn-danger">@SharedLocalizer["ViewNotifications"]</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Help & Support Card -->
-        <div class="col-md-4">
-            <div class="card text-center mb-4">
-                <div class="card-header bg-dark text-white">
-                    <i class="fas fa-cog fa-lg"></i>
-                    @SharedLocalizer["HelpAndSupport"]
-                </div>
-                <div class="card-body">
-                    <p>@SharedLocalizer["HelpAndSupportDescription"]</p>
-                    <a href="/Home/ContactUs" class="btn btn-dark">@SharedLocalizer["GetHelp"]</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ADMIN/MODERATOR ROW -->
-    @if (ViewBag.UserRoles.Contains("Admin") || ViewBag.UserRoles.Contains("Moderator"))
-    {
-        <div class="row">
-            @if (ViewBag.UserRoles.Contains("Admin")) {
-                <div class="col-md-4 offset-md-4">
-                    <div class="card text-center mb-4">
-                        <div class="card-header bg-purple text-white">
-                            <i class="fas fa-shield-alt fa-lg"></i>
-                            Admin Panel
-                        </div>
-                        <div class="card-body">
-                            <p>Manage site-wide settings and users.</p>
-                            <a href="/Administration/AdminPanel" class="btn btn-purple">Go to Admin Panel</a>
-                        </div>
-                    </div>
-                </div>
-            }
-            else if (!ViewBag.UserRoles.Contains("Admin") && ViewBag.UserRoles.Contains("Moderator")){
-                <div class="col-md-4 offset-md-4">
-                    <div class="card text-center mb-4">
-                        <div class="card-header bg-purple text-white">
-                            <i class="fas fa-shield-alt fa-lg"></i>
-                            Moderator Panel
-                        </div>
-                        <div class="card-body">
-                            <p>Manage site-wide settings and users.</p>
-                            <a href="/Administration/ModeratorPanel" class="btn btn-purple">Go to Moderator Panel</a>
-                        </div>
-                    </div>
-                </div>
-            }
-
-        </div>
-        
-    }
-
-    <hr class="my-4" style="padding-bottom:200px;">
-
 </div>
 
 
+</div>
 
+@section Scripts {
+    <script>
+     // Welcome animation script
+        document.addEventListener('DOMContentLoaded', function () {
+            const welcomeOverlay = document.querySelector('.welcome-overlay');
+            const dashboardContainer = document.querySelector('.dashboard-container');
 
-<script>
-    $(document).ready(function () {
-    let chatType = 1; // Default chat type : 0 - global, 1 - dorm, 2 - private
+            setTimeout(() => {
+                console.log("Fading out welcome overlay...");
 
-    // Load messages on page load
-    loadMessages();
+                
+                welcomeOverlay.style.opacity = '0';
+                dashboardContainer.style.opacity = '1';
 
-    // Set interval to refresh messages every 5 seconds
-    setInterval(loadMessages, 5000);
+                
+                setTimeout(() => {
+                    welcomeOverlay.style.display = 'none';
+                }, 600); 
+            }, 2000); 
+        });
+        // Time update script
+        $(document).ready(function() {
+            function updateEventTime() {
+                $.get('@Url.Action("GetCurrentTime", "Account")', {}, function(data) {
+                    $('#eventDetails').html(data);
+                });
+            }
+            setInterval(updateEventTime, 5000);
+            updateEventTime();
+        });
 
-    // Switch to global chat
-    $("#globalChatBtn").on("click", function () {
-        chatType = 1;
-        $("#globalChatBtn").removeClass("btn-outline-primary").addClass("btn-primary");
-        $("#dormChatBtn").removeClass("btn-primary").addClass("btn-outline-primary");
-        loadMessages();
-    });
+        // Chat functionality
+        $(document).ready(function () {
+            let chatType = 1;
+            loadMessages();
+            setInterval(loadMessages, 5000);
 
-    // Switch to dorm chat
-    $("#dormChatBtn").on("click", function () {
-        chatType = 2;
-        $("#dormChatBtn").removeClass("btn-outline-primary").addClass("btn-primary");
-        $("#globalChatBtn").removeClass("btn-primary").addClass("btn-outline-primary");
-        loadMessages();
-    });
-
-    // Send a new message
-    $("#sendMessageBtn").on("click", function () {
-        const message = $("#messageInput").val().trim();
-        if (message) {
-
-            $.ajax({
-                url: '/api/Imgur/SendDashboardMessage?type='+chatType+"&message="+message,
-                type: 'POST',
-                contentType: 'application/json',
-                success: function(response) {
-                    loadMessages();
-                    $('#messageInput').val('');
-                },
-                error: function(xhr, status, error) {
-                    console.log('Error:', error);
-                }
+            $("#globalChatBtn").on("click", function () {
+                chatType = 1;
+                $(".chat-tab").removeClass("active");
+                $(this).addClass("active");
+                loadMessages();
             });
-        }
-    });
 
-    let lastId = -1;
-    // Function to load messages
-    function loadMessages() {
-        $.ajax({
-                url: '/api/Imgur/GetDashboardMessages',
-                type: 'GET',
-                contentType: 'application/json',
-                data: {
-                    type: chatType
-                },
-                success: function(messages) {
-                    var messageArea = $('#messageArea');
-                    messages.value.r.forEach(msg => {
-                        const messageHtml = `
-                            <div class="mb-2">
-                                <strong><a href='profile?username=${msg.user.userName}' target='_blank'>${msg.user.userName}</a>:</strong> ${msg.message}
-                                <div class="text-muted small">${msg.sent_at}</div>
-                            </div>`;
-                        
-                        if (msg.id > lastId) {
-                            messageArea.append(messageHtml);
-                            lastId = msg.id;
+            $("#dormChatBtn").on("click", function () {
+                chatType = 2;
+                $(".chat-tab").removeClass("active");
+                $(this).addClass("active");
+                loadMessages();
+            });
+
+            $("#sendMessageBtn").on("click", function () {
+                const message = $("#messageInput").val().trim();
+                if (message) {
+                    $.ajax({
+                        url: '/api/Imgur/SendDashboardMessage?type='+chatType+"&message="+message,
+                        type: 'POST',
+                        contentType: 'application/json',
+                        success: function(response) {
+                            loadMessages();
+                            $('#messageInput').val('');
+                        },
+                        error: function(xhr, status, error) {
+                            console.log('Error:', error);
                         }
                     });
-
-                    // Scroll to the bottom
-                    messageArea.scrollTop(messageArea[0].scrollHeight);
-                },
-                error: function(xhr, status, error) {
-                    console.log('Error:', error);
                 }
             });
-    }
-});
 
-</script>
+            let lastId = -1;
+            function loadMessages() {
+    $.ajax({
+        url: '/api/Imgur/GetDashboardMessages',
+        type: 'GET',
+        contentType: 'application/json',
+        data: {
+            type: chatType
+        },
+        success: function(messages) {
+            var messageArea = $('#messageArea');
+            messages.value.r.forEach(msg => {
+                const messageHtml = `
+                    <div class="message-postit">
+                        <strong><a href='profile?username=${msg.user.userName}' target='_blank'>${msg.user.userName}</a></strong>
+                        <p>${msg.message}</p>
+                        <small class="text-muted">${msg.sent_at}</small>
+                    </div>`;
+                
+                if (msg.id > lastId) {
+                    messageArea.append(messageHtml);
+                    lastId = msg.id;
+                }
+            });
+
+            messageArea.scrollTop(messageArea[0].scrollHeight);
+        },
+        error: function(xhr, status, error) {
+            console.log('Error:', error);
+        }
+    });
+}
+        });
+        
+    // pencil writing animation  
+    document.addEventListener('DOMContentLoaded', function() {
+    const welcomeText = document.getElementById('welcomeText');
+    const pencil = document.getElementById('pencil');
+    const container = document.querySelector('.writing-container');
+    const hasSeenAnimation = sessionStorage.getItem('hasSeenWelcomeAnimation');
+    
+    const username = '@(ViewBag.Username)';
+    welcomeText.innerHTML = '';
+    
+    const startDelay = !hasSeenAnimation ? 3000 : 400;
+    
+    setTimeout(() => {
+        container.style.opacity = '1';
+        pencil.style.opacity = '1';
+        
+        const text = `Welcome ${username}!`;
+        const chars = text.split('');
+        const totalChars = chars.length;
+        
+        chars.forEach((char, i) => {
+            const span = document.createElement('span');
+            if (char === ' ') {
+                span.innerHTML = '&nbsp;';
+                span.style.marginRight = '10px';
+            } else {
+                span.textContent = char;
+            }
+            welcomeText.appendChild(span);
+            
+            if (i === 0) {
+                const firstRect = span.getBoundingClientRect();
+                pencil.style.left = (firstRect.left - 25) + 'px';
+                pencil.style.top = (firstRect.top - 35) + 'px';
+            }
+            
+            setTimeout(() => {
+                span.style.opacity = '1';
+                
+                const rect = span.getBoundingClientRect();
+                if (char !== ' ') {
+                    pencil.style.left = (rect.left - 15) + 'px';
+                    pencil.style.top = (rect.top - 35) + 'px';
+                }
+                
+                
+                if (i === totalChars - 1) {
+                    pencil.style.left = rect.right + 'px';
+                    setTimeout(() => {
+                        pencil.style.opacity = '0';
+                    }, 200); 
+                }
+            }, i * 100);
+        });
+    }, startDelay);
+});
+    
+    </script>
+     
+}
