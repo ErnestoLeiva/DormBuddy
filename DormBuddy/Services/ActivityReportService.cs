@@ -15,21 +15,25 @@ namespace DormBuddy.Services
             _context = context;
         }
 
-        public async Task<List<UserActivityReport>> GenerateMonthlyActivityReport()
-        {
-            var users = await _context.ApplicationUsers.AsNoTracking().ToListAsync();
+    public async Task<List<UserActivityReport>> GenerateMonthlyActivityReport()
+    {
+        var users = await _context.ApplicationUsers.AsNoTracking().ToListAsync();
 
-            return users.Select(user => new UserActivityReport
-            {
-                UserId = user.Id,
-                FullName = $"{user.FirstName ?? ""} {user.LastName ?? ""}".Trim(),
-                TotalLogins = user.TotalLogins,
-                LastLoginDate = user.LastLoginDate,
-                GroupsJoined = _context.Groups.Count(g => g.Members.Any(m => m.Id == user.Id)),
-                TasksCreated = _context.Tasks.Count(t => t.AssignedTo == user.UserName),
-                ExpensesAdded = _context.Expenses.Count(e => e.UserId == user.Id)
-            }).ToList();
-        }
+        return users.Select(user => new UserActivityReport
+        {
+            UserId = user.Id,
+            FullName = $"{user.FirstName ?? ""} {user.LastName ?? ""}".Trim(),
+            TotalLogins = user.TotalLogins,
+            LastLoginDate = user.LastLoginDate,
+            GroupsJoined = _context.Groups.Count(g =>
+                g.Members.Any(m => m.Id.ToString() == user.Id)), // Convert m.Id to string
+            TasksCreated = _context.Tasks.Count(t =>
+                t.AssignedTo == user.UserName), // Ensure AssignedTo is string
+            ExpensesAdded = _context.Expenses.Count(e =>
+                e.UserId.ToString() == user.Id) // Convert e.UserId to string
+        }).ToList();
+    } 
+
         // Method to get system logs
         public async Task<List<LogModel>> GetSystemLogs()
         {

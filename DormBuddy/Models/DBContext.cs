@@ -13,6 +13,8 @@ namespace DormBuddy.Models
         public string? LastName { get; set; }
 
         public bool RememberMe { get; set; }
+        public int TotalLogins { get; set; } // Example type
+        public DateTime? LastLoginDate { get; set; }
 
     }
 
@@ -45,6 +47,7 @@ namespace DormBuddy.Models
         public DbSet<DashboardChatModel> DashboardChatModel { get; set; }
 
         public DbSet<FriendsModel> FriendsModel { get; set; }
+        public DbSet<LogModel> Logs { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
