@@ -14,6 +14,8 @@ namespace DormBuddy.Models
 
         public int MaxMembers { get; set; } = 4;
 
+        public int TotalMembers { get; set; }
+
         [Required]
         public string CreatedByUserId { get; set; }
 
