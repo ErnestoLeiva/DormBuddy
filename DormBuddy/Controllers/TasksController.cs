@@ -33,24 +33,35 @@ namespace DormBuddy.Controllers
             if (user != null)
             {
                 var tasks = await _dbContext.Tasks
-                    .Where(t => t.AssignedTo.Contains(user.Id) || t.UserId == user.Id)
+                    .Where(t => (t.AssignedTo != null && t.AssignedTo.Contains(user.Id)) || t.UserId == user.Id)
                     .ToListAsync();
 
                 var userGroup = await _dbContext.GroupMembers
                     .Where(gm => gm.UserId == user.Id)
                     .Include(gm => gm.Group)
-                    .ThenInclude(g => g.Members)
                     .FirstOrDefaultAsync();
 
-                ViewBag.GroupMembers = userGroup?.Group?.Members;
+                if (userGroup?.Group != null)
+                {
+                    var groupMembers = userGroup.Group.Members ?? new List<GroupMemberModel>();
+                    ViewBag.GroupMembers = groupMembers;
+                }
+                else
+                {
+                    ViewBag.GroupMembers = new List<GroupMemberModel>();
+                }
+
                 ViewBag.Users = await _dbContext.Users.ToListAsync();
 
                 var newTask = new TaskModel { UserId = user.Id };
+
                 return View("~/Views/Account/Dashboard/Tasks.cshtml", Tuple.Create(tasks, newTask));
             }
 
+            // Redirect to login page if the user is not found
             return RedirectToAction("Login", "Account");
         }
+
 
         // POST: /Tasks/Add
         [HttpPost]
@@ -79,18 +90,25 @@ namespace DormBuddy.Controllers
 
             if (ModelState.IsValid)
             {
-                var dueTime = $"{model.DueDate:yyyy-MM-dd} {DueTimeHour}:{DueTimeMinute} {DueTimeAMPM}";
-                if (DateTime.TryParse(dueTime, out DateTime parsedDate))
+                if (model != null)
                 {
-                    model.DueDate = parsedDate;
-                    model.IsCompleted = false;
+                    var dueTime = $"{model.DueDate:yyyy-MM-dd} {DueTimeHour}:{DueTimeMinute} {DueTimeAMPM}";
+                    if (DateTime.TryParse(dueTime, out DateTime parsedDate))
+                    {
+                        model.DueDate = parsedDate;
+                        model.IsCompleted = false;
 
-                    _dbContext.Tasks.Add(model);
-                    await _dbContext.SaveChangesAsync();
+                        _dbContext.Tasks.Add(model);
+                        await _dbContext.SaveChangesAsync();
 
-                    TempData["message"] = $"Task \"{model.TaskName}\" added successfully!";
-                }
-                else
+                        TempData["message"] = $"Task \"{model.TaskName}\" added successfully!";
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(nameof(TaskModel.DueDate), "Invalid date format.");
+                    }
+                } 
+                else 
                 {
                     ModelState.AddModelError(nameof(TaskModel.DueDate), "Invalid date format.");
                 }

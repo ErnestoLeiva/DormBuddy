@@ -8,7 +8,7 @@ namespace DormBuddy.Models
 
         [Required]
         [MaxLength(100)]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         public DateTime CreatedDate { get; set; } = DateTime.Now;
 
@@ -17,10 +17,10 @@ namespace DormBuddy.Models
         public int TotalMembers { get; set; }
 
         [Required]
-        public string CreatedByUserId { get; set; }
+        public string? CreatedByUserId { get; set; }
 
         [Required]
-        public string InvitationCode { get; set; }
+        public string? InvitationCode { get; set; }
 
         public ICollection<GroupMemberModel> Members { get; set; } = new List<GroupMemberModel>();
     }
