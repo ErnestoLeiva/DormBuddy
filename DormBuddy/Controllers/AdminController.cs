@@ -17,12 +17,15 @@ namespace DormBuddy.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ActivityReportService _activityReportService;
+        private readonly DBContext _dbContext; 
 
-        public AdminController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, ActivityReportService activityReportService)
+        public AdminController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, ActivityReportService activityReportService, DBContext dbContext)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _activityReportService = activityReportService;
+            _dbContext = dbContext; 
+
         }
 
         // Admin Dashboard
@@ -107,8 +110,24 @@ namespace DormBuddy.Controllers
         // View activity logs
         public async Task<IActionResult> Logs()
         {
-            var logs = await _activityReportService.GetSystemLogs(); // Assuming this method exists in your service
+            var logs = await _activityReportService.GetSystemLogs();
+            if (logs == null || !logs.Any())
+            {
+                Console.WriteLine("No logs found.");
+            }
             return View("~/Views/Admin/Logs.cshtml", logs);
         }
+        public async Task<IActionResult> SystemLogs()
+        {
+            var logs = await _dbContext.Logs.ToListAsync();
+            if (logs == null || !logs.Any())
+            {
+                logs = new List<LogModel>(); 
+            }
+            return View("~/Views/Administration/Logs.cshtml", logs);
+        }
+
+
+
     }
 }

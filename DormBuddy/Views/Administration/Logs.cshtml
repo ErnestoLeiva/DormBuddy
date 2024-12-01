@@ -1,14 +1,19 @@
 @model List<DormBuddy.Models.LogModel>
 
-<div class="container">
-    <h1>System Logs</h1>
-    <table class="table table-striped">
+<h2>System Logs</h2>
+
+@if (Model == null || !Model.Any())
+{
+    <p>No logs available.</p>
+}
+else
+{
+    <table>
         <thead>
             <tr>
                 <th>Timestamp</th>
-                <th>Action</th>
-                <th>Username</th>
-                <th>Details</th>
+                <th>Log Type</th>
+                <th>Description</th>
             </tr>
         </thead>
         <tbody>
@@ -16,11 +21,10 @@
             {
                 <tr>
                     <td>@log.Timestamp</td>
-                    <td>@log.Action</td>
-                    <td>@log.Username</td>
-                    <td>@log.Details</td>
+                    <td>@log.LogType</td>
+                    <td>@log.Description</td>
                 </tr>
             }
         </tbody>
     </table>
-</div>
+}

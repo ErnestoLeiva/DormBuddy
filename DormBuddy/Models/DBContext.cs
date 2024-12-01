@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using DormBuddy.Models;
 
 namespace DormBuddy.Models
 {
@@ -15,6 +16,7 @@ namespace DormBuddy.Models
         public bool RememberMe { get; set; }
         public int TotalLogins { get; set; } // Example type
         public DateTime? LastLoginDate { get; set; }
+        
 
     }
 
@@ -47,7 +49,13 @@ namespace DormBuddy.Models
         public DbSet<DashboardChatModel> DashboardChatModel { get; set; }
 
         public DbSet<FriendsModel> FriendsModel { get; set; }
+
+        public DbSet<Notifications> Notifications { get; set; }
+
+        public DbSet<Profile_PostsModel> Profile_Posts { get; set; }
         public DbSet<LogModel> Logs { get; set; }
+        public DbSet<UserActivityReport> UserActivityReports { get; set; }
+
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -125,6 +133,9 @@ namespace DormBuddy.Models
                 entity.Property(t => t.TaskName).HasMaxLength(160).IsRequired();
                 entity.Property(t => t.AssignedTo).HasMaxLength(160).IsRequired();
             });
+
+            builder.Entity<UserActivityReport>().HasNoKey(); // Mark as keyless
+
         }
 
 

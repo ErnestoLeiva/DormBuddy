@@ -1,4 +1,6 @@
 using DormBuddy.Models;
+using DormBuddy.Services;
+
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,26 +17,25 @@ namespace DormBuddy.Services
             _context = context;
         }
 
-    public async Task<List<UserActivityReport>> GenerateMonthlyActivityReport()
-    {
-        var users = await _context.ApplicationUsers.AsNoTracking().ToListAsync();
-
-        return users.Select(user => new UserActivityReport
+        public async Task<List<UserActivityReport>> GenerateMonthlyActivityReport()
         {
-            UserId = user.Id,
-            FullName = $"{user.FirstName ?? ""} {user.LastName ?? ""}".Trim(),
-            TotalLogins = user.TotalLogins,
-            LastLoginDate = user.LastLoginDate,
-            GroupsJoined = _context.Groups.Count(g =>
-                g.Members.Any(m => m.Id.ToString() == user.Id)), // Convert m.Id to string
-            TasksCreated = _context.Tasks.Count(t =>
-                t.AssignedTo == user.UserName), // Ensure AssignedTo is string
-            ExpensesAdded = _context.Expenses.Count(e =>
-                e.UserId.ToString() == user.Id) // Convert e.UserId to string
-        }).ToList();
-    } 
+            var users = await _context.ApplicationUsers.AsNoTracking().ToListAsync();
 
-        // Method to get system logs
+            return users.Select(user => new UserActivityReport
+            {
+                UserId = user.Id,  // Ensure UserId exists and is a string
+                FullName = $"{user.FirstName ?? ""} {user.LastName ?? ""}".Trim(),
+                TotalLogins = user.TotalLogins,
+                LastLoginDate = user.LastLoginDate,
+                GroupsJoined = _context.Groups.Count(g =>
+                    g.Members.Any(m => m.UserId == user.Id)), // Ensure g.Members and m.UserId are properly mapped
+                TasksCreated = _context.Tasks.Count(t =>
+                    t.AssignedTo == user.UserName), // Ensure AssignedTo is string
+                ExpensesAdded = _context.Expenses.Count(e =>
+                    e.UserId == user.Id) // Ensure e.UserId is string
+            }).ToList();
+        }
+
         public async Task<List<LogModel>> GetSystemLogs()
         {
             return await _context.Logs

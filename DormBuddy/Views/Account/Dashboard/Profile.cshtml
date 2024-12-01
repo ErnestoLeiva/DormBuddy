@@ -54,9 +54,9 @@
                 <p>@Model.Bio</p>
             }
 
-            @if (User?.Identity?.Name != Model.User.UserName)
+            @if (User?.Identity?.Name != Model.User.UserName )
             {
-                var fstatus = @ViewData["FriendshipStatus"];
+                var fstatus = (string)@ViewData["FriendshipStatus"];
             <!-- Add/Remove/Block/Unblock buttons go here -->
             <div style="display: flex; justify-content: left; gap: 15px; padding-left:5%;">
                 
@@ -64,7 +64,7 @@
 
                 @if (fstatus == "blocked") {
                     <button class="btn btn-success"
-                        data-url="@Url.Action("UnblockUser", "imgur", new { target = @Model.User.UserName })"
+                        data-url="@Url.Action("UnblockUser", "imgur", new { target = Model.User.UserName })"
                         onclick="navigateToFriendAction(this)">
                         Unblock
                     </button>
@@ -75,40 +75,34 @@
                         Unfriend
                     </button>
                    <button class="btn btn-success"
-                        data-url="@Url.Action("BlockUser", "imgur", new { target = @Model.User.UserName })"
+                        data-url="@Url.Action("BlockUser", "imgur", new { target = Model.User.UserName })"
                         onclick="navigateToFriendAction(this)">
                         Block
                     </button>
                 } else if (fstatus == "not friends") {
                     <button class="btn btn-success"
-                        data-url="@Url.Action("AddFriend", "imgur", new { target = @Model.User.UserName })"
+                        data-url="@Url.Action("AddFriend", "imgur", new { target = Model.User.UserName })"
                         onclick="navigateToFriendAction(this)">
                         Add
                     </button>
                     <button class="btn btn-success"
-                        data-url="@Url.Action("BlockUser", "imgur", new { target = @Model.User.UserName })"
+                        data-url="@Url.Action("BlockUser", "imgur", new { target = Model.User.UserName })"
                         onclick="navigateToFriendAction(this)">
                         Block
                     </button>
                 } else if (fstatus == "pending_accept") {
-                    <button class="btn btn-success"
-                        data-url="@Url.Action("AcceptOrDenyPending", "imgur", new { target = @Model.User.UserName, type="accept" })"
-                        onclick="navigateToFriendAction(this)">
-                        Accept
-                    </button>
-                    <button class="btn btn-success"
-                        data-url="@Url.Action("AcceptOrDenyPending", "imgur", new { target = @Model.User.UserName, type="deny" })"
-                        onclick="navigateToFriendAction(this)">
-                        Deny
-                    </button>
+                    <form action="@Url.Action("AcceptOrDenyPending", "imgur", new { target = Model.User.UserName, type="accept", targetCtrl = "Profile" })", method="post">
+                        <button type="submit" class="btn btn-success">Accept</button>
+                    </form>
+                    <form action="@Url.Action("AcceptOrDenyPending", "imgur", new { target = Model.User.UserName, type="deny", targetCtrl = "Profile" })", method="post">
+                        <button type="submit" class="btn btn-success">Deny</button>
+                    </form>
                 } else if (fstatus == "pending_other") {
+                    <form action="@Url.Action("AcceptOrDenyPending", "imgur", new { target = Model.User.UserName, type="cancel", targetCtrl = "Profile" })", method="post">
+                        <button type="submit" class="btn btn-success">Remove Req.</button>
+                    </form>
                     <button class="btn btn-success"
-                        data-url="@Url.Action("AcceptOrDenyPending", "imgur", new { target = @Model.User.UserName, type="cancel" })"
-                        onclick="navigateToFriendAction(this)">
-                        Cancel Req.
-                    </button>
-                    <button class="btn btn-success"
-                        data-url="@Url.Action("BlockUser", "imgur", new { target = @Model.User.UserName })"
+                        data-url="@Url.Action("BlockUser", "imgur", new { target = Model.User.UserName })"
                         onclick="navigateToFriendAction(this)">
                         Block
                     </button>
@@ -231,10 +225,10 @@
                                     <td>@Model.User.Email</td>
                                 </tr>
                                 <tr>
-                                <th>Date of Birth</th>
+                                    <th>Date of Birth</th>
                                     <td>@(Model.DateOfBirth.HasValue ? Model.DateOfBirth.Value.ToString("yyyy-MM-dd") : "Not Provided")</td>
-                                </tr>
 
+                                </tr>
                                 <tr>
                                     <th>Preferred Language</th>
                                     <td>@Model.Preferred_Language</td>

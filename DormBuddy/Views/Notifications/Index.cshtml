@@ -1,0 +1,87 @@
+@using Microsoft.EntityFrameworkCore
+@model IEnumerable<DormBuddy.Models.NotificationViewModel>
+@inject DormBuddy.Models.DBContext _context
+
+@{
+    ViewData["Title"] = "Notifications";
+
+    var NOTIF_DEFAULT = 1;
+    var NOTIF_ACCEPTANCE = 2;
+}
+
+<style>
+    .notificationX {
+        color: #0060B6;
+        text-decoration: none;
+    }
+    .notificationX:hover {
+        color: #0060B6;
+        text-decoration: none;
+        cursor: pointer;
+    }
+</style>
+
+<!-- Return to Dashboard Button -->
+<div class="mb-4">
+    <a href="/Account/Dashboard" class="btn btn-outline-primary">
+        <i class="fa fa-chevron-left"></i> Return to Dashboard
+    </a>
+</div>
+
+<div class="text-center mb-4">
+    <h1 class="display-4">Notifications</h1>
+    <p>Check new notifications from your dormmates.</p>
+</div>
+
+<!-- Notifications List -->
+@if (Model != null && Model.Any())
+{
+    <div class="list-group">
+        @foreach (var notification in Model)
+        {   
+            <div class="list-group-item d-flex justify-content-between align-items-center" style="margin-bottom: 25px;">
+                @if (notification.MessageType == NOTIF_DEFAULT) {
+                    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                        <div style="display:block;">
+                            <p class="mb-1">@notification.Message</p>
+                            <small class="text-muted">@notification.CreatedAt.ToString("g")</small>
+                        </div>
+                        <div>
+                            <h4 style="font-weight:10;"><a class="notificationX" asp-controller="Notifications" asp-action="RemoveNotificationById" asp-route-id="@notification.Id">X</a></h4>
+                        </div>
+                    </div>
+                }
+                @if (notification.MessageType == NOTIF_ACCEPTANCE) // Friend Request
+                {
+
+                    
+
+                    <!-- Friend Request Actions -->
+                   <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                        <div>
+                            <p style="margin: 0;"><a asp-controller="Account" asp-action="Profile" asp-route-username="@notification.targetUserName">@notification.targetUserName</a> would to be your friend!</p>
+                            <small class="text-muted">@notification.CreatedAt.ToString("g")</small>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            
+                            <form action="@Url.Action("AcceptOrDenyPending", "imgur", new { target = @notification.targetUserName, type="accept", targetCtrl = "Notification" })", method="post">
+                                <button type="submit" class="btn btn-danger btn-sm">Accept</button>
+                            </form>
+
+                            <form action="@Url.Action("AcceptOrDenyPending", "imgur", new { target = @notification.targetUserName, type="deny", targetCtrl = "Notification" })", method="post">
+                                <button type="submit" class="btn btn-danger btn-sm">Decline</button>
+                            </form>
+                        </div>
+                    </div>
+
+                }
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="alert alert-info text-center">
+        <p>No notifications at the moment. Check back later!</p>
+    </div>
+}

@@ -8,7 +8,6 @@ using System.Globalization;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Mvc.Razor;
 using System.Net;
-using DormBuddy.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,24 +32,14 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
         : CookieSecurePolicy.Always;
 });
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowSpecificOrigin", policy =>
-    {
-        policy.WithOrigins("http://localhost:5000") // Replace with your frontend URL
-              .AllowAnyMethod()
-              .AllowAnyHeader();
-    });
-});
-
 builder.Services.AddSingleton<TimeZoneService>();
 builder.Services.AddSingleton<ImgurService>();
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 
 builder.Services.AddScoped<UserLastUpdateActionFilter>();
 builder.Services.AddScoped<NavBarInfoService>();
-builder.Services.AddScoped<ActivityReportService>(); 
-builder.Services.AddScoped<LogService>(); // LogService
+builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<ActivityReportService>();
 
 
 builder.Services.AddCors(options => {
@@ -76,13 +65,9 @@ builder.Services.AddControllersWithViews(options =>
 .AddViewLocalization()
 .AddDataAnnotationsLocalization();
 
-builder.Services.Configure<RequestLocalizationOptions>(options =>
+builder.Services.Configure<RequestLocalizationOptions>(options => 
 {
-    var supportedCultures = new[]
-    {
-        new CultureInfo("en"),
-        new CultureInfo("es")
-    };
+    var supportedCultures = new[] { new CultureInfo("en"), new CultureInfo("es") };
 
     options.DefaultRequestCulture = new RequestCulture("en");
     options.SupportedCultures = supportedCultures;
@@ -97,7 +82,7 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 });
 
 // Initialize Firebase
-FirebaseApp.Create(new AppOptions()
+FirebaseApp.Create(new AppOptions() 
 {
     Credential = GoogleCredential.FromFile("dormbuddy-33ce0-firebase-adminsdk-5i0gl-c049a0fe9a.json")
 });
@@ -105,11 +90,13 @@ FirebaseApp.Create(new AppOptions()
 #region DATABASE CONFIGURATION
 builder.Services.AddDbContext<DBContext>(options =>
     options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
-    new MySqlServerVersion(new Version(8, 0, 2))));
+                     ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))));
+
+
 #endregion
 
 #region IDENTITY CONFIGURATION
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => 
 {
     options.SignIn.RequireConfirmedEmail = true;
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(60);
@@ -160,15 +147,13 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
-// Middleware Configuration
-app.UseCors("AllowSpecificOrigin");
-
+#region MIDDLEWARE CONFIGURATION
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
-}
-else
+} 
+else 
 {
     Console.WriteLine("Development mode: Active");
 }
@@ -199,35 +184,70 @@ app.UseSession(); // UseSession must be before Authentication and Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Admin-specific route
 app.MapControllerRoute(
-    name: "admin",
-    pattern: "Admin/{action=AdminDashboard}/{id?}",
-    defaults: new { controller = "Admin" });
+    name: "account",
+    pattern: "Account/{action=AccountForms}/{id?}",
+    defaults: new { controller = "Account" });
 
-// Default route
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=HomeLogin}/{id?}");
+#endregion
 
+// Call InitializeRolesAndAdminUser to create roles and the default admin user
 await InitializeRolesAndAdminUser(app);
 
 app.Run();
 
-#region ROLE INITIALIZATION
+#region ROLE AND ADMIN INITIALIZATION
 static async Task InitializeRolesAndAdminUser(WebApplication app)
 {
     using (var scope = app.Services.CreateScope())
     {
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
+        // Define roles
         string[] roles = { Roles.Admin, Roles.Moderator, Roles.User };
 
+        // Create roles if they don't exist
         foreach (var role in roles)
         {
             if (!await roleManager.RoleExistsAsync(role))
             {
                 await roleManager.CreateAsync(new IdentityRole(role));
+            }
+        }
+
+        // Create the default admin user if it doesn't exist
+        var defaultAdminEmail = "admin@dormbuddy.com"; // Use a real email
+        var defaultAdminUsername = "admin";
+        var defaultAdminPassword = "Adminpass123!"; // Use a secure password
+
+        var adminUser = await userManager.FindByEmailAsync(defaultAdminEmail);
+
+        if (adminUser == null)
+        {
+            adminUser = new ApplicationUser
+            {
+                UserName = defaultAdminUsername,
+                Email = defaultAdminEmail
+            };
+
+            var createUserResult = await userManager.CreateAsync(adminUser, defaultAdminPassword);
+
+            if (createUserResult.Succeeded)
+            {
+                // Assign the Admin role to the user
+                await userManager.AddToRoleAsync(adminUser, Roles.Admin);
+            }
+            else
+            {
+                // Log any errors or handle them as needed
+                foreach (var error in createUserResult.Errors)
+                {
+                    Console.WriteLine($"Error creating admin user: {error.Description}");
+                }
             }
         }
     }
