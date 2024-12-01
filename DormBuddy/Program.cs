@@ -26,12 +26,17 @@ builder.Services.AddLocalization(options => options.ResourcesPath = "Resources")
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {
     options.CheckConsentNeeded = context => true;
+<<<<<<< Updated upstream
     options.MinimumSameSitePolicy = SameSiteMode.Lax; // Set to Lax for session compatibility
+=======
+    options.MinimumSameSitePolicy = SameSiteMode.None;
+>>>>>>> Stashed changes
     options.Secure = builder.Environment.IsDevelopment() 
         ? CookieSecurePolicy.SameAsRequest 
         : CookieSecurePolicy.Always;
 });
 
+<<<<<<< Updated upstream
 builder.Services.AddSingleton<TimeZoneService>();
 builder.Services.AddSingleton<ImgurService>();
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
@@ -65,6 +70,17 @@ builder.Services.AddControllersWithViews(options =>
 builder.Services.Configure<RequestLocalizationOptions>(options => 
 {
     var supportedCultures = new[] { new CultureInfo("en"), new CultureInfo("es") };
+=======
+builder.Services.AddControllersWithViews().AddViewLocalization().AddDataAnnotationsLocalization();
+
+builder.Services.Configure<RequestLocalizationOptions>(options => 
+{
+    var supportedCultures = new[]
+    {
+        new CultureInfo("en"),
+        new CultureInfo("es")
+    };
+>>>>>>> Stashed changes
 
     options.DefaultRequestCulture = new RequestCulture("en");
     options.SupportedCultures = supportedCultures;
@@ -118,6 +134,18 @@ builder.Services.Configure<IdentityOptions>(options =>
 });
 #endregion
 
+<<<<<<< Updated upstream
+=======
+#region SESSION CONFIGURATION
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+#endregion
+
+>>>>>>> Stashed changes
 #region AUTHENTICATION AND AUTHORIZATION
 builder.Services.AddAuthentication(options =>
 {
@@ -160,22 +188,39 @@ app.UseRequestLocalization(localizationOptions);
 
 app.Use(async (context, next) =>
 {
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
     var cookieValue = context.Request.Cookies["Culture"];
     if (!string.IsNullOrEmpty(cookieValue))
     {
         var culture = new CultureInfo(cookieValue);
         CultureInfo.CurrentCulture = culture;
         CultureInfo.CurrentUICulture = culture;
+<<<<<<< Updated upstream
     }
 
     await next.Invoke();
+=======
+        Console.WriteLine($"Culture set from cookie: {culture.Name}");
+    }
+
+    await next.Invoke();
+    // Log the current culture after request processing
+    Console.WriteLine($"After request: Current culture: {CultureInfo.CurrentCulture.Name}");
+>>>>>>> Stashed changes
 });
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
+<<<<<<< Updated upstream
 app.UseSession(); // UseSession must be before Authentication and Authorization
+=======
+app.UseSession();
+>>>>>>> Stashed changes
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -194,7 +239,11 @@ await InitializeRolesAndAdminUser(app);
 
 app.Run();
 
+<<<<<<< Updated upstream
 #region ROLE AND ADMIN INITIALIZATION
+=======
+#region ROLE INITIALIZATION
+>>>>>>> Stashed changes
 static async Task InitializeRolesAndAdminUser(WebApplication app)
 {
     using (var scope = app.Services.CreateScope())
