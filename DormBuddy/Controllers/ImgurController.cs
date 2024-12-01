@@ -726,5 +726,12 @@ namespace DormBuddy.Controllers
             return RedirectToAction("Settings", "Account", new { page = "PrivacySettings" });
         }
 
+        [HttpGet]
+        public async Task<IActionResult> ProfilePostArea([FromForm] UserProfile model, [FromForm] string message, [FromForm] bool isReply) {
+            var u = await GetCurrentUserAsync();
+            Console.WriteLine(u.UserName);
+            return Ok("true");
+        }
+
     }
 }

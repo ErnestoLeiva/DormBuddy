@@ -82,6 +82,29 @@
 </div>
 
 <hr class="my-4">
+
+
+    <!-- #NOTIFICATIONS_AVAILABLE_MESSAGE  -->
+    
+    @if (ViewBag.NotificationAmount != null && ViewBag.NotificationAmount > 0) {
+
+        <div class="alert alert-warning" style="display: flex; align-items: center; justify-content: space-between; width: 97%; margin: 0 auto; padding: 10px;">
+            <div style="display: flex; align-items: center;">
+                <p style="margin: 0;">You have notification(s) to view!</p>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <a asp-controller="Notifications" asp-action="Index">click here</a>
+            </div>
+            
+        </div>
+
+        <hr class="my-4">
+
+        <!-- #endregion -->
+
+    }
+
+
     <div class="chat-container container mt-4">
         <div class="card">
             <div class="card-header d-flex justify-content-between">
@@ -315,6 +338,8 @@
                 },
                 success: function(messages) {
                     var messageArea = $('#messageArea');
+                    messageArea.html('');
+                    lastId = -1;
                     messages.value.r.forEach(msg => {
                         const messageHtml = `
                             <div class="mb-2">

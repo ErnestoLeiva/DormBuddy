@@ -454,6 +454,8 @@ namespace DormBuddy.Controllers
                     var currentUICulture = CultureInfo.CurrentUICulture.Name;
 
                     ViewBag.CultureInfo = $"Current Culture: {currentCulture}, UI Culture: {currentUICulture}";
+
+                    ViewBag.NotificationAmount = (await _context.Notifications.Where(m => m.UserId == user.Id).ToListAsync()).Count;
                 }
 
                 return View();
