@@ -11,7 +11,7 @@ namespace DormBuddy.Models
         public string? UserId { get; set; }
 
         [ForeignKey("UserId")] 
-        public ApplicationUser User { get; set; }
+        public ApplicationUser? User { get; set; }
 
         // type 1 = global, 2 = dorm, 3 = private message
         public int type { get; set; }

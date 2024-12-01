@@ -8,7 +8,7 @@ namespace DormBuddy.Models
         public int Id { get; set; }
 
         [Required]
-        public string UserId { get; set; }
+        public string? UserId { get; set; }
 
         [Required]
         public int GroupId { get; set; }
@@ -16,7 +16,7 @@ namespace DormBuddy.Models
         public bool IsAdmin { get; set; } = false;
 
         [ForeignKey(nameof(GroupId))]
-        public GroupModel Group { get; set; }
+        public GroupModel? Group { get; set; }
     }
 
 }

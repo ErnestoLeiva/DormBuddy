@@ -55,23 +55,23 @@
             </thead>
             <tbody>
                 <tr>
-                    <td>@userGroup.Group.Name</td>
-                    <td>@userGroup.Group.TotalMembers / @userGroup.Group.MaxMembers</td>
+                    <td>@userGroup?.Group?.Name</td>
+                    <td>@userGroup?.Group?.TotalMembers / @userGroup?.Group?.MaxMembers</td>
                     <td>
                         @if (users != null)
                         {
-                            var createdByUser = users.FirstOrDefault(u => u.Id == userGroup.Group.CreatedByUserId);
+                            var createdByUser = users.FirstOrDefault(u => u.Id == userGroup?.Group?.CreatedByUserId);
                             var createdByName = createdByUser != null ? $"{createdByUser.FirstName} {createdByUser.LastName}" : "Unknown";
                             @createdByName
                         }
                     </td>
-                    <td>@userGroup.Group.InvitationCode</td>
+                    <td>@userGroup?.Group?.InvitationCode</td>
                     <td>
                         <!-- Only non-admins see this -->
-                        @if (!userGroup.IsAdmin)
+                        @if ((bool)(!userGroup?.IsAdmin ?? false))
                         {
                             <form method="post" asp-action="LeaveGroup" asp-controller="Groups" class="d-inline">
-                                <input type="hidden" name="groupId" value="@userGroup.GroupId" />
+                                <input type="hidden" name="groupId" value="@userGroup?.GroupId" />
                                 <button type="submit" class="btn btn-danger btn-sm">Leave Group</button>
                             </form>
                         }
@@ -86,7 +86,7 @@
     </div>
 
     <!-- Additional Features for Admins -->
-    @if (userGroup.IsAdmin)
+    @if (userGroup?.IsAdmin ?? false)
     {
         <h4 class="mt-5">(Admin) - Group Members</h4>
         <div class="table-responsive">
@@ -99,37 +99,39 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var member in userGroup.Group.Members)
-                    {
-                        var memberUser = users?.FirstOrDefault(u => u.Id == member.UserId);
-                        if (memberUser != null)
+                    @if (userGroup?.Group?.Members != null) {
+                        foreach (var member in userGroup.Group.Members)
                         {
-                            <tr>
-                                <td>@($"{memberUser.FirstName} {memberUser.LastName}")</td>
-                                <td>@memberUser.Email</td>
-                                <td>
-                                    <!-- Prevent Admin from Being Kicked -->
-                                    @if (member.UserId != userGroup.Group.CreatedByUserId)
-                                    {
-                                        <form method="post" asp-action="KickMember" asp-controller="Groups" class="d-inline">
-                                            <input type="hidden" name="groupId" value="@userGroup.Group.Id" />
-                                            <input type="hidden" name="userId" value="@member.UserId" />
-                                            <button type="button" class="btn btn-warning btn-sm" 
-                                                    data-toggle="modal" 
-                                                    data-target="#confirmKickModal" 
-                                                    data-member-name="@($"{memberUser.FirstName} {memberUser.LastName}")"
-                                                    data-group-id="@userGroup.Group.Id" 
-                                                    data-user-id="@member.UserId">
-                                                Kick
-                                            </button>
-                                        </form>
-                                    }
-                                    else
-                                    {
-                                        <span class="text-muted">Cannot kick the admin</span>
-                                    }
-                                </td>
-                            </tr>
+                            var memberUser = users?.FirstOrDefault(u => u.Id == member.UserId);
+                            if (memberUser != null)
+                            {
+                                <tr>
+                                    <td>@($"{memberUser.FirstName} {memberUser.LastName}")</td>
+                                    <td>@memberUser.Email</td>
+                                    <td>
+                                        <!-- Prevent Admin from Being Kicked -->
+                                        @if (member.UserId != userGroup?.Group?.CreatedByUserId)
+                                        {
+                                            <form method="post" asp-action="KickMember" asp-controller="Groups" class="d-inline">
+                                                <input type="hidden" name="groupId" value="@userGroup?.Group?.Id" />
+                                                <input type="hidden" name="userId" value="@member.UserId" />
+                                                <button type="button" class="btn btn-warning btn-sm" 
+                                                        data-toggle="modal" 
+                                                        data-target="#confirmKickModal" 
+                                                        data-member-name="@($"{memberUser.FirstName} {memberUser.LastName}")"
+                                                        data-group-id="@userGroup?.Group?.Id" 
+                                                        data-user-id="@member.UserId">
+                                                    Kick
+                                                </button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Cannot kick the admin</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
                         }
                     }
                 </tbody>
@@ -137,7 +139,7 @@
         </div>
 
         <form method="post" asp-action="DeleteGroup" asp-controller="Groups">
-            <input type="hidden" name="groupId" value="@userGroup.Group.Id" />
+            <input type="hidden" name="groupId" value="@userGroup?.Group?.Id" />
             <button type="submit" class="btn btn-danger mt-3">Delete Group</button>
         </form>
     }
@@ -153,15 +155,18 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var member in userGroup.Group.Members)
+                    @if (userGroup?.Group?.Members != null) 
                     {
-                        var memberUser = users?.FirstOrDefault(u => u.Id == member.UserId);
-                        if (memberUser != null)
+                    foreach (var member in userGroup.Group.Members)
                         {
-                            <tr>
-                                <td>@($"{memberUser.FirstName} {memberUser.LastName}")</td>
-                                <td>@memberUser.Email</td>
-                            </tr>
+                            var memberUser = users?.FirstOrDefault(u => u.Id == member.UserId);
+                            if (memberUser != null)
+                            {
+                                <tr>
+                                    <td>@($"{memberUser.FirstName} {memberUser.LastName}")</td>
+                                    <td>@memberUser.Email</td>
+                                </tr>
+                            }
                         }
                     }
                 </tbody>
