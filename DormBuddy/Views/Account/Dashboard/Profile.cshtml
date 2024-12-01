@@ -1,4 +1,5 @@
 @model DormBuddy.Models.UserProfile
+@inject DormBuddy.Models.TimeZoneService TimeZoneService
 
 @{
     ViewData["Title"] = "Profile";
@@ -7,6 +8,7 @@
     List<UserProfile> Friends = (ViewData["Friends"] as List<UserProfile>) ?? new List<UserProfile>();
     List<Profile_PostsModel> Posts = (ViewData["Posts"] as List<Profile_PostsModel>) ?? new List<Profile_PostsModel>();
     List<Profile_PostsModel> Posts_Reply = (ViewData["Posts_Reply"] as List<Profile_PostsModel>) ?? new List<Profile_PostsModel>();
+    string timezone = (ViewData["CurrentTimeZone"] as string) ?? "UTC";
 }
 
 <div class="profile-top-wrapper">   
@@ -207,7 +209,7 @@
                                 <div class="card-body">
                                     <h6 class="card-title">@post.User?.UserName</h6>
                                     <p class="card-text">@post.Message</p>
-                                    <small class="text-muted">Posted @post.CreatedAt.ToString("g")</small>
+                                    <small class="text-muted">Posted @TimeZoneService.getCurrentTimeFromUTC(post.CreatedAt, timezone).ToString("g")</small>
 
                                     <!-- Reply Button -->
                                     <div class="d-flex justify-content-start mt-2">
@@ -239,7 +241,7 @@
                                                     <div class="card-body">
                                                         <h6 class="card-title">@reply.User?.UserName</h6>
                                                         <p class="card-text">@reply.Message</p>
-                                                        <small class="text-muted">Replied @reply.CreatedAt.ToString("g")</small>
+                                                        <small class="text-muted">Replied @TimeZoneService.getCurrentTimeFromUTC(reply.CreatedAt, timezone).ToString("g")</small>
                                                     </div>
                                                 </div>
                                             }
