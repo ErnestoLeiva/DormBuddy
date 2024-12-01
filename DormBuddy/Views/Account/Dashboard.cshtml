@@ -1,6 +1,10 @@
 @inject Microsoft.Extensions.Localization.IStringLocalizerFactory LocalizerFactory
 @{
+<<<<<<< Updated upstream
     var SharedLocalizer = LocalizerFactory.Create("SharedResource", typeof(Program).Assembly.GetName().Name ?? "");
+=======
+    var SharedLocalizer = LocalizerFactory.Create("SharedResource", typeof(Program).Assembly.GetName().Name);
+>>>>>>> Stashed changes
 }
 
 
@@ -33,6 +37,7 @@
         </div>
     }
 
+<<<<<<< Updated upstream
     <p>@SharedLocalizer["Welcome"] <b>@ViewBag.Username</b>!
 
     <!-- SCRIPT TO DISPLAY CURRENT TIME. UPDATES EVERY SECOND-->
@@ -51,6 +56,14 @@
     </script>
 
 
+=======
+    <!--<p>@ViewBag.CultureInfo</p>-->
+
+
+
+
+    <p>@SharedLocalizer["Welcome"] <b>@ViewBag.Username</b>!
+>>>>>>> Stashed changes
     @if (roles.Length > 1) // ONLY SHOW IF THERES MORE ROLES THAN JUST "USER"
     {
         var roleLabel = "Roles";
@@ -82,6 +95,29 @@
 </div>
 
 <hr class="my-4">
+
+
+    <!-- #NOTIFICATIONS_AVAILABLE_MESSAGE  -->
+    
+    @if (ViewBag.NotificationAmount != null && ViewBag.NotificationAmount > 0) {
+
+        <div class="alert alert-warning" style="display: flex; align-items: center; justify-content: space-between; width: 97%; margin: 0 auto; padding: 10px;">
+            <div style="display: flex; align-items: center;">
+                <p style="margin: 0;">You have notification(s) to view!</p>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <a asp-controller="Notifications" asp-action="Index">click here</a>
+            </div>
+            
+        </div>
+
+        <hr class="my-4">
+
+        <!-- #endregion -->
+
+    }
+
+
     <div class="chat-container container mt-4">
         <div class="card">
             <div class="card-header d-flex justify-content-between">
@@ -133,7 +169,11 @@
                 </div>
                 <div class="card-body">
                     <p>@SharedLocalizer["ExpenseSplittingDescription"]</p>
+<<<<<<< Updated upstream
                     <a href="/Expenses/Index" class="btn btn-success">@SharedLocalizer["ViewExpenses"]</a>
+=======
+                    <a href="/Account/Expenses" class="btn btn-success">@SharedLocalizer["ViewExpenses"]</a>
+>>>>>>> Stashed changes
                 </div>
             </div>
         </div>
@@ -147,7 +187,11 @@
                 </div>
                 <div class="card-body">
                     <p>@SharedLocalizer["PeerToPeerLendingDescription"]</p>
+<<<<<<< Updated upstream
                     <a href="/PeerLending/Index" class="btn btn-warning" style="color: white;">@SharedLocalizer["ViewLending"]</a>
+=======
+                    <a href="/Account/Lending" class="btn btn-warning">@SharedLocalizer["ViewLending"]</a>
+>>>>>>> Stashed changes
                 </div>
             </div>
         </div>
@@ -177,7 +221,11 @@
                 </div>
                 <div class="card-body">
                     <p>@SharedLocalizer["NotificationsDescription"]</p>
+<<<<<<< Updated upstream
                     <a asp-controller="Notifications" asp-action="Index" class="btn btn-danger">@SharedLocalizer["ViewNotifications"]</a>
+=======
+                    <a href="/Account/Notifications" class="btn btn-danger">@SharedLocalizer["ViewNotifications"]</a>
+>>>>>>> Stashed changes
                 </div>
             </div>
         </div>
@@ -192,6 +240,7 @@
                 <div class="card-body">
                     <p>@SharedLocalizer["HelpAndSupportDescription"]</p>
                     <a href="/Home/ContactUs" class="btn btn-dark">@SharedLocalizer["GetHelp"]</a>
+<<<<<<< Updated upstream
                 </div>
             </div>
         </div>
@@ -208,6 +257,8 @@
                 <div class="card-body">
                     <p>Create or join a group for collaboration with dormmates.</p>
                     <a href="/Groups/Index" class="btn btn-info">View Groups</a>
+=======
+>>>>>>> Stashed changes
                 </div>
             </div>
         </div>
@@ -315,6 +366,8 @@
                 },
                 success: function(messages) {
                     var messageArea = $('#messageArea');
+                    messageArea.html('');
+                    lastId = -1;
                     messages.value.r.forEach(msg => {
                         const messageHtml = `
                             <div class="mb-2">

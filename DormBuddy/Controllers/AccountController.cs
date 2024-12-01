@@ -114,9 +114,19 @@ namespace DormBuddy.Controllers
 
                 var profile = await GetUserInformation(username);
 
+<<<<<<< Updated upstream
                 if (profile == null) {
                     return BadRequest("User profile could not be found on login");
                 }
+=======
+                var claims = new List<Claim>
+                {
+                    new Claim("FirstName", user.FirstName ?? ""),
+                    new Claim("LastName", user.LastName ?? ""),
+                    new Claim("Credits", user.Credits.ToString()),
+                    new Claim("Email", user.Email ?? "")
+                };
+>>>>>>> Stashed changes
 
                 await _signInManager.SignInAsync(user, rememberMe);
 
@@ -454,6 +464,11 @@ namespace DormBuddy.Controllers
                     var currentUICulture = CultureInfo.CurrentUICulture.Name;
 
                     ViewBag.CultureInfo = $"Current Culture: {currentCulture}, UI Culture: {currentUICulture}";
+<<<<<<< Updated upstream
+
+                    ViewBag.NotificationAmount = (await _context.Notifications.Where(m => m.UserId == user.Id).ToListAsync()).Count;
+=======
+>>>>>>> Stashed changes
                 }
 
                 return View();
@@ -644,13 +659,26 @@ public IActionResult Settings()
         [HttpPost]
         public IActionResult ChangeLanguage(string culture)
         {
+<<<<<<< Updated upstream
             // Remove the existing cookie
             Response.Cookies.Delete("Culture");
+=======
+            // Log the selected culture for debugging
+            Console.WriteLine($"Culture selected: {culture}");
+
+            // Remove the existing cookie
+            Response.Cookies.Delete("Culture");
+            Console.WriteLine("Culture cookie removed.");
+>>>>>>> Stashed changes
 
             // Set the new culture cookie
             Response.Cookies.Append(
             "Culture",
+<<<<<<< Updated upstream
             culture, 
+=======
+            culture, // Use the passed culture instead of hardcoded "es"
+>>>>>>> Stashed changes
             new CookieOptions { 
                 Expires = DateTimeOffset.UtcNow.AddYears(1), 
                 IsEssential = true, 
@@ -658,6 +686,17 @@ public IActionResult Settings()
                 Secure = true // Ensure this is true if running under HTTPS
             });
 
+<<<<<<< Updated upstream
+=======
+            Console.WriteLine($"Culture cookie set to: {culture}");
+
+            // Log current cookies
+            foreach (var cookie in Request.Cookies)
+            {
+                Console.WriteLine($"{cookie.Key}: {cookie.Value}");
+            }
+
+>>>>>>> Stashed changes
             // Redirect back to the previous page
             return Redirect(Request.Headers["Referer"].ToString());
         }
@@ -665,6 +704,9 @@ public IActionResult Settings()
 
 
         #endregion
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
     }
 }   

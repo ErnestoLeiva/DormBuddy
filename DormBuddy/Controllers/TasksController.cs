@@ -2,8 +2,6 @@ using DormBuddy.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -35,10 +33,19 @@ namespace DormBuddy.Controllers
             if (user != null)
             {
                 var tasks = await _dbContext.Tasks
-                    .Where(t => t.UserId == user.Id)
+                    .Where(t => t.AssignedTo.Contains(user.Id) || t.UserId == user.Id)
                     .ToListAsync();
 
-                var newTask = new TaskModel { UserId = user.Id }; // For the form on tasks.cshftml
+                var userGroup = await _dbContext.GroupMembers
+                    .Where(gm => gm.UserId == user.Id)
+                    .Include(gm => gm.Group)
+                    .ThenInclude(g => g.Members)
+                    .FirstOrDefaultAsync();
+
+                ViewBag.GroupMembers = userGroup?.Group?.Members;
+                ViewBag.Users = await _dbContext.Users.ToListAsync();
+
+                var newTask = new TaskModel { UserId = user.Id };
                 return View("~/Views/Account/Dashboard/Tasks.cshtml", Tuple.Create(tasks, newTask));
             }
 
@@ -47,11 +54,31 @@ namespace DormBuddy.Controllers
 
         // POST: /Tasks/Add
         [HttpPost]
-        public async Task<IActionResult> AddTask(TaskModel model, string DueTimeHour, string DueTimeMinute, string DueTimeAMPM)
+        public async Task<IActionResult> AddTask(TaskModel model, string[] AssignedUserIds, string DueTimeHour, string DueTimeMinute, string DueTimeAMPM)
         {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                ModelState.AddModelError(nameof(TaskModel.UserId), "User not found.");
+                return RedirectToAction("Login", "Account");
+            }
+
+            model.UserId = user.Id;
+            ModelState.Remove(nameof(TaskModel.UserId));
+
+            if (AssignedUserIds != null && AssignedUserIds.Length > 0)
+            {
+                model.AssignedTo = string.Join(",", AssignedUserIds);
+
+                ModelState.Remove(nameof(TaskModel.AssignedTo));
+            }
+            else
+            {
+                ModelState.AddModelError(nameof(TaskModel.AssignedTo), "At least one user must be assigned.");
+            }
+
             if (ModelState.IsValid)
             {
-
                 var dueTime = $"{model.DueDate:yyyy-MM-dd} {DueTimeHour}:{DueTimeMinute} {DueTimeAMPM}";
                 if (DateTime.TryParse(dueTime, out DateTime parsedDate))
                 {
@@ -65,15 +92,47 @@ namespace DormBuddy.Controllers
                 }
                 else
                 {
-                    ViewBag.ErrorMessage = "Error: Invalid date format.";
+                    ModelState.AddModelError(nameof(TaskModel.DueDate), "Invalid date format.");
                 }
             }
             else
             {
-                ViewBag.ErrorMessage = "Error: Invalid task input.";
+                Console.WriteLine("INVALID MODEL STATE");
+                foreach (var state in ModelState)
+                {
+                    foreach (var error in state.Value.Errors)
+                    {
+                        Console.WriteLine($"Key: {state.Key}, Error: {error.ErrorMessage}");
+                    }
+                }
             }
 
-            var tasks = await _dbContext.Tasks.Where(t => t.UserId == model.UserId).ToListAsync();
+            // Fetch tasks for the current user
+            var tasks = await _dbContext.Tasks
+                .Where(t => t.UserId == user.Id || (t.AssignedTo != null && t.AssignedTo.Contains(user.Id)))
+                .ToListAsync();
+            
+            // Fetch the current user's group ID
+            var groupId = await _dbContext.GroupMembers
+                .Where(gm => gm.UserId == user.Id)
+                .Select(gm => gm.GroupId)
+                .FirstOrDefaultAsync();
+
+            // Fetch all members of the group
+            var groupMembers = await _dbContext.GroupMembers
+                .Where(gm => gm.GroupId == groupId)
+                .ToListAsync();
+
+            // Fetch all users corresponding to the group members
+            var userIds = groupMembers.Select(gm => gm.UserId).ToList();
+            var users = await _dbContext.Users
+                .Where(u => userIds.Contains(u.Id))
+                .ToListAsync();
+
+            // Assign to ViewBag
+            ViewBag.GroupMembers = groupMembers;
+            ViewBag.Users = users;
+
             var newTask = new TaskModel();
             return View("~/Views/Account/Dashboard/Tasks.cshtml", Tuple.Create(tasks, newTask));
         }
@@ -84,7 +143,9 @@ namespace DormBuddy.Controllers
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
+            {
                 return RedirectToAction("Login", "Account");
+            }
 
             if (taskId <= 0)
             {
@@ -94,8 +155,11 @@ namespace DormBuddy.Controllers
             {
                 try
                 {
-                    var task = await _dbContext.Tasks.FindAsync(taskId);
-                    if (task != null && task.UserId == user.Id)
+                    var task = await _dbContext.Tasks.FirstOrDefaultAsync(t =>
+                        t.Id == taskId &&
+                        (t.UserId == user.Id || (t.AssignedTo != null && t.AssignedTo.Contains(user.Id))));
+
+                    if (task != null)
                     {
                         var taskname = task.TaskName;
                         _dbContext.Tasks.Remove(task);
@@ -104,7 +168,7 @@ namespace DormBuddy.Controllers
                     }
                     else
                     {
-                        TempData["error"] = "Error: Task not found.";
+                        TempData["error"] = "Error: Task not found or you do not have permission to delete it.";
                     }
                 }
                 catch (Exception ex)
@@ -114,7 +178,32 @@ namespace DormBuddy.Controllers
                 }
             }
 
-            var tasks = await _dbContext.Tasks.Where(t => t.UserId == user.Id).ToListAsync();
+            // Fetch tasks for the current user
+            var tasks = await _dbContext.Tasks
+                .Where(t => t.UserId == user.Id || (t.AssignedTo != null && t.AssignedTo.Contains(user.Id)))
+                .ToListAsync();
+
+            // Fetch the current user's group ID
+            var groupId = await _dbContext.GroupMembers
+                .Where(gm => gm.UserId == user.Id)
+                .Select(gm => gm.GroupId)
+                .FirstOrDefaultAsync();
+
+            // Fetch all members of the group
+            var groupMembers = await _dbContext.GroupMembers
+                .Where(gm => gm.GroupId == groupId)
+                .ToListAsync();
+
+            // Fetch all users corresponding to the group members
+            var userIds = groupMembers.Select(gm => gm.UserId).ToList();
+            var users = await _dbContext.Users
+                .Where(u => userIds.Contains(u.Id))
+                .ToListAsync();
+
+            // Assign to ViewBag
+            ViewBag.GroupMembers = groupMembers;
+            ViewBag.Users = users;
+
             var newTask = new TaskModel { UserId = user.Id };
             return View("~/Views/Account/Dashboard/Tasks.cshtml", Tuple.Create(tasks, newTask));
         }

@@ -59,7 +59,7 @@
     <div class="alert alert-danger">
         @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
         {
-            <p>@error.ErrorMessage</p>
+            @error.ErrorMessage<br />
         }
     </div>
 }
@@ -77,7 +77,31 @@
         </div>
         <div class="form-group">
             <label for="assignedTo">Assigned To</label>
-            <input type="text" class="form-control" id="assignedTo" name="AssignedTo" placeholder="Enter name" required />
+            <div id="assignedTo">
+                @if (ViewBag.GroupMembers != null && ViewBag.Users != null && ((List<DormBuddy.Models.GroupMemberModel>)ViewBag.GroupMembers).Any())
+                {
+                    var groupMembers = (List<DormBuddy.Models.GroupMemberModel>)ViewBag.GroupMembers;
+                    var users = (List<DormBuddy.Models.ApplicationUser>)ViewBag.Users;
+
+                    foreach (var member in groupMembers)
+                    {
+                        var user = users.FirstOrDefault(u => u.Id == member.UserId);
+                        if (user != null)
+                        {
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="AssignedUserIds" id="user_@user.Id" value="@user.Id" />
+                                <label class="form-check-label" for="user_@user.Id">@($"{user.FirstName} {user.LastName}")</label>
+                            </div>
+                        }
+                    }
+                }
+                else
+                {
+                    <div class="alert alert-warning">
+                        <strong>Notice:</strong> You are not part of any group. Please <a href="/Groups/Index">join or create</a> a group to use this feature.
+                    </div>
+                }
+            </div>
         </div>
         <div class="form-group">
             <label for="dueDate">Due Date</label>
@@ -130,7 +154,24 @@
                 {
                     <tr>
                         <td>@task.TaskName</td>
-                        <td>@task.AssignedTo</td>
+                        <td>
+                            @{
+                                if (ViewBag.Users != null)
+                                {
+                                    var users = (List<DormBuddy.Models.ApplicationUser>)ViewBag.Users;
+                                    var assignedIds = task.AssignedTo?.Split(',') ?? Array.Empty<string>();
+                                    var assignedNames = users
+                                        .Where(u => assignedIds.Contains(u.Id))
+                                        .Select(u => $"{u.FirstName} {u.LastName}");
+
+                                    <span>@string.Join(", ", assignedNames)</span>
+                                }
+                                else
+                                {
+                                    <span>Unknown</span>
+                                }
+                            }
+                        </td>
                         <td>@task.DueDate.ToString("MM/dd/yyyy hh:mm tt")</td>
                         <td class="text-center">
                             <span class="badge @(task.IsCompleted ? "bg-success" : "bg-danger")">

@@ -1,11 +1,17 @@
 ﻿@inject Microsoft.Extensions.Localization.IStringLocalizerFactory LocalizerFactory
 @{
+<<<<<<< Updated upstream
     var SharedLocalizer = LocalizerFactory.Create("SharedResource", typeof(Program).Assembly.GetName().Name ?? "");
 }
 
 @inject NavBarInfoService NavBarInfoService
 @using System.Threading.Tasks
 
+=======
+    var SharedLocalizer = LocalizerFactory.Create("SharedResource", typeof(Program).Assembly.GetName().Name);
+}
+
+>>>>>>> Stashed changes
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -50,15 +56,22 @@
                             </li>
 
                             <li class="nav-item">
+<<<<<<< Updated upstream
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Community">@SharedLocalizer["Community"]</a>
+=======
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">@SharedLocalizer["Privacy"]</a>
+>>>>>>> Stashed changes
                             </li>
                             
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="ContactUs">@SharedLocalizer["ContactUs"]</a>
+<<<<<<< Updated upstream
                             </li>
 
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">@SharedLocalizer["Privacy"]</a>
+=======
+>>>>>>> Stashed changes
                             </li>
                         } else {
                             <li class="nav-item">
