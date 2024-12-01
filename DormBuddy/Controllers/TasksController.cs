@@ -59,7 +59,7 @@ namespace DormBuddy.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                ViewBag.ErrorMessage = "User not found.";
+                ModelState.AddModelError(nameof(TaskModel.UserId), "User not found.");
                 return RedirectToAction("Login", "Account");
             }
 
@@ -92,7 +92,7 @@ namespace DormBuddy.Controllers
                 }
                 else
                 {
-                    ViewBag.ErrorMessage = "Error: Invalid date format.";
+                    ModelState.AddModelError(nameof(TaskModel.DueDate), "Invalid date format.");
                 }
             }
             else
@@ -105,7 +105,6 @@ namespace DormBuddy.Controllers
                         Console.WriteLine($"Key: {state.Key}, Error: {error.ErrorMessage}");
                     }
                 }
-                ViewBag.ErrorMessage = "Error: Invalid task input.";
             }
 
             // Fetch tasks for the current user
