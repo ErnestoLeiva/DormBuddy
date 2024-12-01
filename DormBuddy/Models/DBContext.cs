@@ -49,6 +49,10 @@ namespace DormBuddy.Models
         public DbSet<FriendsModel> FriendsModel { get; set; }
         public DbSet<LogModel> Logs { get; set; }
 
+        public DbSet<Notifications> Notifications { get; set; }
+
+        public DbSet<Profile_PostsModel> Profile_Posts { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured) {
@@ -79,6 +83,7 @@ namespace DormBuddy.Models
                 entity.Property(g => g.Name).IsRequired().HasMaxLength(100);
                 entity.Property(g => g.InvitationCode).IsRequired().HasMaxLength(8);
                 entity.Property(g => g.CreatedByUserId).IsRequired();
+                entity.Property(g => g.TotalMembers).IsRequired();
                 entity.HasMany(g => g.Members)
                     .WithOne(m => m.Group)
                     .HasForeignKey(m => m.GroupId)

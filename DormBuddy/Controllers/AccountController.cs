@@ -112,13 +112,27 @@ namespace DormBuddy.Controllers
             if (result.Succeeded) {
                 await _userManager.ResetAccessFailedCountAsync(user);
 
-                //var profile = await getProfile(user);
-                var profile = await GetUserInformation(user.UserName);
+                var profile = await GetUserInformation(username);
+
+                if (profile == null) {
+                    return BadRequest("User profile could not be found on login");
+                }
 
                 await _signInManager.SignInAsync(user, rememberMe);
 
                 profile.LastLogin = DateTime.UtcNow;
-                 _context.SaveChanges();
+
+                await _context.SaveChangesAsync();
+
+
+                /*
+                _context.Add(new Notifications {
+                    UserId = profile.UserId,
+                    MessageType = 1, // FOR REGULAR MESSAGE
+                    CreatedAt = DateTime.UtcNow,
+                    Message = profile?.User?.UserName + "..... WELCOME!"
+                });
+                */
 
                 return RedirectToAction("Dashboard");
 
@@ -180,7 +194,7 @@ namespace DormBuddy.Controllers
                 _context.UserLastUpdate.Add(instance);
             }
 
-            return instance;
+            return instance ?? new UserLastUpdate();
         }
 
         #region SIGN UP
@@ -440,6 +454,8 @@ namespace DormBuddy.Controllers
                     var currentUICulture = CultureInfo.CurrentUICulture.Name;
 
                     ViewBag.CultureInfo = $"Current Culture: {currentCulture}, UI Culture: {currentUICulture}";
+
+                    ViewBag.NotificationAmount = (await _context.Notifications.Where(m => m.UserId == user.Id).ToListAsync()).Count;
                 }
 
                 return View();
@@ -458,28 +474,34 @@ namespace DormBuddy.Controllers
 
         public IActionResult Lending() => User?.Identity?.IsAuthenticated == true ? View("~/Views/Account/Dashboard/Lending.cshtml") : RedirectToAction("AccountForms");
 
-        public IActionResult Notifications() => User?.Identity?.IsAuthenticated == true ? View("~/Views/Account/Dashboard/Notifications.cshtml") : RedirectToAction("AccountForms");
+        //public IActionResult Notifications() => User?.Identity?.IsAuthenticated == true ? View("~/Views/Account/Dashboard/Notifications.cshtml", new List<Notifications>()) : RedirectToAction("AccountForms");
 
+public IActionResult Settings()
+{
+    if (User?.Identity?.IsAuthenticated == true)
+    {
+        // Retrieve 'page' query parameter, default to empty string if not provided
+        string loadPage = Request.Query["page"].ToString();
 
-        public IActionResult Settings() {
-            if (User?.Identity?.IsAuthenticated == true) {
+        // Define allowed pages
+        var allowedPages = new HashSet<string> { "AccountSettings", "GeneralSettings", "PrivacySettings", "ProfileSettings" };
 
-                string loadPage = Request.Query["page"].ToString() ?? "";
-
-                var allowedPages = new List<string> { "AccountSettings", "GeneralSettings", "PrivacySettings", "ProfileSettings" };
-
-                // Check if the 'page' is a valid value from the list
-                if (!allowedPages.Contains(loadPage) && !string.IsNullOrEmpty(loadPage))
-                {
-                    return BadRequest("Invalid page parameter.");
-                }
-
-                ViewBag.LoadPage = loadPage;
-                return View("~/Views/Account/Dashboard/Settings.cshtml");
-            } else {
-                return RedirectToAction("AccountForms");
-            }
+        // Validate the 'page' parameter
+        if (!string.IsNullOrEmpty(loadPage) && !allowedPages.Contains(loadPage))
+        {
+            // Redirect to a default page or return a friendly error message if invalid
+            return RedirectToAction(nameof(Settings), new { page = "GeneralSettings" });
         }
+
+        // Pass the page to the view
+        ViewBag.LoadPage = string.IsNullOrEmpty(loadPage) ? "GeneralSettings" : loadPage;
+        return View("~/Views/Account/Dashboard/Settings.cshtml");
+    }
+
+    // Redirect unauthenticated users to the account forms
+    return RedirectToAction("AccountForms");
+}
+
 
 
         public async Task<IActionResult> Profile()
@@ -494,7 +516,7 @@ namespace DormBuddy.Controllers
 
                 // Get the username from query parameter or fallback to User.Identity.Name
                 string get_username = Request.Query["username"].ToString() ?? "";
-                get_username = string.IsNullOrEmpty(get_username) ? User?.Identity?.Name : get_username;
+                get_username = string.IsNullOrEmpty(get_username) ? User?.Identity?.Name ?? string.Empty : get_username;
 
                 // If username is still null or empty, redirect to the dashboard
                 if (string.IsNullOrEmpty(get_username))
@@ -516,6 +538,12 @@ namespace DormBuddy.Controllers
                     return RedirectToAction("Dashboard");
                 }
 
+                var bannerImage = _configuration["Profile:Default_BannerImage"];
+                if (string.IsNullOrEmpty(profile.BannerImageUrl))
+                {
+                    profile.BannerImageUrl = bannerImage;
+                }
+
                 var profileImage = _configuration["Profile:Default_ProfileImage"];
                 if (string.IsNullOrEmpty(profile.ProfileImageUrl))
                 {
@@ -527,15 +555,16 @@ namespace DormBuddy.Controllers
 
                 // Profile Online Status Check
                 ViewData["profile_online_status"] = "Offline";
-                var getLastUpdate = await getUserLastUpdate(profile.User);
+                var getLastUpdate = await getUserLastUpdate(u);
+
                 if (getLastUpdate?.LastUpdate is DateTime lastUpdate &&
                     (DateTime.UtcNow - lastUpdate).TotalSeconds < 300)
                 {
                     ViewData["profile_online_status"] = "Online";
                 }
 
-                if (profile.User.UserName != User?.Identity?.Name) {
-                    var fstatus = await FriendshipStatus(profile.User);
+                if (u.UserName != User?.Identity?.Name) {
+                    var fstatus = await FriendshipStatus(u);
                     ViewData["FriendshipStatus"] = fstatus;
                 }
 
@@ -553,7 +582,8 @@ namespace DormBuddy.Controllers
             }
         }
 
-        public async Task<IActionResult> LoadSettings(string settingsPage)
+
+        public async Task<IActionResult> LoadSettings(string settingsPage, string errorMessage = "")
         {
 
             var profile = await GetUserInformation();
@@ -567,6 +597,10 @@ namespace DormBuddy.Controllers
                 case "GeneralSettings":
                     return PartialView("Dashboard/Settings/_GeneralSettings");
                 case "AccountSettings":
+                    if (!string.IsNullOrEmpty(errorMessage)) {
+                        ViewBag.ErrorMessage = errorMessage;
+                    }
+                    
                     return PartialView("Dashboard/Settings/_AccountSettings", profile);
                 case "PrivacySettings":
                     return PartialView("Dashboard/Settings/_PrivacySettings", profile);
@@ -634,6 +668,5 @@ namespace DormBuddy.Controllers
 
 
         #endregion
-
     }
 }   

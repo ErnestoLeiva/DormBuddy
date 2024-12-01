@@ -80,7 +80,29 @@
         }]</p>
     }
 </div>
+
 <hr class="my-4">
+
+
+    <!-- #NOTIFICATIONS_AVAILABLE_MESSAGE  -->
+    
+    @if (ViewBag.NotificationAmount != null && ViewBag.NotificationAmount > 0) {
+
+        <div class="alert alert-warning" style="display: flex; align-items: center; justify-content: space-between; width: 97%; margin: 0 auto; padding: 10px;">
+            <div style="display: flex; align-items: center;">
+                <p style="margin: 0;">You have notification(s) to view!</p>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <a asp-controller="Notifications" asp-action="Index">click here</a>
+            </div>
+            
+        </div>
+
+        <hr class="my-4">
+
+        <!-- #endregion -->
+
+    }
 
 
     <div class="chat-container container mt-4">
@@ -106,8 +128,7 @@
 <!-- DASHBOARD PANEL CARDS -->
 <div class="container">
 <hr class="my-4">
-
-    <div style="display: flex; align-items: center; justify-content: center; margin:150px 0 50px 0;">
+    <div style="display: flex; align-items: center; justify-content: center; margin:50px 0 50px 0;">
         <h1 class="display-4"><strong>Shortcuts</strong></h1>
     </div>
 
@@ -179,7 +200,7 @@
                 </div>
                 <div class="card-body">
                     <p>@SharedLocalizer["NotificationsDescription"]</p>
-                    <a href="/Account/Notifications" class="btn btn-danger">@SharedLocalizer["ViewNotifications"]</a>
+                    <a asp-controller="Notifications" asp-action="Index" class="btn btn-danger">@SharedLocalizer["ViewNotifications"]</a>
                 </div>
             </div>
         </div>
@@ -194,6 +215,22 @@
                 <div class="card-body">
                     <p>@SharedLocalizer["HelpAndSupportDescription"]</p>
                     <a href="/Home/ContactUs" class="btn btn-dark">@SharedLocalizer["GetHelp"]</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Group Management Card -->
+        <div class="col-md-4 offset-md-4">
+            <div class="card text-center mb-4">
+                <div class="card-header bg-info text-white">
+                    <i class="fas fa-users fa-lg"></i>
+                    Manage Groups
+                </div>
+                <div class="card-body">
+                    <p>Create or join a group for collaboration with dormmates.</p>
+                    <a href="/Groups/Index" class="btn btn-info">View Groups</a>
                 </div>
             </div>
         </div>
@@ -240,95 +277,6 @@
 
 </div>
 
-<div class="container">
-    <div class="row">
-        <!-- Task Management Card -->
-        <div class="col-md-4">
-            <div class="card text-center mb-4">
-                <div class="card-header bg-primary text-white">
-                    <i class="fas fa-tasks fa-lg"></i> <!-- Task Icon -->
-                    Task Management
-                </div>
-                <div class="card-body">
-                    <p>Manage your dorm-related tasks and track progress.</p>
-                    <a href="/Tasks/Index" class="btn btn-primary">View Tasks</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Expense Splitting Card -->
-        <div class="col-md-4">
-            <div class="card text-center mb-4">
-                <div class="card-header bg-success text-white">
-                    <i class="fas fa-money-bill-wave fa-lg"></i> <!-- Expense Icon -->
-                    Expense Splitting
-                </div>
-                <div class="card-body">
-                    <p>Track shared expenses and manage balance with dormmates.</p>
-                    <a href="/Account/Expenses" class="btn btn-success">View Expenses</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- P2P Lending Card -->
-        <div class="col-md-4">
-            <div class="card text-center mb-4">
-                <div class="card-header bg-warning text-white">
-                    <i class="fas fa-handshake fa-lg"></i> <!-- Lending Icon -->
-                    Peer-to-Peer Lending
-                </div>
-                <div class="card-body">
-                    <p>Manage loans and transactions with your dormmates.</p>
-                    <a href="/Account/Lending" class="btn btn-warning">View Lending</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <!-- Account Settings Card -->
-        <div class="col-md-4">
-            <div class="card text-center mb-4">
-                <div class="card-header bg-info text-white">
-                    <i class="fas fa-user-cog fa-lg"></i> <!-- Account Settings Icon -->
-                    Account Settings
-                </div>
-                <div class="card-body">
-                    <p>Update your account information and preferences.</p>
-                    <a href="/Account/Settings" class="btn btn-info">Manage Account</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Notifications Card -->
-        <div class="col-md-4">
-            <div class="card text-center mb-4">
-                <div class="card-header bg-danger text-white">
-                    <i class="fas fa-bell fa-lg"></i> <!-- Notification Icon -->
-                    Notifications
-                </div>
-                <div class="card-body">
-                    <p>Check new notifications from your dormmates.</p>
-                    <a href="/Account/Notifications" class="btn btn-danger">View Notifications</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Help & Support Card -->
-        <div class="col-md-4">
-            <div class="card text-center mb-4">
-                <div class="card-header bg-dark text-white">
-                    <i class="fas fa-cog fa-lg"></i> <!-- Help Icon -->
-                    Help & Support
-                </div>
-                <div class="card-body">
-                    <p>Need assistance? Reach out for help with any issues.</p>
-                    <a href="#" class="btn btn-dark">Get Help</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
 
 
@@ -390,6 +338,8 @@
                 },
                 success: function(messages) {
                     var messageArea = $('#messageArea');
+                    messageArea.html('');
+                    lastId = -1;
                     messages.value.r.forEach(msg => {
                         const messageHtml = `
                             <div class="mb-2">

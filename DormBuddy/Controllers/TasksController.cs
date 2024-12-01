@@ -33,24 +33,35 @@ namespace DormBuddy.Controllers
             if (user != null)
             {
                 var tasks = await _dbContext.Tasks
-                    .Where(t => t.AssignedTo.Contains(user.Id) || t.UserId == user.Id)
+                    .Where(t => (t.AssignedTo != null && t.AssignedTo.Contains(user.Id)) || t.UserId == user.Id)
                     .ToListAsync();
 
                 var userGroup = await _dbContext.GroupMembers
                     .Where(gm => gm.UserId == user.Id)
                     .Include(gm => gm.Group)
-                    .ThenInclude(g => g.Members)
                     .FirstOrDefaultAsync();
 
-                ViewBag.GroupMembers = userGroup?.Group?.Members;
+                if (userGroup?.Group != null)
+                {
+                    var groupMembers = userGroup.Group.Members ?? new List<GroupMemberModel>();
+                    ViewBag.GroupMembers = groupMembers;
+                }
+                else
+                {
+                    ViewBag.GroupMembers = new List<GroupMemberModel>();
+                }
+
                 ViewBag.Users = await _dbContext.Users.ToListAsync();
 
                 var newTask = new TaskModel { UserId = user.Id };
+
                 return View("~/Views/Account/Dashboard/Tasks.cshtml", Tuple.Create(tasks, newTask));
             }
 
+            // Redirect to login page if the user is not found
             return RedirectToAction("Login", "Account");
         }
+
 
         // POST: /Tasks/Add
         [HttpPost]
@@ -59,7 +70,7 @@ namespace DormBuddy.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                ViewBag.ErrorMessage = "User not found.";
+                ModelState.AddModelError(nameof(TaskModel.UserId), "User not found.");
                 return RedirectToAction("Login", "Account");
             }
 
@@ -79,20 +90,27 @@ namespace DormBuddy.Controllers
 
             if (ModelState.IsValid)
             {
-                var dueTime = $"{model.DueDate:yyyy-MM-dd} {DueTimeHour}:{DueTimeMinute} {DueTimeAMPM}";
-                if (DateTime.TryParse(dueTime, out DateTime parsedDate))
+                if (model != null)
                 {
-                    model.DueDate = parsedDate;
-                    model.IsCompleted = false;
+                    var dueTime = $"{model.DueDate:yyyy-MM-dd} {DueTimeHour}:{DueTimeMinute} {DueTimeAMPM}";
+                    if (DateTime.TryParse(dueTime, out DateTime parsedDate))
+                    {
+                        model.DueDate = parsedDate;
+                        model.IsCompleted = false;
 
-                    _dbContext.Tasks.Add(model);
-                    await _dbContext.SaveChangesAsync();
+                        _dbContext.Tasks.Add(model);
+                        await _dbContext.SaveChangesAsync();
 
-                    TempData["message"] = "Task added successfully!";
-                }
-                else
+                        TempData["message"] = $"Task \"{model.TaskName}\" added successfully!";
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(nameof(TaskModel.DueDate), "Invalid date format.");
+                    }
+                } 
+                else 
                 {
-                    ViewBag.ErrorMessage = "Error: Invalid date format.";
+                    ModelState.AddModelError(nameof(TaskModel.DueDate), "Invalid date format.");
                 }
             }
             else
@@ -105,7 +123,6 @@ namespace DormBuddy.Controllers
                         Console.WriteLine($"Key: {state.Key}, Error: {error.ErrorMessage}");
                     }
                 }
-                ViewBag.ErrorMessage = "Error: Invalid task input.";
             }
 
             // Fetch tasks for the current user
@@ -150,40 +167,69 @@ namespace DormBuddy.Controllers
 
             if (taskId <= 0)
             {
-                ViewBag.ErrorMessage = "Invalid Task ID.";
-                return RedirectToAction("Index");
+                TempData["error"] = "Invalid Task ID.";
+            }
+            else
+            {
+                try
+                {
+                    var task = await _dbContext.Tasks.FirstOrDefaultAsync(t =>
+                        t.Id == taskId &&
+                        (t.UserId == user.Id || (t.AssignedTo != null && t.AssignedTo.Contains(user.Id))));
+
+                    if (task != null)
+                    {
+                        var taskname = task.TaskName;
+                        _dbContext.Tasks.Remove(task);
+                        await _dbContext.SaveChangesAsync();
+                        TempData["message"] = $"Task \"{taskname}\" deleted successfully!";
+                    }
+                    else
+                    {
+                        TempData["error"] = "Error: Task not found or you do not have permission to delete it.";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Error deleting task with ID {taskId}: {ex.Message}");
+                    TempData["error"] = "Error: Could not delete the task.";
+                }
             }
 
-            try
-            {
-                var task = await _dbContext.Tasks.FindAsync(taskId);
-                if (task != null)
-                {
-                    var taskname = task.TaskName;
-                    _dbContext.Tasks.Remove(task);
-                    await _dbContext.SaveChangesAsync();
-                    TempData["message"] = $"Task \"{taskname}\" deleted successfully!";
-                }
-                else
-                {
-                    ViewBag.ErrorMessage = "Error: Task not found.";
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error deleting task with ID {taskId}: {ex.Message}");
-                ViewBag.ErrorMessage = "Error: Could not delete the task.";
-            }
+            // Fetch tasks for the current user
+            var tasks = await _dbContext.Tasks
+                .Where(t => t.UserId == user.Id || (t.AssignedTo != null && t.AssignedTo.Contains(user.Id)))
+                .ToListAsync();
 
-            return RedirectToAction("Index");
+            // Fetch the current user's group ID
+            var groupId = await _dbContext.GroupMembers
+                .Where(gm => gm.UserId == user.Id)
+                .Select(gm => gm.GroupId)
+                .FirstOrDefaultAsync();
+
+            // Fetch all members of the group
+            var groupMembers = await _dbContext.GroupMembers
+                .Where(gm => gm.GroupId == groupId)
+                .ToListAsync();
+
+            // Fetch all users corresponding to the group members
+            var userIds = groupMembers.Select(gm => gm.UserId).ToList();
+            var users = await _dbContext.Users
+                .Where(u => userIds.Contains(u.Id))
+                .ToListAsync();
+
+            // Assign to ViewBag
+            ViewBag.GroupMembers = groupMembers;
+            ViewBag.Users = users;
+
+            var newTask = new TaskModel { UserId = user.Id };
+            return View("~/Views/Account/Dashboard/Tasks.cshtml", Tuple.Create(tasks, newTask));
         }
 
         // POST: /Tasks/ToggleStatus
         [HttpPost]
         public async Task<IActionResult> ToggleStatus(int taskId)
         {
-            Console.WriteLine("\n\n\nREACHED ACTION\n\n\n");
-            
             if (taskId <= 0)
             {
                 return Json(new { success = false, message = "Invalid Task ID." });
@@ -205,7 +251,6 @@ namespace DormBuddy.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Exception occurred: {ex.Message}\n{ex.StackTrace}");
                 _logger.LogError($"Error toggling task status with ID {taskId}: {ex.Message}");
                 return Json(new { success = false, message = "Error: Could not update the task." });
             }

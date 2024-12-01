@@ -13,9 +13,9 @@
 
 @if (User?.Identity != null && User?.Identity.IsAuthenticated != null) {
 
-    string firstName = @Model.User.FirstName ?? "";
-    string lastName = @Model.User.LastName ?? "";
-    string email = @Model.User.Email ?? "";
+    string firstName = @Model.User?.FirstName ?? "";
+    string lastName = @Model.User?.LastName ?? "";
+    string email = @Model.User?.Email ?? "";
 
     <div class="settings-container container mt-4">
         <h2>Account Settings</h2>

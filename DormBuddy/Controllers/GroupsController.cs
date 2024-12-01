@@ -34,9 +34,24 @@ namespace DormBuddy.Controllers
             var users = await _dbContext.Users.ToListAsync();
             ViewBag.Users = users;
 
+            // Fetch all members for the current group
+            if (userGroup?.Group != null)
+            {
+                var groupMembers = await _dbContext.GroupMembers
+                    .Where(gm => gm.GroupId == userGroup.Group.Id)
+                    .ToListAsync();
+
+                ViewBag.GroupMembers = groupMembers;
+            }
+            else
+            {
+                ViewBag.GroupMembers = null; // No group members to show
+            }
+
             return View("~/Views/Account/Dashboard/Groups.cshtml", Tuple.Create(groups, userGroup));
         }
 
+        #region GROUP MANAGEMENT
         // POST: /Groups/Create
         [HttpPost]
         public async Task<IActionResult> CreateGroup(GroupModel model)
@@ -51,7 +66,8 @@ namespace DormBuddy.Controllers
             {
                 model.CreatedByUserId = user.Id;
                 model.InvitationCode = Guid.NewGuid().ToString("N").Substring(0, 8);
-                
+                model.TotalMembers = 1;
+
                 _dbContext.Groups.Add(model);
                 await _dbContext.SaveChangesAsync();
 
@@ -77,6 +93,7 @@ namespace DormBuddy.Controllers
             var userGroup = await _dbContext.GroupMembers
                 .Where(gm => gm.UserId == user.Id)
                 .Include(gm => gm.Group)
+                .ThenInclude(g => g.Members)
                 .FirstOrDefaultAsync();
             var users = await _dbContext.Users.ToListAsync(); // Refresh users
 
@@ -85,7 +102,6 @@ namespace DormBuddy.Controllers
             return View("~/Views/Account/Dashboard/Groups.cshtml", Tuple.Create(groups, userGroup));
         }
 
-
         // POST: /Groups/Join
         [HttpPost]
         public async Task<IActionResult> JoinGroup(string invitationCode)
@@ -93,15 +109,16 @@ namespace DormBuddy.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return RedirectToAction("Login", "Account");
 
-            var group = await _dbContext.Groups.FirstOrDefaultAsync(g => g.InvitationCode == invitationCode);
+            var group = await _dbContext.Groups
+                .FirstOrDefaultAsync(g => g.InvitationCode == invitationCode);
+
             if (group == null)
             {
                 TempData["error"] = "Invalid invitation code.";
             }
             else
             {
-                var memberCount = await _dbContext.GroupMembers.CountAsync(gm => gm.GroupId == group.Id);
-                if (memberCount >= group.MaxMembers)
+                if (group.TotalMembers + 1 > group.MaxMembers)
                 {
                     TempData["error"] = "Group is full.";
                 }
@@ -118,16 +135,19 @@ namespace DormBuddy.Controllers
                     };
 
                     _dbContext.GroupMembers.Add(groupMember);
+                    group.TotalMembers++;
                     await _dbContext.SaveChangesAsync();
+
                     TempData["message"] = "Joined group successfully!";
                 }
             }
 
             // Re-fetch data for the view
-            var groups = await _dbContext.Groups.ToListAsync();
+            var groups = await _dbContext.Groups.Include(g => g.Members).ToListAsync();
             var userGroup = await _dbContext.GroupMembers
                 .Where(gm => gm.UserId == user.Id)
                 .Include(gm => gm.Group)
+                .ThenInclude(g => g.Members)
                 .FirstOrDefaultAsync();
             var users = await _dbContext.Users.ToListAsync(); // Refresh users
 
@@ -146,22 +166,28 @@ namespace DormBuddy.Controllers
             var membership = await _dbContext.GroupMembers
                 .FirstOrDefaultAsync(gm => gm.GroupId == groupId && gm.UserId == user.Id);
 
-            if (membership != null)
+
+            var group = await _dbContext.Groups.FirstOrDefaultAsync(g => g.Id == groupId);
+
+            if (membership != null && group != null)
             {
                 _dbContext.GroupMembers.Remove(membership);
+                group.TotalMembers = Math.Max(0, group.TotalMembers - 1);
+
                 await _dbContext.SaveChangesAsync();
                 TempData["message"] = "Left group successfully!";
             }
             else
             {
-                TempData["error"] = "You are not a member of this group.";
+                TempData["error"] = "You are not a member of this group or the group doesn't exist.";
             }
 
             // Re-fetch data for the view
-            var groups = await _dbContext.Groups.ToListAsync();
+            var groups = await _dbContext.Groups.Include(g => g.Members).ToListAsync();
             var userGroup = await _dbContext.GroupMembers
                 .Where(gm => gm.UserId == user.Id)
                 .Include(gm => gm.Group)
+                .ThenInclude(g => g.Members)
                 .FirstOrDefaultAsync();
             var users = await _dbContext.Users.ToListAsync(); // Refresh users
 
@@ -169,7 +195,9 @@ namespace DormBuddy.Controllers
 
             return View("~/Views/Account/Dashboard/Groups.cshtml", Tuple.Create(groups, userGroup));
         }
+        #endregion
 
+        #region GROUP ADMIN CONTROLS
         // POST: /Groups/KickMember
         [HttpPost]
         public async Task<IActionResult> KickMember(int groupId, string userId)
@@ -180,19 +208,23 @@ namespace DormBuddy.Controllers
             var groupMember = await _dbContext.GroupMembers
                 .FirstOrDefaultAsync(gm => gm.GroupId == groupId && gm.UserId == userId);
 
-            if (groupMember != null)
+            var group = await _dbContext.Groups.FirstOrDefaultAsync(g => g.Id == groupId);
+
+            if (group != null && groupMember != null)
             {
                 _dbContext.GroupMembers.Remove(groupMember);
+                group.TotalMembers = Math.Max(0, group.TotalMembers - 1);
+
                 await _dbContext.SaveChangesAsync();
                 TempData["message"] = "Member removed successfully.";
             }
             else
             {
-                TempData["error"] = "Member not found in the group.";
+                TempData["error"] = "Member not found in the group or group does not exist.";
             }
 
             // Re-fetch data for the view
-            var groups = await _dbContext.Groups.ToListAsync();
+            var groups = await _dbContext.Groups.Include(g => g.Members).ToListAsync();
             var userGroup = await _dbContext.GroupMembers
                 .Where(gm => gm.UserId == user.Id)
                 .Include(gm => gm.Group)
@@ -240,6 +272,7 @@ namespace DormBuddy.Controllers
 
             return View("~/Views/Account/Dashboard/Groups.cshtml", Tuple.Create(groups, userGroup));
         }
+        #endregion
     }
 
 }
