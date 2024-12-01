@@ -1,0 +1,57 @@
+/* Stat Card Colors */
+.stat-total {
+    background: #ecfdf5;  
+}
+.stat-total .stat-icon {
+    background: #10b981;  
+}
+
+.stat-share {
+    background: #e6fffa;  
+}
+.stat-share .stat-icon {
+    background: #38b2ac;
+}
+
+.stat-pending {
+    background: #fff5f5;  
+}
+.stat-pending .stat-icon {
+    background: #f56565;
+}
+
+.stat-splits {
+    background: #f5f3ff;  
+}
+.stat-splits .stat-icon {
+    background: #805ad5;  
+}
+
+/* fly in animation */
+@keyframes flyInWithInertia {
+    0% {
+        opacity: 0;             
+        transform: translateX(-300%) rotate(-15deg); 
+    }
+    70% {
+        opacity: 1;              
+        transform: translateX(10%) rotate(5deg); 
+    }
+    85% {
+        transform: translateX(-5%) rotate(-2deg); 
+    }
+    100% {
+        transform: translateX(0) rotate(0deg); 
+    }
+}
+
+/* animation to the dollar icon */
+.expenses-header h1 i {
+    display: inline-block;
+    animation: flyInWithInertia 1.5s cubic-bezier(0.25, 1, 0.5, 1); 
+    animation-fill-mode: forwards; 
+    transform-origin: center; 
+}
+
+
+

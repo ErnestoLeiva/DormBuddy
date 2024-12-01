@@ -340,6 +340,10 @@ namespace DormBuddy.Migrations
                     b.Property<int>("Reply_Id")
                         .HasColumnType("int");
 
+                    b.Property<string>("TargetId")
+                        .HasMaxLength(160)
+                        .HasColumnType("varchar(160)");
+
                     b.Property<string>("UserId")
                         .HasMaxLength(160)
                         .HasColumnType("varchar(160)");
@@ -397,7 +401,6 @@ namespace DormBuddy.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasMaxLength(160)
                         .HasColumnType("varchar(160)");
 
@@ -678,9 +681,7 @@ namespace DormBuddy.Migrations
                 {
                     b.HasOne("DormBuddy.Models.ApplicationUser", "User")
                         .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
 
                     b.Navigation("User");
                 });

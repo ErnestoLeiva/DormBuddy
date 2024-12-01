@@ -1,0 +1,450 @@
+/* General Page Styles */
+body {
+    background: linear-gradient(135deg, #f6f9fc 0%, #edf2f7 100%);
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Welcome Animation */
+.welcome-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 1;
+    transition: opacity 0.5s ease-out;
+}
+
+.welcome-content {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.welcome-logo {
+    width: 120px;
+    height: 120px;
+    margin-bottom: 2rem;
+    animation: pulse 2s infinite;
+}
+
+.welcome-content h1 {
+    font-size: 3.5rem;
+    color: #2d3748;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    opacity: 0;
+    animation: fadeIn 1s ease-out 0.5s forwards;
+}
+
+.dashboard-container {
+    opacity: 0;
+    transition: opacity 1s ease-out;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Dashboard Grid */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+/* Dashboard Cards */
+.dashboard-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    position: relative;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Video Wrapper */
+.video-wrapper {
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%;
+    overflow: hidden;
+}
+
+.card-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.dashboard-card:hover .card-video {
+    pointer-events: auto;
+}
+
+/* Title Section */
+.card-title-wrapper {
+    background-color: #dceefb;
+    padding: 0.75rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 0;
+}
+
+.card-icon {
+    font-size: 1.5rem;
+    color: #2d3748;
+    margin-left: auto;
+}
+
+/* Card Content */
+.card-content {
+    padding: 1rem;
+    text-align: left;
+}
+
+.card-description {
+    color: #718096;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+/* Buttons */
+.card-button {
+    display: inline-block;
+    padding: 0.4rem 0.75rem;
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-decoration: none;
+    background: #3182ce;
+    transition: transform 0.2s ease, color 0.2s ease;
+    margin-top: 0.5rem;
+}
+
+/* Button Colors for Each Card */
+.dashboard-card:nth-child(1) .card-button { background: #2c5282; }
+.dashboard-card:nth-child(2) .card-button { background: #2f855a; }
+.dashboard-card:nth-child(3) .card-button { background: #553c9a; }
+.dashboard-card:nth-child(4) .card-button { background: #2d3748; }
+.dashboard-card:nth-child(5) .card-button { background: #c53030; }
+.dashboard-card:nth-child(6) .card-button { background: #b7791f; }
+
+.card-button:hover {
+    transform: scale(1.05);
+    color: white;
+    text-decoration: none;
+}
+
+/* Title Background Colors for Cards */
+.dashboard-card:nth-child(1) .card-title-wrapper { background-color: #dceefb; }
+.dashboard-card:nth-child(2) .card-title-wrapper { background-color: #dcf5e7; }
+.dashboard-card:nth-child(3) .card-title-wrapper { background-color: #efe6ff; }
+.dashboard-card:nth-child(4) .card-title-wrapper { background-color: #e2e8f0; }
+.dashboard-card:nth-child(5) .card-title-wrapper { background-color: #fed7d7; }
+.dashboard-card:nth-child(6) .card-title-wrapper { background-color: #fefcbf; }
+
+/* Notifications Video Specific Styling */
+.dashboard-card.notifications-card .card-video {
+    object-position: 50% 20%;
+}
+
+/* Admin Card */
+.admin-card-container {
+    display: flex;
+    justify-content: center;
+    grid-column: 1 / -1;
+    margin-top: 1rem;
+}
+
+.admin-card-container .dashboard-card {
+    width: 100%;
+    max-width: 400px;
+}
+
+.admin-card .card-status {
+    background: #e5edff;
+}
+
+.admin-card .card-button:hover {
+    background: #434190;
+    border-color: #434190;
+    color: white;
+}
+
+
+@media (max-width: 768px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-header h1 {
+        font-size: 2rem;
+    }
+}
+
+.chat-container {
+    margin-top: 2rem;
+    width: 100%;
+    max-width: 800px;
+    margin: 20px auto;
+    position: relative;
+    background-image: url('/images/fridge.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: top center;
+    min-height: 800px;
+    padding: 40px 20px;
+}
+
+/* Message Area (Post-it Note) */
+#messageArea {
+    font-family: 'Just Another Hand', cursive;
+    font-size: 1.6rem;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 20px;
+    background: #feff9c;
+    box-shadow: 3px 3px 15px rgba(0,0,0,0.2);
+    transform: rotate(-1deg);
+    border-radius: 2px;
+    width: 90%;
+    margin: 20px auto;
+}
+
+.message-postit {
+    margin-bottom: 8px;
+}
+
+.message-postit p {
+    margin: 3px 0; 
+}
+
+.message-postit small {
+    font-size: 1.2rem;
+    color: #666;
+    margin-top: 2px; 
+    display: inline-block;
+}
+
+.chat-tabs {
+    margin-bottom: 15px;
+    display: flex;
+    gap: 20px;
+    justify-content: flex-start;
+    padding: 20px 40px;
+}
+
+.chat-tab {
+    font-family: 'Just Another Hand', cursive;
+    font-size: 1.6rem;
+    padding: 8px 20px;
+    cursor: pointer;
+    border: none;
+    border-radius: 50px; 
+    color: #fff;
+    position: relative;
+    box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+    transition: all 0.2s ease;
+}
+
+#globalChatBtn {
+    background-color: #ff6b6b;
+}
+
+#dormChatBtn {
+    background-color: #4b93ff;
+}
+
+/* Active state for magnets */
+.chat-tab.active {
+    transform: scale(1.02);
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+}
+
+/* Hover effect */
+.chat-tab:hover {
+    transform: scale(1.02);
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+}
+
+
+.chat-tab.btn-primary,
+.chat-tab.btn-outline-primary {
+    border: none !important;
+}
+
+.chat-footer {
+    width: 90%;
+    margin: 0 auto;
+    padding: 15px;
+    background: #feff9c;
+    position: absolute;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-1deg);
+    border-radius: 2px;
+    box-shadow: 3px 3px 15px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.chat-footer.visible {
+    display: flex;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.chat-input {
+    width: 85%;
+    padding: 10px;
+    border: 1px dashed #c4c4a7;
+    border-radius: 0;
+    background: transparent;
+    font-family: 'Just Another Hand', cursive;
+    font-size: 1.3rem;
+    resize: none;
+}
+
+.chat-send-btn {
+    padding: 5px 15px;
+    background: transparent;
+    border: 2px dashed #c4c4a7;
+    font-family: 'Just Another Hand', cursive;
+    font-size: 1.4rem;
+    cursor: pointer;
+    margin-left: 10px;
+    transition: all 0.2s ease;
+}
+
+.chat-send-btn:hover {
+    background: rgba(196, 196, 167, 0.2);
+}
+
+
+/* Custom scrollbar */
+#messageArea::-webkit-scrollbar {
+    width: 6px;
+}
+
+#messageArea::-webkit-scrollbar-track {
+    background: rgba(196, 196, 167, 0.2);
+}
+
+#messageArea::-webkit-scrollbar-thumb {
+    background: #c4c4a7;
+    border-radius: 3px;
+}
+
+/* Writing Animation Styles */
+.writing-container {
+    position: relative;
+    padding: 2rem;
+    margin: 20px auto;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.writing-text {
+    font-family: 'Just Another Hand', cursive;
+    font-size: 4.5rem;
+    color: #2d3748;
+    margin: 0;
+    white-space: nowrap;
+    text-align: center;
+}
+
+.writing-text span {
+    opacity: 0;
+    display: inline-block;
+    transition: opacity 0.1s ease;
+}
+
+.pencil-icon {
+    position: absolute;
+    width: 25px;
+    height: 25px;
+    transform: rotate(60deg);
+    pointer-events: none;
+    z-index: 2;
+    opacity: 0;
+    transition: all 0.1s linear;
+}
+
+
+
+.decorative-postit {
+    position: fixed;      
+    pointer-events: none; 
+    z-index: -1;         
+    opacity: 1;          
+    transform: rotate(var(--rotate)); 
+    width: 250px;        
+    height: auto;        
+ }
+ 
+ /* Individual post-it settings */
+ .postit-1 {
+    top: 40%;           
+    left: 5%;           
+    --rotate: 0deg;    
+    width: 500px; 
+    transform: scaleX(-1);  
+ }
+ 
+ 
+ .postit-2 {
+    top: 10%;           
+    right: 15%;          
+    --rotate: -8deg;   
+    width: 350px;
+ }
+ 
+ 
+ .postit-3 {
+    bottom: -10%;        
+    right: 0;           
+    --rotate: 0deg;
+    width: 300px;
+    transform-origin: right center; 
+}
