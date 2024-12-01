@@ -1,51 +1,90 @@
-<div class="settings-section fade-in">
-    @if (User?.Identity != null && User?.Identity.IsAuthenticated != null) {
-        string firstName = User.FindFirst("FirstName")?.Value ?? "";
-        string lastName = User.FindFirst("LastName")?.Value ?? "";
-        string email = User.FindFirst("Email")?.Value ?? "";
+
+@model DormBuddy.Models.UserProfile
+
+@if (User?.Identity != null && User?.Identity.IsAuthenticated != null) {
+
+    string firstName = @Model.User.FirstName ?? "";
+    string lastName = @Model.User.LastName ?? "";
+    string email = @Model.User.Email ?? "";
+
+  <div class="settings-section fade-in">
 
         <h2 class="mb-4">Account Settings</h2>
 
-        <!-- Account Information Section -->
-        <div class="form-group">
-            <label for="email">Current Email</label>
-            <input id="emailchange" type="email" class="form-control" value="@email" />
-        </div>
 
-        <div class="form-group">
-            <label for="username">Current Username</label>
-            <input id="usernamechange" type="text" class="form-control" value="@User.Identity.Name" />
-        </div>
 
-        <div class="form-group">
-            <label for="firstname">Current First Name</label>
-            <input id="firstnamechange" type="text" class="form-control" value="@firstName" />
-        </div>
+@if (User?.Identity != null && User?.Identity.IsAuthenticated != null) {
 
-        <div class="form-group">
-            <label for="lastname">Current Last Name</label>
-            <input id="lastnamechange" type="text" class="form-control" value="@lastName" />
-        </div>
+    string firstName = @Model.User.FirstName ?? "";
+    string lastName = @Model.User.LastName ?? "";
+    string email = @Model.User.Email ?? "";
 
-        <!-- Password Change Section -->
-        <div class="form-group">
-            <label for="password">Old Password</label>
-            <input id="passwordchange_old" type="password" class="form-control" />
-        </div>
+    <div class="settings-container container mt-4">
+        <h2>Account Settings</h2>
 
-        <div class="form-group">
-            <label for="emailchange">New Password</label>
-            <input id="emailchange_new" type="password" class="form-control" />
-        </div>
+        <form style="margin:30px 0px;" id="UpdateEUFLForm" asp-controller="Imgur" asp-action="UpdateEUFLInformation" method="post">
+            <div class="mb-3">
+                <label for="email" class="form-label">Current Email</label>
+                <input name="Email" id="emailchange" type="email" class="form-control" value="@email" />
+            </div>
 
-        <div class="form-group">
-            <label for="emailchange">Re-Enter Password</label>
-            <input id="emailchange_new_retyped" type="password" class="form-control" />
-        </div>
+            <div class="mb-3">
+                <label for="username" class="form-label">Current Username</label>
+                <input name="Username" id="usernamechange" type="text" class="form-control" value="@User.Identity.Name" />
+            </div>
 
-        <!-- Two-Factor Authentication Section -->
-        <div class="form-group">
-            <label for="twofactor">Two-Factor Authentication</label>
+            <div class="mb-3">
+                <label for="firstname" class="form-label">Current First Name</label>
+                <input name="FirstName" id="firstnamechange" type="text" class="form-control" value="@firstName" />
+            </div>
+
+            <div class="mb-3">
+                <label for="lastname" class="form-label">Current Last Name</label>
+                <input name="LastName" id="lastnamechange" type="text" class="form-control" value="@lastName" />
+            </div>
+
+            
+
+            <button type="submit" class="btn btn-primary">Update Information</button>
+        </form>
+
+        <form id="UpdatePasswordForm" action="/api/Imgur/UpdateAccountPassword" method="post">
+
+            <div class="mb-3">
+                <label for="passwordchange" class="form-label">New Password</label>
+                <input name="NewPassword" id="passwordchange_new" type="password" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label for="passwordchange" class="form-label">Re-Enter Password</label>
+                <input name="ReEnteredPassword" id="passwordchange_reentered" type="password" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label for="passwordchange" class="form-label">Old Password</label>
+                <input name="OldPassword" id="passwordchange_old" type="password" class="form-control" />
+            </div>
+
+            @{
+            var em = ViewBag.ErrorMessage as string ?? "";
+            }
+
+            @if (!string.IsNullOrEmpty(em))
+            {
+                <div class="alert alert-danger" id="passSpan">
+                    @em
+                </div>
+            }
+
+            <button id="PasswordChangeSubmit" type="submit" class="btn btn-primary">Update Password</button>
+
+            
+        </form>
+
+        <!-- Two-Factor Authentication Setting -->
+        <div class="mb-3" style="margin-top: 30px;">
+            <label for="twofactor" class="form-label">Two-Factor Authentication</label>
+
             <select id="twofactor" class="form-select" onchange="toggleMobileAuthSection()">
                 <option value="disabled">Disabled</option>
                 <option value="enabled">Enabled</option>
@@ -97,8 +136,32 @@
     }
 </div>
 
+
 <!-- Firebase Scripts -->
+
 <script type="module">
+
+    $(document).ready(function() {
+        $('#PasswordChangeSubmit').prop('disabled', true);
+        $('#passwordchange_old, #passwordchange_reentered').on("input", function() {
+            let info = $(this).val();
+            let NewPassword = $('#passwordchange_new').val();
+            let ReEntered = $('#passwordchange_reentered').val();
+            if (NewPassword === ReEntered && NewPassword != "" && NewPassword != "") {
+                $('#PasswordChangeSubmit').prop('disabled', false);
+                $('#passSpan').text("");
+                $('#passSpan').css('display', 'none');
+            } else {
+                $('#PasswordChangeSubmit').prop('disabled', true);
+                $('#passSpan').text("* Passwords do not match!");
+                
+                $('#passSpan').css('display', 'block');
+            }
+
+        });
+    });
+
+
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
     import { getAuth, signInWithPhoneNumber, RecaptchaVerifier } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
 

@@ -31,9 +31,9 @@ public class NavBarInfoService
 
     public async Task<UserProfile> GetUserInformationAsync(string username)
     {
-        var user = await _userManager.FindByNameAsync(username);
+        //var user = await _userManager.FindByNameAsync(username);
+        var user = await _context.Users.FirstOrDefaultAsync(p => p.UserName == username);
         var profile = await _context.UserProfiles.AsNoTracking().FirstOrDefaultAsync(p => p.UserId == user.Id);
-
 
         var cacheKey = $"userProfile_{user.Id}";
         if (_memoryCache.TryGetValue(cacheKey, out UserProfile cachedProfile))
@@ -49,6 +49,8 @@ public class NavBarInfoService
         if (string.IsNullOrEmpty(profile.ProfileImageUrl)) {
             profile.ProfileImageUrl = _configuration["Profile:Default_ProfileImage"];
         }
+
+        profile.User = user;
 
         return profile;
     }

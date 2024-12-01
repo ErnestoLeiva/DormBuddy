@@ -9,11 +9,17 @@
     <link rel="stylesheet" href="~/css/settings.css" asp-append-version="true" />
 
     <script>
-        function validateImage() {
-            const fileInput = document.getElementById("imageInput");
+
+        const ImageType = {
+            banner: "bannerImageInput",
+            profile: "imageInput"
+        };
+
+        function validateImage(fSize, w, h, iType) {
+            const fileInput = document.getElementById(iType);
             const file = fileInput.files[0];
             const allowedExtensions = ["image/jpeg", "image/png", "image/jpg", "image/gif"];
-            const maxFileSize = 2 * 1024 * 1024;
+            const maxFileSize = fSize * 1024 * 1024;
 
             if (!file) {
                 alert("No image uploaded. Please choose an image file.");
@@ -26,16 +32,15 @@
             }
 
             if (file.size > maxFileSize) {
-                alert("File size should be less than 2 MB.");
+                alert(`File size should be less than ${fSize} MB.`);
                 return false;
             }
 
             const img = new Image();
             img.onload = function () {
-                const maxDimension = 500;
 
-                if (img.width > maxDimension || img.height > maxDimension) {
-                    alert("Image dimensions should not exceed 500x500 pixels.");
+                if (img.width > w || img.height > h) {
+                    alert(`Image dimensions should not exceed ${w}x${h} pixels.`);
                     fileInput.value = "";
                     return false;
                 } else {
@@ -45,6 +50,7 @@
             img.onerror = function () {
                 alert("Invalid image file.");
                 fileInput.value = "";
+                return false;
             };
             img.src = URL.createObjectURL(file);
             return false;
@@ -60,16 +66,18 @@
         <!-- Display Current Banner Image -->
         <div class="mb-4">
             <h3>Current Banner</h3>
-            <img src="" alt="Current Banner" class="img-fluid banner-image" />
+            <img src="@Model.BannerImageUrl" alt="Current Banner" class="img-fluid banner-image" />
         </div>
 
         <!-- Upload Banner Image -->
         <div class="mb-4">
             <label class="form-label">Upload Banner Image</label>
-            <form class="" asp-controller="Imgur" asp-action="UploadBannerImage" method="post" enctype="multipart/form-data" onsubmit="return validateImage()">
-                <input type="file" name="bannerImage" id="bannerImageInput" accept=".jpg, .jpeg, .png, .gif" class="form-control mb-3" />
-                <button type="submit" class="btn btn-primary">Upload Banner</button>
+            <form id="uploadForm" asp-controller="Imgur" asp-action="UploadImage" method="post" enctype="multipart/form-data" 
+                onsubmit="return validateImage(2, 1920, 1080, 'banner')">
+                <input type="file" id="imageInput" name="image" accept=".jpg, .jpeg, .png, .gif" class="form-control mb-3" />
+                <button type="submit" class="btn btn-primary">Upload</button>
             </form>
+
         </div>
 
         <!-- Profile Image Upload Section -->
@@ -78,8 +86,9 @@
             <img src="@Model.ProfileImageUrl" alt="Current Profile Image" class="img-fluid" style="width: 150px; height: 150px; border-radius: 50%;" />
             
             <label class="form-label">Upload Profile Image</label>
-            <form id="uploadForm" asp-controller="Imgur" asp-action="UploadImage" method="post" enctype="multipart/form-data" onsubmit="return validateImage()">
-                <input type="file" name="image" id="imageInput" accept=".jpg, .jpeg, .png, .gif" class="form-control mb-3" />
+            <form id="uploadForm" asp-controller="Imgur" asp-action="UploadImage" method="post" enctype="multipart/form-data" 
+                onsubmit="return validateImage(2, 500, 500, 'profile')">
+                <input type="file" id="imageInput" name="image" accept=".jpg, .jpeg, .png, .gif" class="form-control mb-3" />
                 <button type="submit" class="btn btn-primary">Upload</button>
             </form>
         </div>
@@ -88,7 +97,7 @@
         <div class="mb-4">
             <h3>Update Bio</h3>
             <form asp-controller="Imgur" asp-action="UpdateBio" method="post">
-                <textarea name="bio" rows="4" cols="50" maxlength="250" placeholder="Write a short bio about yourself..." class="form-control">@Model.Bio</textarea>
+                <textarea name="Bio" rows="4" cols="50" maxlength="300" placeholder="Write a short bio about yourself..." class="form-control">@Model.Bio</textarea>
                 <br />
                 <button type="submit" class="btn btn-primary mt-2">Save Bio</button>
             </form>
