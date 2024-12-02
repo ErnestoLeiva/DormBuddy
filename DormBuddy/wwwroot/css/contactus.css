@@ -31,6 +31,7 @@
     position: relative;
     --border: 1px solid black;
     margin-left: 100px;
+    padding-right: 110px;
 }
 .ContactUsContainer #content #left-side::before{
     content: '';
@@ -61,6 +62,7 @@
 .ContactUsContainer #content #left-side #details #text-two{
     font-size: 14px;
     color: #afafb6;
+    white-space: nowrap;
 }
 
 
