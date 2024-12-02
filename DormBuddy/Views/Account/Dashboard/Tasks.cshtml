@@ -64,16 +64,16 @@
 </div>
         
 <div class="messages-container">
-    @if (TempData["Message"] != null)
+    @if (TempData["message"] != null)
     {
         <div class="alert alert-success">
-            @TempData["Message"]
+            @Html.Raw(TempData["message"])
         </div>
     }
-    @if (TempData["Error"] != null)
+    @if (TempData["error"] != null)
     {
         <div class="alert alert-danger">
-            @TempData["Error"]
+            @Html.Raw(TempData["error"])
         </div>
     }
     @if (!ViewData.ModelState.IsValid)

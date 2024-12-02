@@ -66,13 +66,13 @@
             @if (TempData["message"] != null)
             {
                 <div class="alert alert-success">
-                    @TempData["message"]
+                    @Html.Raw(TempData["message"])
                 </div>
             }
             @if (TempData["error"] != null)
             {
                 <div class="alert alert-danger">
-                    @TempData["error"]
+                    @Html.Raw(TempData["error"])
                 </div>
             }
 

@@ -2,8 +2,6 @@ using DormBuddy.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -23,6 +21,7 @@ namespace DormBuddy.Controllers
             _userManager = userManager;
         }
 
+        // GET: /Expenses/Index
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -90,7 +89,7 @@ namespace DormBuddy.Controllers
             {
                 _dbContext.Expenses.Add(model);
                 await _dbContext.SaveChangesAsync();
-                TempData["message"] = $"Expense \"{model.ExpenseName}\" added successfully!";
+                TempData["message"] = $"Expense <b>{model.ExpenseName}</b> added successfully!";
             }
             else
             {
@@ -123,7 +122,6 @@ namespace DormBuddy.Controllers
             return View("~/Views/Account/Dashboard/Expenses.cshtml", Tuple.Create(expenses, newExpense));
         }
 
-
         // POST: /Expenses/DeleteExpense
         [HttpPost]
         public async Task<IActionResult> DeleteExpense(int expenseId)
@@ -146,7 +144,7 @@ namespace DormBuddy.Controllers
                         var expenseName = expense.ExpenseName;
                         _dbContext.Expenses.Remove(expense);
                         await _dbContext.SaveChangesAsync();
-                        TempData["message"] = $"Expense \"{expenseName}\" deleted successfully!";
+                        TempData["message"] = $"Expense <b>{expenseName}</b> deleted successfully!";
                     }
                     else
                     {
