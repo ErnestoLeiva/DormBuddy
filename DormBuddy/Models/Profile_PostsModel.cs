@@ -13,6 +13,11 @@ namespace DormBuddy.Models {
         [ForeignKey("UserId")] 
         public ApplicationUser? User { get; set; }
 
+        public string? TargetId { get; set; }
+
+        [ForeignKey("TargetId")]
+        public ApplicationUser? TargetUser { get; set; }
+
         public DateTime CreatedAt { get; set; }
 
         public string? Message { get; set; }

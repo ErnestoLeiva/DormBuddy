@@ -15,7 +15,7 @@ namespace DormBuddy.Models {
         public ImgurService(IConfiguration configuration)
         {
             _httpClient = new HttpClient();
-            _clientId = configuration["Imgur:ClientId"];
+            _clientId = configuration["Imgur:ClientId"] ?? "";
         }
 
         public async Task<string> UploadImageAsync(byte[] imageBytes)
@@ -37,7 +37,14 @@ namespace DormBuddy.Models {
 
             var jsonResponse = await response.Content.ReadAsStringAsync();
             var data = JObject.Parse(jsonResponse)["data"];
-            return data["link"].ToString();
+            if (data != null && data["link"] != null)
+            {
+                return data["link"]!.ToString(); // Using the null-forgiving operator (!), as we already checked
+            }
+            else
+            {
+                throw new Exception("Imgur response does not contain a valid link.");
+            }
         }
     }
 

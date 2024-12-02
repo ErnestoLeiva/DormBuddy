@@ -33,17 +33,26 @@ public class NavBarInfoService
     {
         //var user = await _userManager.FindByNameAsync(username);
         var user = await _context.Users.FirstOrDefaultAsync(p => p.UserName == username);
+
+        if (user == null) 
+        {
+            return new UserProfile();
+        }
+
         var profile = await _context.UserProfiles.AsNoTracking().FirstOrDefaultAsync(p => p.UserId == user.Id);
 
-        var cacheKey = $"userProfile_{user.Id}";
-        if (_memoryCache.TryGetValue(cacheKey, out UserProfile cachedProfile))
+        var cacheKey = $"userProfile_{user?.Id}";
+        if (_memoryCache.TryGetValue(cacheKey, out UserProfile? cachedProfile))
         {
-            profile = cachedProfile;
+            if (cachedProfile != null)
+            {
+                profile = cachedProfile;
+            }
         }
 
         if (user == null || profile == null)
         {
-            return null;
+            return new UserProfile();
         }
         
         if (string.IsNullOrEmpty(profile.ProfileImageUrl)) {

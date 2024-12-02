@@ -51,6 +51,11 @@ namespace DormBuddy.Controllers
         public async Task<IActionResult> Index() {
             if (User?.Identity?.IsAuthenticated == true) {
                 var user = await GetCurrentUserAsync();
+
+                if (user == null) {
+                    return RedirectToAction("AccountForms");
+                }
+
                 List<NotificationViewModel> notifs = await GetNotifications(user.Id);
                 return View(notifs);
             }
@@ -64,7 +69,7 @@ namespace DormBuddy.Controllers
         };
 
         // type: 1 = standard message, 2 = accept/decline, ....
-        public async Task<IActionResult> CreateNotification(string userId, int type, string message, FriendsModel request = null)
+        public async Task<IActionResult> CreateNotification(string userId, int type, string message, FriendsModel? request = null)
         {
             if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(message))
             {
@@ -94,7 +99,7 @@ namespace DormBuddy.Controllers
                     UserId = userId,
                     MessageType = type,
                     CreatedAt = DateTime.UtcNow,
-                    Message = request.Id.ToString()
+                    Message = request?.Id.ToString()
                 };
                     break;
                 }
@@ -153,10 +158,7 @@ namespace DormBuddy.Controllers
 
                 return notificationViewModels;
             }
-            catch (Exception ex)
-            {
-                return null;
-            }
+            catch (Exception) { return new List<NotificationViewModel>(); }
         }
         public async Task<IActionResult> RemoveNotification(Notifications not)
         {
