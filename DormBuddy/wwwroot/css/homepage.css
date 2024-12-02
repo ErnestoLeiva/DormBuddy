@@ -89,3 +89,40 @@
     font-weight: 600;
     margin: 10px 0;
 }
+
+
+.dropdown-avatar {
+    border: 1px solid black;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+  
+.dropdown-avatar img {
+width: 100%;
+height: 100%;
+object-fit: cover;
+}
+
+.dropdown-menu {
+padding: 0px;
+
+}
+
+.dropdown #dropdownMenuButton {
+color: #343a40;
+background-color: transparent;
+border: none;
+border-radius: 10%;
+}
+
+.dropdown-item {
+color: #343a40;
+padding: 10px 15px;
+}
+
+.dropdown-menu .dropdown-item:hover {
+color: #0056b3; 
+background-color: #f8f9fa;
+}
