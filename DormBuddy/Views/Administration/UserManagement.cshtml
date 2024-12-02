@@ -1,0 +1,25 @@
+@model IEnumerable<DormBuddy.Models.ApplicationUser>
+
+<h1>Manage Users</h1>
+<table>
+    <thead>
+        <tr>
+            <th>UserName</th>
+            <th>Email</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.UserName</td>
+                <td>@user.Email</td>
+                <td>
+                    <!-- Add Edit/Delete buttons or links -->
+                    <a href="#">Edit</a> | <a href="#">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

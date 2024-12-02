@@ -1,10 +1,21 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity; // For UserManager and Identity types
+using DormBuddy.Models;             // For ApplicationUser
+
 
 namespace DormBuddy.Controllers
 {
     public class AdministrationController : Controller
     {
+         private readonly UserManager<ApplicationUser> _userManager;
+
+        // Constructor to inject UserManager
+        public AdministrationController(UserManager<ApplicationUser> userManager)
+        {
+            _userManager = userManager;
+        }
+
         // GET: /Administration/AdminPanel
         [Authorize(Roles = "Admin")]
         public IActionResult AdminPanel() => View("~/Views/Administration/AdminPanel.cshtml");
@@ -12,12 +23,15 @@ namespace DormBuddy.Controllers
         // GET: /Administration/ModeratorPanel
         [Authorize(Roles = "Admin,Moderator")]
         public IActionResult ModeratorPanel() => View("~/Views/Administration/ModeratorPanel.cshtml");
-
+        
+        [Authorize(Roles = "Admin")]
         public IActionResult ManageUsers()
         {
-            // Add logic for managing users
-            return View("~/Views/Administration/UserManagement.cshtml");
+            // Get the list of users from UserManager
+            var users = _userManager.Users.ToList();
+            return View("~/Views/Administration/UserManagement.cshtml", users);
         }
+
 
         public IActionResult ModerateContent()
         {
