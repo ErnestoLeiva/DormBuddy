@@ -139,10 +139,16 @@
                                         </button>
 
                                         <div class="dropdown-menu dropdown-menu-right text-left">
-                                            <a class="dropdown-item fas fa-user" asp-controller="Account" asp-action="Profile"> Profile</a>
-                                            <a class="dropdown-item fas fa-cog" asp-controller="Account" asp-action="Settings"> Settings</a>
+                                            <a class="dropdown-item" asp-controller="Account" asp-action="Profile">
+                                                <i class="fas fa-user"></i> Profile
+                                            </a>
+                                            <a class="dropdown-item" asp-controller="Account" asp-action="Settings">
+                                                <i class="fas fa-cog"></i> Settings
+                                            </a>
                                             <div class="line-divider"></div>
-                                            <a class="dropdown-item fas fa-sign-out-alt" asp-controller="Account" asp-action="Logout"> Sign Out</a>
+                                            <a class="dropdown-item" asp-controller="Account" asp-action="Logout">
+                                                <i class="fas fa-sign-out-alt"></i> Sign Out
+                                            </a>
                                         </div>
                                     </div>
                                 }
