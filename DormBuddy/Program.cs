@@ -38,6 +38,7 @@ builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 
 builder.Services.AddScoped<UserLastUpdateActionFilter>();
 builder.Services.AddScoped<NavBarInfoService>();
+builder.Services.AddScoped<TimeZoneService>();
 
 builder.Services.AddCors(options => {
     options.AddDefaultPolicy(policy =>

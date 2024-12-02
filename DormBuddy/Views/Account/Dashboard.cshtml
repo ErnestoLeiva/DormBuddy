@@ -180,6 +180,52 @@
     }
 
 
+<hr class="my-4">
+
+
+    <!-- #NOTIFICATIONS_AVAILABLE_MESSAGE  -->
+    
+    @if (ViewBag.NotificationAmount != null && ViewBag.NotificationAmount > 0) {
+
+        <div class="alert alert-warning" style="display: flex; align-items: center; justify-content: space-between; width: 97%; margin: 0 auto; padding: 10px;">
+            <div style="display: flex; align-items: center;">
+                <p style="margin: 0;">You have notification(s) to view!</p>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <a asp-controller="Notifications" asp-action="Index">click here</a>
+            </div>
+            
+        </div>
+
+        <hr class="my-4">
+
+        <!-- #endregion -->
+
+    }
+
+
+    <div class="chat-container container mt-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between">
+                <div>
+                    <button id="globalChatBtn" class="btn btn-primary btn-sm">Global Chat</button>
+                    <button id="dormChatBtn" class="btn btn-outline-primary btn-sm">Dorm Chat</button>
+                </div>
+            </div>
+            <div class="card-body" style="height: 400px; overflow-y: auto;" id="messageArea">
+                <!-- Messages will load here -->
+            </div>
+            <div class="card-footer">
+                <div class="input-group">
+                    <textarea id="messageInput" class="form-control" placeholder="Type your message..." style="resize: none;"></textarea>
+                    <button id="sendMessageBtn" class="btn btn-primary">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
    <div class="chat-container" id="chatContainer">
     <!-- Chat Tabs -->
     <div class="chat-tabs" id="chatTabs">
@@ -300,6 +346,7 @@
                 loadMessages();
             });
 
+
             $("#sendMessageBtn").on("click", function () {
                 const message = $("#messageInput").val().trim();
                 if (message) {
@@ -313,6 +360,7 @@
                         },
                         error: function(xhr, status, error) {
                             console.log('Error:', error);
+
                         }
                     });
                 }

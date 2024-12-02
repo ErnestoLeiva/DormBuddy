@@ -194,7 +194,7 @@ namespace DormBuddy.Controllers
                 _context.UserLastUpdate.Add(instance);
             }
 
-            return instance;
+            return instance ?? new UserLastUpdate();
         }
 
         #region SIGN UP
@@ -455,9 +455,16 @@ namespace DormBuddy.Controllers
             ViewBag.TaskCount = await _context.Tasks
                 .CountAsync(t => t.UserId == user.Id && !t.IsCompleted);
 
+
             // Count expenses
             ViewBag.PendingExpenses = await _context.Expenses
                 .CountAsync(e => e.UserId == user.Id);
+
+                    ViewBag.CultureInfo = $"Current Culture: {currentCulture}, UI Culture: {currentUICulture}";
+
+                    ViewBag.NotificationAmount = (await _context.Notifications.Where(m => m.UserId == user.Id).ToListAsync()).Count;
+                }
+
 
             //static active until implemented
             ViewBag.LoanStatus = "Active";
@@ -523,7 +530,7 @@ public IActionResult Settings()
 
                 // Get the username from query parameter or fallback to User.Identity.Name
                 string get_username = Request.Query["username"].ToString() ?? "";
-                get_username = string.IsNullOrEmpty(get_username) ? User?.Identity?.Name : get_username;
+                get_username = string.IsNullOrEmpty(get_username) ? User?.Identity?.Name ?? string.Empty : get_username;
 
                 // If username is still null or empty, redirect to the dashboard
                 if (string.IsNullOrEmpty(get_username))
@@ -562,21 +569,39 @@ public IActionResult Settings()
 
                 // Profile Online Status Check
                 ViewData["profile_online_status"] = "Offline";
-                var getLastUpdate = await getUserLastUpdate(profile.User);
+                var getLastUpdate = await getUserLastUpdate(u);
+
                 if (getLastUpdate?.LastUpdate is DateTime lastUpdate &&
                     (DateTime.UtcNow - lastUpdate).TotalSeconds < 300)
                 {
                     ViewData["profile_online_status"] = "Online";
                 }
 
-                if (profile.User.UserName != User?.Identity?.Name) {
-                    var fstatus = await FriendshipStatus(profile.User);
+                if (u.UserName != User?.Identity?.Name) {
+                    var fstatus = await FriendshipStatus(u);
                     ViewData["FriendshipStatus"] = fstatus;
                 }
 
                 ViewData["FriendCount"] = await GetFriendCount(get_username);
 
                 ViewData["Friends"] = await GetAllFriends(get_username);
+
+                // posts //
+
+                List<Profile_PostsModel> posts = await _context.Profile_Posts.Where(p => p.TargetId == u.Id && p.Reply_Id == -1).OrderByDescending(p => p.CreatedAt).Include(p => p.TargetUser).ToListAsync();
+                List<Profile_PostsModel> posts_reply = await _context.Profile_Posts.Where(p => p.TargetId == u.Id && p.Reply_Id != -1).Include(p => p.TargetUser).ToListAsync();
+
+                if (posts == null) {
+                    posts = new List<Profile_PostsModel>();
+                }
+
+                if (posts_reply == null) {
+                    posts_reply = new List<Profile_PostsModel>();
+                }
+
+                ViewData["CurrentTimeZone"] = Request.Cookies["UserTimeZone"] ?? "UTC";
+                ViewData["Posts"] = posts;
+                ViewData["Posts_Reply"] = posts_reply;
 
                 return View("~/Views/Account/Dashboard/Profile.cshtml", profile);
             }
@@ -674,6 +699,5 @@ public IActionResult Settings()
 
 
         #endregion
-
     }
 }   

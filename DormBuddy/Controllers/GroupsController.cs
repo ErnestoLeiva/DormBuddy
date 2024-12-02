@@ -35,7 +35,7 @@ namespace DormBuddy.Controllers
             ViewBag.Users = users;
 
             // Fetch all members for the current group
-            if (userGroup != null)
+            if (userGroup?.Group != null)
             {
                 var groupMembers = await _dbContext.GroupMembers
                     .Where(gm => gm.GroupId == userGroup.Group.Id)

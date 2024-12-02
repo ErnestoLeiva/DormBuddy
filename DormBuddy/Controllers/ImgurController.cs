@@ -51,36 +51,48 @@ namespace DormBuddy.Controllers
 
             // Get the tracked user profile
             var profile = await GetUserInformation();
-            if (profile == null)
+            if (profile == null || profile.User == null)
             {
-                TempData["Message"] = "Profile not found.";
+                TempData["Message"] = "Profile and/or user not found.";
                 return RedirectToAction("Settings", "Account", new { page = "AccountSettings" });
             }
 
-            EnsureProfileAttached(profile);
-
-            if (!string.IsNullOrEmpty(Email) && Email != profile.User.Email) {
-                profile.User.Email = Email;
-                profile.User.NormalizedEmail = Email.ToUpper();
+            if (!string.IsNullOrEmpty(Email) && Email != profile?.User?.Email) {
+                if (profile?.User != null)
+                {
+                    profile.User.Email = Email;
+                    profile.User.NormalizedEmail = Email.ToUpper();
+                }
 
                 // send email to check for new email verification
             }
-            if (!string.IsNullOrEmpty(Username) && Username != profile.User.UserName) {
-                profile.User.UserName = Username;
-                profile.User.NormalizedUserName = Username.ToUpper();
+            if (!string.IsNullOrEmpty(Username) && Username != profile?.User?.UserName) {
+                if (profile?.User != null)
+                {
+                    profile.User.UserName = Username;
+                    profile.User.NormalizedUserName = Username.ToUpper();
+                }
             }
-            if (!string.IsNullOrEmpty(FirstName) && FirstName != profile.User.FirstName) {
-                profile.User.FirstName = FirstName;
+            if (!string.IsNullOrEmpty(FirstName) && FirstName != profile?.User?.FirstName) {
+                if (profile?.User != null)
+                {
+                    profile.User.FirstName = FirstName;
+                }
             }
-            if (!string.IsNullOrEmpty(LastName) && LastName != profile.User.LastName) {
-                profile.User.LastName = LastName;
+            if (!string.IsNullOrEmpty(LastName) && LastName != profile?.User?.LastName) {
+                if (profile?.User != null)
+                {
+                    profile.User.LastName = LastName;
+                }
             }
 
             // Save changes to the database
             await _context.SaveChangesAsync();
 
             // Clear and optionally refresh cache
-            RevalidateCache(profile);
+            if (profile != null) {
+                RevalidateCache(profile);
+            }
 
             TempData["Message"] = "Account information has been updated successfully.";
 
@@ -109,8 +121,9 @@ namespace DormBuddy.Controllers
 
             // check if passwords match parameters
 
-            var user = await _context.Users.FirstOrDefaultAsync(p => p.UserName == User.Identity.Name);
-            
+            var userName = User.Identity?.Name ?? string.Empty;  // Use an empty string as fallback
+            var user = await _context.Users.FirstOrDefaultAsync(p => p.UserName == userName);
+
             if (user == null) {
                 return BadRequest( new { error = "User not found!" } );
             }
@@ -156,17 +169,20 @@ namespace DormBuddy.Controllers
 
             //// send email confirming password change
 
-            //return Ok( new { message = "New password has been set!" } );
             } catch (Exception e) {
                 Console.WriteLine(e.Message);
                 return BadRequest(new{Error = "Failed to reset password!"});
             }
-            return BadRequest(new{Error = "Failed to reset password!"});
         }
 
         [HttpPost]
         public async Task<IActionResult> GetAllFriends() {
             var user = await GetCurrentUserAsync();
+
+            if (user == null) {
+                return BadRequest("Current user could not be found!");
+            }
+
             var friendsTable = await _context.FriendsModel.Where(p => (p.UserId == user.Id && p.blocked == false) || (p.FriendId == user.Id && p.blocked == false)).ToListAsync();
 
 
@@ -386,7 +402,7 @@ namespace DormBuddy.Controllers
                 return BadRequest(new { error = "You do not have the user blocked currently!" });
             }
             
-            if (friendsAlready.blocked == true) {
+            if (friendsAlready?.blocked == true) {
                 //return BadRequest(new { error ="You must first unblock this user!" });
 
                 fmodel.Remove(friendsAlready);
@@ -433,7 +449,10 @@ namespace DormBuddy.Controllers
                 var friendCOrB = await fmodel.FirstOrDefaultAsync(m => m.UserId == user.Id && m.FriendId == targetUser.Id);
 
                 if (type == "cancel") {
-                    _context.Remove(friendCOrB);
+                    if (friendCOrB != null)
+                    {
+                        _context.Remove(friendCOrB);
+                    }
                     await _context.SaveChangesAsync();
                 }
 
@@ -447,7 +466,10 @@ namespace DormBuddy.Controllers
                         friendAOrD.pending = false;
 
                         try {
-                            _context.Remove(notification);
+                            if (notification != null)
+                            {
+                                _context.Remove(notification);
+                            }
                             Console.WriteLine("notification has been removed");
                         } catch (Exception ex) {Console.WriteLine(ex.Message);}
 
@@ -457,7 +479,10 @@ namespace DormBuddy.Controllers
                         _context.Remove(friendAOrD);
 
                         try {
-                            _context.Remove(notification);
+                            if (notification != null)
+                            {
+                                _context.Remove(notification);
+                            }
                         } catch (Exception ex) {Console.WriteLine(ex.Message);}
 
                         await _context.SaveChangesAsync();
@@ -480,8 +505,6 @@ namespace DormBuddy.Controllers
                     
                 }
             }
-
-            return BadRequest(new { error = "No friend request found to process." });
         }
 
         [HttpGet("GetDashboardMessages")]
@@ -500,17 +523,11 @@ namespace DormBuddy.Controllers
             await sendDBoardMessage(type, message);
         }
 
-
-        public enum ImageType 
-        {
-            Banner,
-            Profile
-        };
-
-
         [HttpPost]
-        public async Task<IActionResult> UploadImage(IFormFile image, ImageType type)
+        [Route("UploadImage")]
+        public async Task<IActionResult> UploadImage([FromForm] IFormFile image, [FromForm] string imageType)
         {
+
             if (image == null || image.Length == 0)
             {
                 TempData["Message"] = "No image uploaded.";
@@ -545,12 +562,12 @@ namespace DormBuddy.Controllers
             {
                 EnsureProfileAttached(profile);
 
-                switch (type)
+                switch (imageType)
                 {
-                    case ImageType.Banner:
+                    case "banner":
                         profile.BannerImageUrl = imageUrl;
                     break;
-                    case ImageType.Profile:
+                    case "profile":
                         profile.ProfileImageUrl = imageUrl;
                     break;
                     default:
@@ -725,6 +742,47 @@ namespace DormBuddy.Controllers
 
             return RedirectToAction("Settings", "Account", new { page = "PrivacySettings" });
         }
+
+        [HttpPost]
+        [Route("ProfilePostArea")]
+        public async Task<IActionResult> ProfilePostArea([FromForm] string message, [FromForm] int Reply_Id, [FromForm] string targetUsername)
+        {
+            var user = await GetCurrentUserAsync();
+
+            if (user == null)
+            {
+                return BadRequest("Current user could not be found!");
+            }
+
+            var target = await _context.Users.FirstOrDefaultAsync(m => m.UserName == targetUsername);
+
+            if (target == null) 
+            {
+                return BadRequest("Target could not be found!");
+            }
+
+            // Check if the parent post exists when replying
+            if (Reply_Id != -1 && !await _context.Profile_Posts.AnyAsync(p => p.Id == Reply_Id))
+            {
+                return BadRequest("Parent post not found.");
+            }
+
+            var post = new Profile_PostsModel {
+                UserId = user.Id,
+                TargetId = target.Id,
+                CreatedAt = DateTime.UtcNow,
+                Message = message,
+                Reply_Id = Reply_Id
+            };
+
+            await _context.AddAsync(post);
+            await _context.SaveChangesAsync();
+
+            
+            // Return a success response
+            return RedirectToAction("Profile", "Account", new { username = target.UserName });
+        }
+
 
     }
 }

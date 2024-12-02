@@ -49,12 +49,12 @@ namespace DormBuddy.Controllers
             _configuration = configuration;
         }
 
-        protected async Task<ApplicationUser> GetCurrentUserAsync()
+        protected async Task<ApplicationUser?> GetCurrentUserAsync()
         {
             return await _userManager.GetUserAsync(User);
         }
 
-        protected async Task<UserProfile> GetUserInformation(string uname = null)
+        protected async Task<UserProfile> GetUserInformation(string? uname = null)
         {
             var user = await GetCurrentUserAsync();
 
@@ -65,17 +65,19 @@ namespace DormBuddy.Controllers
 
             if (user == null)
             {
-                return null;
+                return new UserProfile();
             }
 
             var cacheKey = $"userProfile_{user.Id}";
 
             // Check the cache first
-            if (_memoryCache.TryGetValue(cacheKey, out UserProfile cachedProfile))
+            if (_memoryCache.TryGetValue(cacheKey, out UserProfile? cachedProfile))
             {
-                // Attach the cached profile if it is detached
-                EnsureProfileAttached(cachedProfile);
-                return cachedProfile;
+                if (cachedProfile != null) {
+                    // Attach the cached profile if it is detached
+                    EnsureProfileAttached(cachedProfile);
+                    return cachedProfile;
+                }
             }
 
             // Fetch the profile from the database (tracked entity)
@@ -134,7 +136,7 @@ namespace DormBuddy.Controllers
                 _memoryCache.Set(cacheKey, profile, TimeSpan.FromMinutes(time)); // Optional: refresh cache
         }
 
-        protected UserProfile BuildUserProfile(ApplicationUser user, UserProfile profile) {
+        protected UserProfile BuildUserProfile(ApplicationUser user, UserProfile? profile) {
             if (user == null)
             {
                 throw new ArgumentNullException(nameof(user), "User cannot be null.");
@@ -216,7 +218,7 @@ namespace DormBuddy.Controllers
             var user = await GetCurrentUserAsync();
 
             var message = new DashboardChatModel{
-                UserId = user.Id,
+                UserId = user?.Id,
                 type =  ChatType,
                 sent_at = DateTime.UtcNow,
                 message = text
@@ -276,6 +278,11 @@ namespace DormBuddy.Controllers
         [HttpPost]
         public async Task<string> FriendshipStatus(ApplicationUser target) {
             var user = await GetCurrentUserAsync();
+
+            if (user == null) {
+                return "Current user not found!";
+            }
+
             var friendTable = await _context.FriendsModel.Where(p => p.UserId == user.Id || p.UserId == target.Id).ToListAsync();
 
             var t = friendTable.FirstOrDefault(m => (m.UserId == user.Id && m.FriendId == target.Id) || (m.UserId == target.Id && m.FriendId == user.Id));
@@ -375,7 +382,7 @@ namespace DormBuddy.Controllers
                     continue;
                 }
 
-                var foundU = await GetUserInformation(targetEntity.UserName);   
+                var foundU = await GetUserInformation(targetEntity.UserName ?? "");   
 
                 var img = foundU.ProfileImageUrl;
 
@@ -390,7 +397,7 @@ namespace DormBuddy.Controllers
                 list.Add(pr);
             }
 
-            list = list.DistinctBy(profile => profile.User.Id).ToList();
+            list = list.DistinctBy(profile => profile?.User?.Id).ToList();
 
             return list;
         }
