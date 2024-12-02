@@ -292,3 +292,9 @@ button.accept-policy {
   color: #4e95d1 !important;
 }
 
+select.form-control {
+  height: 38px;
+  padding: 5px 10px;
+  font-size: 14px;
+  line-height: normal;
+}

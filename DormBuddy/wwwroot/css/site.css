@@ -129,3 +129,10 @@ body {
   background-color: #f0f8ff !important;
   color: #3a7ab3 !important;
 }
+
+select.form-control {
+  height: 38px;
+  padding: 5px 10px;
+  font-size: 14px;
+  line-height: normal;
+}

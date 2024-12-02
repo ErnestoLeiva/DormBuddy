@@ -130,3 +130,10 @@
     border: 1px solid #e2e8f0;
     border-radius: 6px;
 }
+
+select.form-control {
+    height: 45px;
+    padding: 5px 10px;
+    font-size: 14px;
+    line-height: normal;
+}
