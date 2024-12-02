@@ -279,88 +279,90 @@
 
 
 
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+        let chatType = 1; // Default chat type : 0 - global, 1 - dorm, 2 - private
 
-<script>
-    $(document).ready(function () {
-    let chatType = 1; // Default chat type : 0 - global, 1 - dorm, 2 - private
-
-    // Load messages on page load
-    loadMessages();
-
-    // Set interval to refresh messages every 5 seconds
-    setInterval(loadMessages, 5000);
-
-    // Switch to global chat
-    $("#globalChatBtn").on("click", function () {
-        chatType = 1;
-        $("#globalChatBtn").removeClass("btn-outline-primary").addClass("btn-primary");
-        $("#dormChatBtn").removeClass("btn-primary").addClass("btn-outline-primary");
+        // Load messages on page load
         loadMessages();
-    });
 
-    // Switch to dorm chat
-    $("#dormChatBtn").on("click", function () {
-        chatType = 2;
-        $("#dormChatBtn").removeClass("btn-outline-primary").addClass("btn-primary");
-        $("#globalChatBtn").removeClass("btn-primary").addClass("btn-outline-primary");
-        loadMessages();
-    });
+        // Set interval to refresh messages every 5 seconds
+        setInterval(loadMessages, 5000);
 
-    // Send a new message
-    $("#sendMessageBtn").on("click", function () {
-        const message = $("#messageInput").val().trim();
-        if (message) {
+        // Switch to global chat
+        $("#globalChatBtn").on("click", function () {
+            chatType = 1;
+            $("#globalChatBtn").removeClass("btn-outline-primary").addClass("btn-primary");
+            $("#dormChatBtn").removeClass("btn-primary").addClass("btn-outline-primary");
+            loadMessages();
+        });
 
+        // Switch to dorm chat
+        $("#dormChatBtn").on("click", function () {
+            chatType = 2;
+            $("#dormChatBtn").removeClass("btn-outline-primary").addClass("btn-primary");
+            $("#globalChatBtn").removeClass("btn-primary").addClass("btn-outline-primary");
+            loadMessages();
+        });
+
+        // Send a new message
+        $("#sendMessageBtn").on("click", function () {
+            const message = $("#messageInput").val().trim();
+            if (message) {
+
+                $.ajax({
+                    url: '/api/Imgur/SendDashboardMessage?type='+chatType+"&message="+message,
+                    type: 'POST',
+                    contentType: 'application/json',
+                    success: function(response) {
+                        loadMessages();
+                        $('#messageInput').val('');
+                    },
+                    error: function(xhr, status, error) {
+                        console.log('Error:', error);
+                    }
+                });
+            }
+        });
+
+        let lastId = -1;
+        // Function to load messages
+        function loadMessages() {
             $.ajax({
-                url: '/api/Imgur/SendDashboardMessage?type='+chatType+"&message="+message,
-                type: 'POST',
-                contentType: 'application/json',
-                success: function(response) {
-                    loadMessages();
-                    $('#messageInput').val('');
-                },
-                error: function(xhr, status, error) {
-                    console.log('Error:', error);
-                }
-            });
+                    url: '/api/Imgur/GetDashboardMessages',
+                    type: 'GET',
+                    contentType: 'application/json',
+                    data: {
+                        type: chatType
+                    },
+                    success: function(messages) {
+                        var messageArea = $('#messageArea');
+                        messageArea.html('');
+                        lastId = -1;
+                        
+                        messages.value.r.forEach(msg => {
+                            const messageHtml = `
+                                <div class="mb-2">
+                                    <strong><a href='profile?username=${msg.user.userName}' target='_blank'>${msg.user.userName}</a>:</strong> ${msg.message}
+                                    <div class="text-muted small">${msg.sent_at}</div>
+                                </div>`;
+                            
+                            if (msg.id > lastId) {
+                                messageArea.append(messageHtml);
+                                lastId = msg.id;
+                            }
+                        });
+
+                        // Scroll to the bottom
+                        messageArea.scrollTop(messageArea[0].scrollHeight);
+                    },
+                    error: function(xhr, status, error) {
+                        console.log('Error:', error);
+                    }
+                });
         }
     });
 
-    let lastId = -1;
-    // Function to load messages
-    function loadMessages() {
-        $.ajax({
-                url: '/api/Imgur/GetDashboardMessages',
-                type: 'GET',
-                contentType: 'application/json',
-                data: {
-                    type: chatType
-                },
-                success: function(messages) {
-                    var messageArea = $('#messageArea');
-                    messageArea.html('');
-                    lastId = -1;
-                    messages.value.r.forEach(msg => {
-                        const messageHtml = `
-                            <div class="mb-2">
-                                <strong><a href='profile?username=${msg.user.userName}' target='_blank'>${msg.user.userName}</a>:</strong> ${msg.message}
-                                <div class="text-muted small">${msg.sent_at}</div>
-                            </div>`;
-                        
-                        if (msg.id > lastId) {
-                            messageArea.append(messageHtml);
-                            lastId = msg.id;
-                        }
-                    });
-
-                    // Scroll to the bottom
-                    messageArea.scrollTop(messageArea[0].scrollHeight);
-                },
-                error: function(xhr, status, error) {
-                    console.log('Error:', error);
-                }
-            });
-    }
-});
-
-</script>
+    </script>
+}
