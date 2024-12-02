@@ -23,7 +23,7 @@ namespace DormBuddy.Models {
         public string? Message { get; set; }
 
         public int Reply_Id { get; set; }
-
+//$839.57 863.50
         
     }
 }
