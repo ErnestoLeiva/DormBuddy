@@ -63,7 +63,19 @@
         </div>
 </div>
         
-    
+<div class="messages-container">
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Message"]
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["Error"]
+        </div>
+    }
     @if (!ViewData.ModelState.IsValid)
     {
         <div class="alert alert-danger">
@@ -73,6 +85,7 @@
             }
         </div>
     }
+</div>
 
     <!-- Add Task Form -->
     <div class="add-task-section">
