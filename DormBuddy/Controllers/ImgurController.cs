@@ -523,17 +523,11 @@ namespace DormBuddy.Controllers
             await sendDBoardMessage(type, message);
         }
 
-
-        public enum ImageType 
-        {
-            Banner,
-            Profile
-        };
-
-
         [HttpPost]
-        public async Task<IActionResult> UploadImage(IFormFile image, ImageType type)
+        [Route("UploadImage")]
+        public async Task<IActionResult> UploadImage([FromForm] IFormFile image, [FromForm] string imageType)
         {
+
             if (image == null || image.Length == 0)
             {
                 TempData["Message"] = "No image uploaded.";
@@ -568,12 +562,12 @@ namespace DormBuddy.Controllers
             {
                 EnsureProfileAttached(profile);
 
-                switch (type)
+                switch (imageType)
                 {
-                    case ImageType.Banner:
+                    case "banner":
                         profile.BannerImageUrl = imageUrl;
                     break;
-                    case ImageType.Profile:
+                    case "profile":
                         profile.ProfileImageUrl = imageUrl;
                     break;
                     default:
@@ -749,17 +743,46 @@ namespace DormBuddy.Controllers
             return RedirectToAction("Settings", "Account", new { page = "PrivacySettings" });
         }
 
-        [HttpGet]
-        public async Task<IActionResult> ProfilePostArea([FromForm] UserProfile model, [FromForm] string message, [FromForm] bool isReply) {
-            var u = await GetCurrentUserAsync();
+        [HttpPost]
+        [Route("ProfilePostArea")]
+        public async Task<IActionResult> ProfilePostArea([FromForm] string message, [FromForm] int Reply_Id, [FromForm] string targetUsername)
+        {
+            var user = await GetCurrentUserAsync();
 
-            if (u == null) {
+            if (user == null)
+            {
                 return BadRequest("Current user could not be found!");
             }
 
-            Console.WriteLine(u.UserName);
-            return Ok("true");
+            var target = await _context.Users.FirstOrDefaultAsync(m => m.UserName == targetUsername);
+
+            if (target == null) 
+            {
+                return BadRequest("Target could not be found!");
+            }
+
+            // Check if the parent post exists when replying
+            if (Reply_Id != -1 && !await _context.Profile_Posts.AnyAsync(p => p.Id == Reply_Id))
+            {
+                return BadRequest("Parent post not found.");
+            }
+
+            var post = new Profile_PostsModel {
+                UserId = user.Id,
+                TargetId = target.Id,
+                CreatedAt = DateTime.UtcNow,
+                Message = message,
+                Reply_Id = Reply_Id
+            };
+
+            await _context.AddAsync(post);
+            await _context.SaveChangesAsync();
+
+            
+            // Return a success response
+            return RedirectToAction("Profile", "Account", new { username = target.UserName });
         }
+
 
     }
 }

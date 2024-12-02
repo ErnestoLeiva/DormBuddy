@@ -8,54 +8,70 @@
 
     <link rel="stylesheet" href="~/css/settings.css" asp-append-version="true" />
 
-    <script>
+<script>
 
-        const ImageType = {
-            banner: "bannerImageInput",
-            profile: "imageInput"
-        };
 
-        function validateImage(fSize, w, h, iType) {
-            const fileInput = document.getElementById(iType);
-            const file = fileInput.files[0];
-            const allowedExtensions = ["image/jpeg", "image/png", "image/jpg", "image/gif"];
-            const maxFileSize = fSize * 1024 * 1024;
+$(document).ready(function() {
+    // General function to check file type and size
+    function validateFile(inputId, maxFileSize) {
+        // Get the selected file
+        var file = $(inputId)[0].files[0];
 
-            if (!file) {
-                alert("No image uploaded. Please choose an image file.");
-                return false;
-            }
 
-            if (!allowedExtensions.includes(file.type)) {
-                alert("Invalid file type. Please upload a JPG, JPEG, PNG, or GIF image.");
-                return false;
-            }
-
-            if (file.size > maxFileSize) {
-                alert(`File size should be less than ${fSize} MB.`);
-                return false;
-            }
-
-            const img = new Image();
-            img.onload = function () {
-
-                if (img.width > w || img.height > h) {
-                    alert(`Image dimensions should not exceed ${w}x${h} pixels.`);
-                    fileInput.value = "";
-                    return false;
-                } else {
-                    document.getElementById("uploadForm").submit();
-                }
-            };
-            img.onerror = function () {
-                alert("Invalid image file.");
-                fileInput.value = "";
-                return false;
-            };
-            img.src = URL.createObjectURL(file);
+        // Check if a file is selected
+        if (!file) {
+            alert("No image uploaded. Please choose a file.");
             return false;
         }
-    </script>
+
+        // Allowed file types
+        var allowedExtensions = ["image/jpeg", "image/png", "image/jpg", "image/gif"];
+
+        // Check the file type
+        if (!allowedExtensions.includes(file.type)) {
+            alert("Invalid file type. Please upload a JPG, JPEG, PNG, or GIF image.");
+            return false;
+        }
+
+        // Check the file size
+        if (file.size > maxFileSize) {
+            alert("File size should be less than " + (maxFileSize / (1024 * 1024)) + " MB.");
+            return false;
+        }
+
+        // If all validations pass
+        return true;
+    }
+
+    // Handle the banner image upload form submission
+    $('#uploadBanner').submit(function(event) {
+        // Prevent form submission for validation
+        event.preventDefault();
+
+        // Validate the banner image (max size: 5 MB)
+        if (validateFile('#bannerImageInput', 2 * 1920 * 1080)) {
+            // Proceed with form submission if file is valid
+            this.submit(); // Uncomment to proceed with form submission
+        }
+    });
+
+    // Handle the profile image upload form submission
+    $('#uploadProfileImage').submit(function(event) {
+        // Prevent form submission for validation
+        event.preventDefault();
+
+        // Validate the profile image (max size: 5 MB)
+        if (validateFile('#profileImageInput', 2 * 500 * 500)) {
+            // Proceed with form submission if file is valid
+            this.submit(); // Uncomment to proceed with form submission
+        }
+    });
+});
+
+
+
+</script>
+
 </head>
 <body>
 
@@ -72,12 +88,11 @@
         <!-- Upload Banner Image -->
         <div class="mb-4">
             <label class="form-label">Upload Banner Image</label>
-            <form id="uploadForm" asp-controller="Imgur" asp-action="UploadImage" method="post" enctype="multipart/form-data" 
-                onsubmit="return validateImage(2, 1920, 1080, 'banner')">
-                <input type="file" id="imageInput" name="image" accept=".jpg, .jpeg, .png, .gif" class="form-control mb-3" />
+            <form id="uploadBanner" asp-controller="Imgur" asp-action="UploadImage" method="post" enctype="multipart/form-data" >
+                <input type="file" id="bannerImageInput" name="image" accept=".jpg, .jpeg, .png, .gif" class="form-control mb-3" />
+                <input type="hidden" name="imageType" value="banner"/>
                 <button type="submit" class="btn btn-primary">Upload</button>
             </form>
-
         </div>
 
         <!-- Profile Image Upload Section -->
@@ -86,9 +101,9 @@
             <img src="@Model.ProfileImageUrl" alt="Current Profile Image" class="img-fluid" style="width: 150px; height: 150px; border-radius: 50%;" />
             
             <label class="form-label">Upload Profile Image</label>
-            <form id="uploadForm" asp-controller="Imgur" asp-action="UploadImage" method="post" enctype="multipart/form-data" 
-                onsubmit="return validateImage(2, 500, 500, 'profile')">
-                <input type="file" id="imageInput" name="image" accept=".jpg, .jpeg, .png, .gif" class="form-control mb-3" />
+            <form id="uploadProfileImage" asp-controller="Imgur" asp-action="UploadImage" method="post" enctype="multipart/form-data">
+                <input type="file" id="profileImageInput" name="image" accept=".jpg, .jpeg, .png, .gif" class="form-control mb-3" />
+                <input type="hidden" name="imageType" value="profile"/>
                 <button type="submit" class="btn btn-primary">Upload</button>
             </form>
         </div>

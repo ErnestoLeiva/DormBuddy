@@ -1,0 +1,44 @@
+/* Stat Card Colors */
+.stat-card:nth-child(1) {
+    background: #ebf8ff;  
+}
+.stat-card:nth-child(1) .stat-icon {
+    background: #4e95d1;
+}
+
+.stat-card:nth-child(2) {
+    background: #ecfdf5;  
+}
+.stat-card:nth-child(2) .stat-icon {
+    background: #4caf50;
+}
+
+.stat-card:nth-child(3) {
+    background: #fff5f5;  
+}
+.stat-card:nth-child(3) .stat-icon {
+    background: #f44336;
+}
+
+.stat-card:nth-child(4) {
+    background: #fff7ed; 
+}
+.stat-card:nth-child(4) .stat-icon {
+    background: #ff9800;
+}
+
+
+@keyframes handshake {
+    0% { transform: rotate(0deg) translateY(0); }
+    25% { transform: rotate(4deg) translateY(-6px); } 
+    50% { transform: rotate(0deg) translateY(0); }
+    75% { transform: rotate(-4deg) translateY(6px); } 
+    100% { transform: rotate(0deg) translateY(0); }
+}
+
+/* trigger handshake animation */
+.shake-once {
+    display: inline-block;
+    animation: handshake 2s ease-in-out; 
+    animation-fill-mode: forwards; 
+}

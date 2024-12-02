@@ -106,7 +106,7 @@
                             if (memberUser != null)
                             {
                                 <tr>
-                                    <td>@($"{memberUser.FirstName} {memberUser.LastName}")</td>
+                                    <td><a href="/Account/profile?username=@memberUser.UserName">@($"{memberUser.FirstName} {memberUser.LastName}")</a></td>
                                     <td>@memberUser.Email</td>
                                     <td>
                                         <!-- Prevent Admin from Being Kicked -->
@@ -163,7 +163,7 @@
                             if (memberUser != null)
                             {
                                 <tr>
-                                    <td>@($"{memberUser.FirstName} {memberUser.LastName}")</td>
+                                    <td><a href="/Account/profile?username=@memberUser.UserName">@($"{memberUser.FirstName} {memberUser.LastName}")</a></td>
                                     <td>@memberUser.Email</td>
                                 </tr>
                             }

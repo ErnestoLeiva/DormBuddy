@@ -1,10 +1,14 @@
 @model DormBuddy.Models.UserProfile
+@inject DormBuddy.Models.TimeZoneService TimeZoneService
 
 @{
     ViewData["Title"] = "Profile";
     string FriendshipStatus = ViewData["FriendshipStatus"]?.ToString() ?? "";
     int FriendCount = ViewData["FriendCount"] as int? ?? 0;
     List<UserProfile> Friends = (ViewData["Friends"] as List<UserProfile>) ?? new List<UserProfile>();
+    List<Profile_PostsModel> Posts = (ViewData["Posts"] as List<Profile_PostsModel>) ?? new List<Profile_PostsModel>();
+    List<Profile_PostsModel> Posts_Reply = (ViewData["Posts_Reply"] as List<Profile_PostsModel>) ?? new List<Profile_PostsModel>();
+    string timezone = (ViewData["CurrentTimeZone"] as string) ?? "UTC";
 }
 
 <div class="profile-top-wrapper">   
@@ -15,6 +19,7 @@
         
     </div>
 
+    using Microsoft.CodeAnalysis;
     <!-- Return to Dashboard Button -->
     <div class="mb-4">
         <a href="/Account/Dashboard" class="btn btn-primary">
@@ -53,7 +58,12 @@
             </h3>
             <p class="text-muted">@@@Model.User?.UserName</p>
             @if (FriendshipStatus != "blocked" && FriendshipStatus != "blocked_me") {
-                <p>Current Status: @ViewData["profile_online_status"]</p>
+                <p>
+                    <span class="status-box @(ViewData["profile_online_status"]?.ToString() == "Online" ? "online" : "offline")">
+                        @ViewData["profile_online_status"]
+                    </span>
+                </p>
+                <h5>Bio</h5>
                 <p>@Model.Bio</p>
             }
 
@@ -185,9 +195,10 @@
                 <div class="tab-pane fade show active" id="posts" role="tabpanel" aria-labelledby="posts-tab">
                     <!-- Create Post Section -->
                     <div class="mb-3">
-                        <form asp-controller="imgur" asp-action="ProfilePostArea" method="get">
+                        <form asp-controller="imgur" asp-action="ProfilePostArea" method="post">
                             <textarea name="message" class="form-control" id="createPostTextarea" rows="3" placeholder="What's on your mind?"></textarea>
-                            <input type="hidden" name="isReply" value="false" />
+                            <input type="hidden" name="Reply_Id" value="-1" />
+                            <input type="hidden" name="targetUsername" value="@Model.User?.UserName" />
                             <div class="text-end mt-2">
                                 <button type="submit" class="btn btn-primary">
                                     <i class="fas fa-paper-plane"></i> Post
@@ -198,17 +209,66 @@
 
                     <!-- Posts Section -->
                     <div id="postsSection">
-                        <!-- Example Post -->
-                        <div class="card mb-3">
-                            <div class="card-body">
-                                <h6 class="card-title">@Model.User?.UserName</h6>
-                                <p class="card-text">This is an example post. Posts will appear here!</p>
-                                <small class="text-muted">Posted just now</small>
+                        @foreach (var post in Posts)
+                        {
+                            <div class="card mb-3" id="post-@post.Id">
+                                <div class="card-body">
+                                    <h6 class="card-title">@post.User?.UserName</h6>
+                                    <p class="card-text">@post.Message</p>
+                                    <small class="text-muted">Posted @TimeZoneService.getCurrentTimeFromUTC(post.CreatedAt, timezone).ToString("g")</small>
+
+                                    <!-- Reply Button -->
+                                    <div class="d-flex justify-content-start mt-2">
+                                        <button class="btn btn-outline-primary btn-sm reply-btn" data-post-id="@post.Id">
+                                            <i class="fas fa-reply"></i> Reply
+                                        </button>
+                                    </div>
+
+                                    <!-- Reply Textbox (hidden initially) -->
+                                    <div class="reply-box mt-2" id="reply-box-@post.Id" style="display: none;">
+                                        <form asp-controller="imgur" asp-action="ProfilePostArea" method="post">
+                                            <textarea name="message" class="form-control" rows="2" placeholder="Write your reply here..."></textarea>
+                                            <input type="hidden" name="Reply_Id" value="@post.Id" />
+                                            <input type="hidden" name="targetUsername" value="@Model.User?.UserName" />
+                                            <div class="text-end mt-2">
+                                                <button type="submit" class="btn btn-primary btn-sm">
+                                                    <i class="fas fa-paper-plane"></i> Submit
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    <!-- Replies Section -->
+                                    <div class="replies mt-3" id="replies-for-@post.Id">
+                                        @foreach (var reply in Posts_Reply)
+                                        {
+                                            if (reply.Reply_Id == post.Id) {
+                                                <div class="card mb-2 ms-3">
+                                                    <div class="card-body">
+                                                        <h6 class="card-title">@reply.User?.UserName</h6>
+                                                        <p class="card-text">@reply.Message</p>
+                                                        <small class="text-muted">Replied @TimeZoneService.getCurrentTimeFromUTC(reply.CreatedAt, timezone).ToString("g")</small>
+                                                    </div>
+                                                </div>
+                                            }
+                                        }
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <!-- End of Example Post -->
+                        }
                     </div>
+
                 </div>
+
+            <script>
+                $(document).ready(function () {
+                    // Toggle reply box visibility on button click
+                    $('.reply-btn').on('click', function () {
+                        const postId = $(this).data('post-id');
+                        $(`#reply-box-${postId}`).toggle(); // Show or hide the reply box
+                    });
+                });
+            </script>
 
                 <!-- About Tab -->
                 <div class="tab-pane fade" id="about" role="tabpanel" aria-labelledby="about-tab">
@@ -339,18 +399,40 @@
     </div>
 </div>
 
-<script>
-$(document).ready(function () {
-    // Use event delegation to handle clicks on dynamically generated elements
-    $(document).on("click", ".friend-card", function () {
-        let uname = $(this).data("username");
-        window.location.href = "profile?username=" + uname;
-    });
+@section Scripts {
+    <script>
+    $(document).ready(function () {
+        // Use event delegation to handle clicks on dynamically generated elements
+        $(document).on("click", ".friend-card", function () {
+            let uname = $(this).data("username");
+            window.location.href = "profile?username=" + uname;
+        });
 
-    $(document).on("click", ".ViewAllFriends", function() {
-        $('button[data-bs-target="#friends"]').tab('show');
+        $(document).on("click", ".ViewAllFriends", function() {
+            $('button[data-bs-target="#friends"]').tab('show');
+        });
     });
-});
-</script>
+    </script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+}
+
+
+<style>
+    .status-box {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-weight: bold;
+        color: white;
+        text-align: center;
+    }
+
+    .status-box.online {
+        background-color: green;
+    }
+
+    .status-box.offline {
+        background-color: red;
+    }
+</style>

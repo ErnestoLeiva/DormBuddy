@@ -1,0 +1,201 @@
+/* Base Container Styles */
+.tasks-container,
+.expenses-container,
+.lending-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+    padding-bottom: 6rem;
+}
+
+/* Header Styles */
+.tasks-header,
+.expenses-header,
+.lending-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-top: 3rem;
+}
+
+.tasks-header h1,
+.expenses-header h1,
+.lending-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #2d3748;
+}
+
+.tasks-header p,
+.expenses-header p,
+.lending-header p {
+    font-size: 1rem;
+    color: #718096;
+}
+
+/* Stats Cards */
+.stats-container, .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stat-icon i {
+    font-size: 1.5rem;
+    color: white;
+}
+
+.stat-info h3,
+.stat-content h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin: 0;
+}
+
+.stat-info p,
+.stat-content p {
+    color: #718096;
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+/* Form Sections */
+.add-task-section,
+.add-expense-section,
+.add-loan-section {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Table Styles */
+.table-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin-bottom: 4rem; 
+}
+
+.table {
+    margin-bottom: 0;
+    width: 100%;
+    background-color: white; 
+}
+
+.table thead th {
+    background: #f7fafc;
+    color: #2d3748;
+    font-weight: 500; 
+    padding: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    height: 60px; 
+    vertical-align: middle;
+}
+
+
+.table thead th:not(:last-child) {
+    border-right: 1px solid #e2e8f0;
+}
+
+.table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+    color: #4a5568;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+
+/* Status Badges */
+.badge {
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    font-weight: 500;
+}
+
+.badge.bg-success {
+    background-color: #48bb78 !important;
+    color: white !important;
+}
+
+.badge.bg-danger {
+    background-color: #e53e3e !important;
+    color: white !important;
+}
+
+/* Animation */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Form Controls */
+.form-control {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.75rem;
+    font-size: 1rem;
+}
+
+.form-control:focus {
+    border-color: #4e95d1;
+    box-shadow: 0 0 0 3px rgba(78, 149, 209, 0.1);
+    outline: none;
+}
+
+/* Button Styles */
+.btn {
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.875rem;
+    margin-right: 0.5rem;
+}
+
+
+@media (max-width: 768px) {
+    .stats-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .table-container {
+        overflow-x: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-container {
+        grid-template-columns: 1fr;
+    }
+}

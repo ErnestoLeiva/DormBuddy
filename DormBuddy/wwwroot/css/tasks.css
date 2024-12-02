@@ -1,0 +1,68 @@
+/* Stat Card Colors */
+.stat-all {
+    background: #ebf8ff;
+}
+.stat-all .stat-icon {
+    background: #4299e1;
+}
+
+.stat-incomplete {
+    background: #e6fffa;
+}
+.stat-incomplete .stat-icon {
+    background: #38b2ac;
+}
+
+.stat-overdue {
+    background: #fff5f5;
+}
+.stat-overdue .stat-icon {
+    background: #f56565;
+}
+
+.stat-due-today {
+    background: #f4f0ff;
+}
+.stat-due-today .stat-icon {
+    background: #ed8936;
+}
+
+/* Time Selector Specific Styling */
+.time-select-group {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.time-select-group select {
+    flex: 1;
+    min-width: 80px;
+}
+
+/* checkmark motion */
+@keyframes checkmarkMotion {
+    0% {
+        opacity: 0;                            
+        transform: translate(-150%, -150%) rotate(-45deg); 
+    }
+    40% {
+        opacity: 1;                            
+        transform: translate(10%, 20%) rotate(20deg); 
+    }
+    70% {
+        transform: translate(20%, -10%) rotate(0deg); 
+    }
+    100% {
+        transform: translate(0, 0) rotate(0deg); 
+    }
+}
+
+/* animation to the checklist icon */
+.tasks-header h1 i {
+    display: inline-block;
+    animation: checkmarkMotion 1.5s cubic-bezier(0.25, 1, 0.5, 1);
+    animation-fill-mode: forwards; 
+    transform-origin: center; 
+}
+
+
