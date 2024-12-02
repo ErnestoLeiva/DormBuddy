@@ -503,10 +503,9 @@ public IActionResult Settings()
 }
 
 
-
-        public async Task<IActionResult> Profile()
+public async Task<IActionResult> Profile()
         {
-            try
+         try
             {
                 // Ensure the user is authenticated
                 if (User?.Identity?.IsAuthenticated != true)
@@ -572,6 +571,23 @@ public IActionResult Settings()
 
                 ViewData["Friends"] = await GetAllFriends(get_username);
 
+                // posts //
+
+                List<Profile_PostsModel> posts = await _context.Profile_Posts.Where(p => p.TargetId == u.Id && p.Reply_Id == -1).OrderByDescending(p => p.CreatedAt).Include(p => p.TargetUser).ToListAsync();
+                List<Profile_PostsModel> posts_reply = await _context.Profile_Posts.Where(p => p.TargetId == u.Id && p.Reply_Id != -1).Include(p => p.TargetUser).ToListAsync();
+
+                if (posts == null) {
+                    posts = new List<Profile_PostsModel>();
+                }
+
+                if (posts_reply == null) {
+                    posts_reply = new List<Profile_PostsModel>();
+                }
+
+                ViewData["CurrentTimeZone"] = Request.Cookies["UserTimeZone"] ?? "UTC";
+                ViewData["Posts"] = posts;
+                ViewData["Posts_Reply"] = posts_reply;
+
                 return View("~/Views/Account/Dashboard/Profile.cshtml", profile);
             }
             catch (Exception ex)
@@ -581,6 +597,7 @@ public IActionResult Settings()
                 return View("Error");  // Show a generic error page or message
             }
         }
+
 
 
         public async Task<IActionResult> LoadSettings(string settingsPage, string errorMessage = "")

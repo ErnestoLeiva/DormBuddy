@@ -1,5 +1,6 @@
 using DormBuddy.Models; 
 using System.Collections.Generic;
+
 namespace DormBuddy.ViewModels
 {
     public class AdminDashboardViewModel
