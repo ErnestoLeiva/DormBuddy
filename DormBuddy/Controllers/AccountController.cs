@@ -455,9 +455,11 @@ namespace DormBuddy.Controllers
             ViewBag.TaskCount = await _context.Tasks
                 .CountAsync(t => t.UserId == user.Id && !t.IsCompleted);
 
+
             // Count expenses
             ViewBag.PendingExpenses = await _context.Expenses
                 .CountAsync(e => e.UserId == user.Id);
+
                     ViewBag.CultureInfo = $"Current Culture: {currentCulture}, UI Culture: {currentUICulture}";
 
                     ViewBag.NotificationAmount = (await _context.Notifications.Where(m => m.UserId == user.Id).ToListAsync()).Count;

@@ -30,38 +30,46 @@ namespace DormBuddy.Controllers
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(User);
-            if (user != null)
+            if (user == null)
             {
-                var tasks = await _dbContext.Tasks
-                    .Where(t => (t.AssignedTo != null && t.AssignedTo.Contains(user.Id)) || t.UserId == user.Id)
-                    .ToListAsync();
-
-                var userGroup = await _dbContext.GroupMembers
-                    .Where(gm => gm.UserId == user.Id)
-                    .Include(gm => gm.Group)
-                    .FirstOrDefaultAsync();
-
-                if (userGroup?.Group != null)
-                {
-                    var groupMembers = userGroup.Group.Members ?? new List<GroupMemberModel>();
-                    ViewBag.GroupMembers = groupMembers;
-                }
-                else
-                {
-                    ViewBag.GroupMembers = new List<GroupMemberModel>();
-                }
-
-                ViewBag.Users = await _dbContext.Users.ToListAsync();
-
-                var newTask = new TaskModel { UserId = user.Id };
-
-                return View("~/Views/Account/Dashboard/Tasks.cshtml", Tuple.Create(tasks, newTask));
+                return RedirectToAction("Login", "Account");
             }
 
-            // Redirect to login page if the user is not found
-            return RedirectToAction("Login", "Account");
-        }
+            var tasks = await _dbContext.Tasks
+                .Where(t => (t.AssignedTo != null && t.AssignedTo.Contains(user.Id)) || t.UserId == user.Id)
+                .ToListAsync();
 
+            var groupId = await _dbContext.GroupMembers
+                .Where(gm => gm.UserId == user.Id)
+                .Select(gm => gm.GroupId)
+                .FirstOrDefaultAsync();
+
+
+            if (groupId == 0)
+            {
+                ViewBag.GroupMembers = new List<GroupMemberModel>();
+                ViewBag.Users = new List<ApplicationUser>();
+                TempData["error"] = "You are not part of any group. Please join or create a group to use this feature.";
+            }
+            else
+            {
+                var groupMembers = await _dbContext.GroupMembers
+                    .Where(gm => gm.GroupId == groupId)
+                    .ToListAsync();
+
+                var userIds = groupMembers.Select(gm => gm.UserId).ToList();
+                var users = await _dbContext.Users
+                    .Where(u => userIds.Contains(u.Id))
+                    .ToListAsync();
+
+                ViewBag.GroupMembers = groupMembers;
+                ViewBag.Users = users;
+            }
+
+            var newTask = new TaskModel { UserId = user.Id };
+
+            return View("~/Views/Account/Dashboard/Tasks.cshtml", Tuple.Create(tasks, newTask));
+        }
 
         // POST: /Tasks/Add
         [HttpPost]
@@ -125,29 +133,24 @@ namespace DormBuddy.Controllers
                 }
             }
 
-            // Fetch tasks for the current user
             var tasks = await _dbContext.Tasks
                 .Where(t => t.UserId == user.Id || (t.AssignedTo != null && t.AssignedTo.Contains(user.Id)))
                 .ToListAsync();
             
-            // Fetch the current user's group ID
             var groupId = await _dbContext.GroupMembers
                 .Where(gm => gm.UserId == user.Id)
                 .Select(gm => gm.GroupId)
                 .FirstOrDefaultAsync();
 
-            // Fetch all members of the group
             var groupMembers = await _dbContext.GroupMembers
                 .Where(gm => gm.GroupId == groupId)
                 .ToListAsync();
 
-            // Fetch all users corresponding to the group members
             var userIds = groupMembers.Select(gm => gm.UserId).ToList();
             var users = await _dbContext.Users
                 .Where(u => userIds.Contains(u.Id))
                 .ToListAsync();
 
-            // Assign to ViewBag
             ViewBag.GroupMembers = groupMembers;
             ViewBag.Users = users;
 
@@ -196,29 +199,24 @@ namespace DormBuddy.Controllers
                 }
             }
 
-            // Fetch tasks for the current user
             var tasks = await _dbContext.Tasks
                 .Where(t => t.UserId == user.Id || (t.AssignedTo != null && t.AssignedTo.Contains(user.Id)))
                 .ToListAsync();
 
-            // Fetch the current user's group ID
             var groupId = await _dbContext.GroupMembers
                 .Where(gm => gm.UserId == user.Id)
                 .Select(gm => gm.GroupId)
                 .FirstOrDefaultAsync();
 
-            // Fetch all members of the group
             var groupMembers = await _dbContext.GroupMembers
                 .Where(gm => gm.GroupId == groupId)
                 .ToListAsync();
 
-            // Fetch all users corresponding to the group members
             var userIds = groupMembers.Select(gm => gm.UserId).ToList();
             var users = await _dbContext.Users
                 .Where(u => userIds.Contains(u.Id))
                 .ToListAsync();
 
-            // Assign to ViewBag
             ViewBag.GroupMembers = groupMembers;
             ViewBag.Users = users;
 
