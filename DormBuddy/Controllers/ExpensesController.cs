@@ -31,7 +31,7 @@ namespace DormBuddy.Controllers
             }
 
             var expenses = await _dbContext.Expenses
-                .Where(e => e.UserId == user.Id)
+                .Where(e => e.UserId == user.Id || e.SharedWith.Contains(user.Id))
                 .ToListAsync();
 
             var groupId = await _dbContext.GroupMembers
@@ -98,7 +98,7 @@ namespace DormBuddy.Controllers
             }
 
             var expenses = await _dbContext.Expenses
-                .Where(e => e.UserId == user.Id)
+                .Where(e => e.UserId == user.Id  || e.SharedWith.Contains(user.Id))
                 .ToListAsync();
 
             var groupId = await _dbContext.GroupMembers
@@ -139,7 +139,7 @@ namespace DormBuddy.Controllers
                 try
                 {
                     var expense = await _dbContext.Expenses.FindAsync(expenseId);
-                    if (expense != null && expense.UserId == user.Id)
+                    if (expense != null && expense.UserId == user.Id  || expense.SharedWith.Contains(user.Id))
                     {
                         var expenseName = expense.ExpenseName;
                         _dbContext.Expenses.Remove(expense);

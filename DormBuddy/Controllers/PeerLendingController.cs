@@ -33,7 +33,7 @@ namespace DormBuddy.Controllers
             }
 
             var loans = await _dbContext.PeerLendings
-                .Where(l => l.UserId == user.Id)
+                .Where(l => l.UserId == user.Id || l.BorrowerId == user.Id)
                 .ToListAsync();
 
             var groupId = await _dbContext.GroupMembers
@@ -119,7 +119,7 @@ namespace DormBuddy.Controllers
             }
 
             var loans = await _dbContext.PeerLendings
-                .Where(l => l.UserId == user.Id)
+                .Where(l => l.UserId == user.Id || l.BorrowerId == user.Id)
                 .ToListAsync();
 
             var groupId = await _dbContext.GroupMembers
@@ -190,7 +190,7 @@ namespace DormBuddy.Controllers
             }
 
             var loans = await _dbContext.PeerLendings
-                .Where(l => l.UserId == user.Id)
+                .Where(l => l.UserId == user.Id || l.BorrowerId == user.Id)
                 .ToListAsync();
 
             var groupId = await _dbContext.GroupMembers
