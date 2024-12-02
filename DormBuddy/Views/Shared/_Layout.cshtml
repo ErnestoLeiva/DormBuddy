@@ -44,7 +44,6 @@
             <div class="sidebar-logo">
                 <img src="~/favicon.ico" alt="DormBuddy Logo" /> 
             </div>
-<<<<<<< Updated upstream
             <div class="sidebar-nav">
                 <a href="/Tasks/Index" class="sidebar-item">
                     <i class="fas fa-tasks"></i>
@@ -118,7 +117,7 @@
                         @if (User?.Identity != null && User.Identity.IsAuthenticated)
 
                         {
-                            string uname = User?.Identity?.Name;
+                            string uname = User?.Identity?.Name ?? "";
 
                             if (!string.IsNullOrEmpty(uname))
                             {
@@ -161,7 +160,6 @@
                 </div>
             </footer>
         </div>
-=======
         </nav>
 
 
@@ -186,7 +184,6 @@
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
->>>>>>> Stashed changes
     </div>
 
     <!-- Scripts -->
