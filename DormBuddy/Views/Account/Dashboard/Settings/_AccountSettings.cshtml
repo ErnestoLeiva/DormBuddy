@@ -1,14 +1,12 @@
-
 @model DormBuddy.Models.UserProfile
 
-@if (User?.Identity != null && User?.Identity.IsAuthenticated != null) {
+@if (User?.Identity != null && User?.Identity.IsAuthenticated == true)
+{
+    string firstName = Model.User.FirstName ?? "";
+    string lastName = Model.User.LastName ?? "";
+    string email = Model.User.Email ?? "";
 
-    string firstName = @Model.User.FirstName ?? "";
-    string lastName = @Model.User.LastName ?? "";
-    string email = @Model.User.Email ?? "";
-
-  <div class="settings-section fade-in">
-
+    <div class="settings-section fade-in">
         <h2 class="mb-4">Account Settings</h2>
 
         <form style="margin:30px 0px;" id="UpdateEUFLForm" asp-controller="Imgur" asp-action="UpdateEUFLInformation" method="post">
@@ -32,13 +30,10 @@
                 <input name="LastName" id="lastnamechange" type="text" class="form-control" value="@lastName" />
             </div>
 
-            
-
             <button type="submit" class="btn btn-primary">Update Information</button>
         </form>
 
         <form id="UpdatePasswordForm" action="/api/Imgur/UpdateAccountPassword" method="post">
-
             <div class="mb-3">
                 <label for="passwordchange" class="form-label">New Password</label>
                 <input name="NewPassword" id="passwordchange_new" type="password" class="form-control" />
@@ -55,7 +50,7 @@
             </div>
 
             @{
-            var em = ViewBag.ErrorMessage as string ?? "";
+                var em = ViewBag.ErrorMessage as string ?? "";
             }
 
             @if (!string.IsNullOrEmpty(em))
@@ -66,8 +61,6 @@
             }
 
             <button id="PasswordChangeSubmit" type="submit" class="btn btn-primary">Update Password</button>
-
-            
         </form>
 
         <!-- Two-Factor Authentication Setting -->
@@ -122,124 +115,126 @@
         }
 
         <button id="deleteaccount" class="btn btn-danger mt-4 w-100">Remove Account Permanently</button>
-    }
-</div>
+    </div>
 }
 
+
 <!-- Firebase Scripts -->
+@section Scripts {
 
-<script type="module">
+    <script type="module">
 
-    $(document).ready(function() {
-        $('#PasswordChangeSubmit').prop('disabled', true);
-        $('#passwordchange_old, #passwordchange_reentered').on("input", function() {
-            let info = $(this).val();
-            let NewPassword = $('#passwordchange_new').val();
-            let ReEntered = $('#passwordchange_reentered').val();
-            if (NewPassword === ReEntered && NewPassword != "" && NewPassword != "") {
-                $('#PasswordChangeSubmit').prop('disabled', false);
-                $('#passSpan').text("");
-                $('#passSpan').css('display', 'none');
+        $(document).ready(function() {
+            $('#PasswordChangeSubmit').prop('disabled', true);
+            $('#passwordchange_old, #passwordchange_reentered').on("input", function() {
+                let info = $(this).val();
+                let NewPassword = $('#passwordchange_new').val();
+                let ReEntered = $('#passwordchange_reentered').val();
+                if (NewPassword === ReEntered && NewPassword != "" && NewPassword != "") {
+                    $('#PasswordChangeSubmit').prop('disabled', false);
+                    $('#passSpan').text("");
+                    $('#passSpan').css('display', 'none');
+                } else {
+                    $('#PasswordChangeSubmit').prop('disabled', true);
+                    $('#passSpan').text("* Passwords do not match!");
+                    
+                    $('#passSpan').css('display', 'block');
+                }
+
+            });
+        });
+
+
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+        import { getAuth, signInWithPhoneNumber, RecaptchaVerifier } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDjifg3IPrpo2cqjG1s8s72lhmXXKB1gng",
+            authDomain: "dormbuddy-33ce0.firebaseapp.com",
+            projectId: "dormbuddy-33ce0",
+            storageBucket: "dormbuddy-33ce0.appspot.com",
+            messagingSenderId: "890087100030",
+            appId: "1:890087100030:web:fc0dc67ff5f0517de8d22f",
+            measurementId: "G-XN11GF25LY"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Initialize reCAPTCHA verifier
+        let recaptchaVerifier;
+
+        window.onload = function () {
+            createRecaptchaVerifier();
+        };
+
+        function createRecaptchaVerifier() {
+            recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+                'size': 'normal',
+                'callback': function (response) {
+                    console.log("reCAPTCHA solved:", response);
+                },
+                'expired-callback': function () {
+                    console.log("reCAPTCHA expired. Re-rendering...");
+                    recaptchaVerifier.render();
+                }
+            }, auth);
+            
+            recaptchaVerifier.render().then((widgetId) => {
+                console.log("reCAPTCHA rendered with widgetId:", widgetId);
+            }).catch((error) => {
+                console.error("Error rendering reCAPTCHA:", error);
+            });
+        }
+
+        window.toggleMobileAuthSection = function() {
+            const twoFactorSelect = document.getElementById('twofactor');
+            const mobileAuthSection = document.getElementById('mobile-auth-section');
+
+            if (twoFactorSelect.value === 'enabled') {
+                mobileAuthSection.style.display = 'block';
+                if (!recaptchaVerifier) {
+                    createRecaptchaVerifier();
+                }
             } else {
-                $('#PasswordChangeSubmit').prop('disabled', true);
-                $('#passSpan').text("* Passwords do not match!");
-                
-                $('#passSpan').css('display', 'block');
+                mobileAuthSection.style.display = 'none';
+                if (recaptchaVerifier) {
+                    recaptchaVerifier.reset();
+                }
             }
+        }
 
-        });
-    });
+        document.getElementById('send-code-btn').onclick = function() {
+            const countryCode = document.getElementById('country-code').value;
+            const phoneNumber = document.getElementById('phone-number').value;
+            const fullNumber = countryCode + phoneNumber;
 
-
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
-    import { getAuth, signInWithPhoneNumber, RecaptchaVerifier } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
-
-    const firebaseConfig = {
-        apiKey: "AIzaSyDjifg3IPrpo2cqjG1s8s72lhmXXKB1gng",
-        authDomain: "dormbuddy-33ce0.firebaseapp.com",
-        projectId: "dormbuddy-33ce0",
-        storageBucket: "dormbuddy-33ce0.appspot.com",
-        messagingSenderId: "890087100030",
-        appId: "1:890087100030:web:fc0dc67ff5f0517de8d22f",
-        measurementId: "G-XN11GF25LY"
-    };
-
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-
-    // Initialize reCAPTCHA verifier
-    let recaptchaVerifier;
-
-    window.onload = function () {
-        createRecaptchaVerifier();
-    };
-
-    function createRecaptchaVerifier() {
-        recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-            'size': 'normal',
-            'callback': function (response) {
-                console.log("reCAPTCHA solved:", response);
-            },
-            'expired-callback': function () {
-                console.log("reCAPTCHA expired. Re-rendering...");
-                recaptchaVerifier.render();
-            }
-        }, auth);
-        
-        recaptchaVerifier.render().then((widgetId) => {
-            console.log("reCAPTCHA rendered with widgetId:", widgetId);
-        }).catch((error) => {
-            console.error("Error rendering reCAPTCHA:", error);
-        });
-    }
-
-    window.toggleMobileAuthSection = function() {
-        const twoFactorSelect = document.getElementById('twofactor');
-        const mobileAuthSection = document.getElementById('mobile-auth-section');
-
-        if (twoFactorSelect.value === 'enabled') {
-            mobileAuthSection.style.display = 'block';
-            if (!recaptchaVerifier) {
-                createRecaptchaVerifier();
-            }
-        } else {
-            mobileAuthSection.style.display = 'none';
             if (recaptchaVerifier) {
-                recaptchaVerifier.reset();
+                signInWithPhoneNumber(auth, fullNumber, recaptchaVerifier)
+                    .then((confirmationResult) => {
+                        window.confirmationResult = confirmationResult;
+                        document.getElementById('code-verification-section').style.display = 'block';
+                        console.log('Verification code sent.');
+                    })
+                    .catch((error) => {
+                        console.error('Error during phone verification:', error);
+                    });
+            } else {
+                console.error("reCAPTCHA not initialized");
             }
+        };
+
+        window.verifyCode = function() {
+            const verificationCode = document.getElementById('verification-code').value;
+            window.confirmationResult.confirm(verificationCode).then((result) => {
+                const user = result.user;
+                console.log('Phone verification successful. User:', user);
+                document.getElementById('verification-status').innerText = 'Phone verified successfully!';
+            }).catch((error) => {
+                console.error('Error verifying code:', error);
+                document.getElementById('verification-status').innerText = 'Verification failed. Please try again.';
+            });
         }
-    }
-
-    document.getElementById('send-code-btn').onclick = function() {
-        const countryCode = document.getElementById('country-code').value;
-        const phoneNumber = document.getElementById('phone-number').value;
-        const fullNumber = countryCode + phoneNumber;
-
-        if (recaptchaVerifier) {
-            signInWithPhoneNumber(auth, fullNumber, recaptchaVerifier)
-                .then((confirmationResult) => {
-                    window.confirmationResult = confirmationResult;
-                    document.getElementById('code-verification-section').style.display = 'block';
-                    console.log('Verification code sent.');
-                })
-                .catch((error) => {
-                    console.error('Error during phone verification:', error);
-                });
-        } else {
-            console.error("reCAPTCHA not initialized");
-        }
-    };
-
-    window.verifyCode = function() {
-        const verificationCode = document.getElementById('verification-code').value;
-        window.confirmationResult.confirm(verificationCode).then((result) => {
-            const user = result.user;
-            console.log('Phone verification successful. User:', user);
-            document.getElementById('verification-status').innerText = 'Phone verified successfully!';
-        }).catch((error) => {
-            console.error('Error verifying code:', error);
-            document.getElementById('verification-status').innerText = 'Verification failed. Please try again.';
-        });
-    }
-</script>
+    </script>
+}
