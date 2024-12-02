@@ -29,6 +29,7 @@ namespace DormBuddy.Controllers
 
         private readonly DBContext _context;
         private readonly IMemoryCache _memoryCache;
+        private readonly GlobalMessageService _global_MessageService;
 
         public NotificationsController(
             UserManager<ApplicationUser> userManager,
@@ -37,7 +38,8 @@ namespace DormBuddy.Controllers
             ILogger<NotificationsController> logger,
             IMemoryCache memoryCache,
             TimeZoneService timeZoneService,
-            IConfiguration configuration) : base(userManager, signInManager, context, logger, memoryCache, timeZoneService, configuration)
+            GlobalMessageService globalMessageService,
+            IConfiguration configuration) : base(userManager, signInManager, context, logger, memoryCache, timeZoneService, configuration, globalMessageService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -46,6 +48,7 @@ namespace DormBuddy.Controllers
             _memoryCache = memoryCache;
             _timeZoneService = timeZoneService;
             _configuration = configuration;
+            _global_MessageService = globalMessageService;
         }
 
         public async Task<IActionResult> Index() {

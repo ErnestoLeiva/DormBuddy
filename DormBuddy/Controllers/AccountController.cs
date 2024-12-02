@@ -28,6 +28,8 @@ namespace DormBuddy.Controllers
 
         private readonly IMemoryCache _memoryCache;
 
+        private readonly GlobalMessageService _global_MessageService;
+
         public AccountController(
             ILogger<AccountController> logger,
             UserManager<ApplicationUser> userManager,
@@ -36,7 +38,8 @@ namespace DormBuddy.Controllers
             TimeZoneService timeZoneService,
             IConfiguration configuration,
             IMemoryCache memoryCache,
-            DBContext context) : base(userManager, signInManager, context, logger, memoryCache, timeZoneService, configuration)
+            GlobalMessageService globalMessageService,
+            DBContext context) : base(userManager, signInManager, context, logger, memoryCache, timeZoneService, configuration, globalMessageService)
         {
             _logger = logger;
             _userManager = userManager;
@@ -46,6 +49,7 @@ namespace DormBuddy.Controllers
             _configuration = configuration;
             _context = context;
             _memoryCache = memoryCache;
+            _global_MessageService = globalMessageService;
         }
 
         #region ACCOUNT FORMS
@@ -123,6 +127,8 @@ namespace DormBuddy.Controllers
                 profile.LastLogin = DateTime.UtcNow;
 
                 await _context.SaveChangesAsync();
+
+                _global_MessageService.SetMessage("Welcome to the site!", "success");
 
 
                 /*

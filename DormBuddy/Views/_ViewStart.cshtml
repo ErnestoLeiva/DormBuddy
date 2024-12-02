@@ -1,3 +1,14 @@
-﻿@{
+﻿@inject DormBuddy.Models.GlobalMessageService MessageService
+
+@{
     Layout = "_Layout";
+}
+
+@{
+    var message = MessageService.GetMessage();
+    if (message.Message != null)
+    {
+        ViewData["GlobalMessage"] = message.Message;
+        ViewData["GlobalMessageType"] = message.Type;
+    }
 }

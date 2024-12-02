@@ -24,6 +24,7 @@ namespace DormBuddy.Controllers
         private readonly IMemoryCache _memoryCache;
         private readonly TimeZoneService _timezoneService;
         private readonly IConfiguration _configuration;
+        private readonly GlobalMessageService _global_MesssageService;
 
         public ImgurController(
             DBContext context,
@@ -33,8 +34,9 @@ namespace DormBuddy.Controllers
             ILogger<BaseController> logger,
             IMemoryCache memoryCache,
             TimeZoneService timezoneService,
-            IConfiguration configuration
-        ) : base(userManager, signInManager, context, logger, memoryCache, timezoneService, configuration)
+            IConfiguration configuration,
+            GlobalMessageService globalMessageService
+        ) : base(userManager, signInManager, context, logger, memoryCache, timezoneService, configuration, globalMessageService)
         {
             _context = context;
             _imgurService = imgurService;
@@ -44,6 +46,7 @@ namespace DormBuddy.Controllers
             _memoryCache = memoryCache;
             _timezoneService = timezoneService;
             _configuration = configuration;
+            _global_MesssageService = globalMessageService;
         }
 
         [HttpPost("UppdateEUFLInformation")]

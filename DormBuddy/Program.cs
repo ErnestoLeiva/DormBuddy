@@ -35,6 +35,7 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
 builder.Services.AddSingleton<TimeZoneService>();
 builder.Services.AddSingleton<ImgurService>();
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
+builder.Services.AddSingleton<GlobalMessageService>();
 
 builder.Services.AddScoped<UserLastUpdateActionFilter>();
 builder.Services.AddScoped<NavBarInfoService>();

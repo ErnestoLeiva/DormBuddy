@@ -28,6 +28,8 @@ namespace DormBuddy.Controllers
 
         private readonly IConfiguration _configuration;
 
+        private readonly GlobalMessageService _global_MessageService;
+
         private readonly int REVALIDATE_TIME = 30; // in minutes
 
         public BaseController(
@@ -37,7 +39,8 @@ namespace DormBuddy.Controllers
             ILogger<BaseController> logger,
             IMemoryCache memoryCache,
             TimeZoneService timezoneService,
-            IConfiguration configuration
+            IConfiguration configuration,
+            GlobalMessageService globalMessageService
         )
         {
             _userManager = userManager;
@@ -47,6 +50,7 @@ namespace DormBuddy.Controllers
             _memoryCache = memoryCache;
             _timezoneService = timezoneService;
             _configuration = configuration;
+            _global_MessageService = globalMessageService;
         }
 
         protected async Task<ApplicationUser?> GetCurrentUserAsync()
