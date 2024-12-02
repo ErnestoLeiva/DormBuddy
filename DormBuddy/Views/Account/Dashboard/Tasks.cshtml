@@ -61,7 +61,7 @@
                 <p class="stat-label">Due Today</p>
             </div>
         </div>
-
+</div>
         <div class="form-group">
             <label for="assignedTo">Assigned To</label>
             <div id="assignedTo">
@@ -91,7 +91,7 @@
             </div>
 
         </div>
-    }
+    
     @if (!ViewData.ModelState.IsValid)
     {
         <div class="alert alert-danger">
@@ -148,7 +148,7 @@
         </form>
     </div>
 
-    <!-- Tasks Table -->
+        <!-- Tasks Table -->
     <div class="table-container">
         <table class="table" id="taskTable">
             <thead>
@@ -161,72 +161,52 @@
                 </tr>
             </thead>
             <tbody id="taskTableBody">
-                @if (!tasks.Any())
-                {
-
-                    <tr>
-                        <td>@task.TaskName</td>
-                        <td>
-                            @{
-                                if (ViewBag.Users != null)
-                                {
-                                    var users = (List<DormBuddy.Models.ApplicationUser>)ViewBag.Users;
-                                    var assignedIds = task.AssignedTo?.Split(',') ?? Array.Empty<string>();
-                                    var assignedNames = users
-                                        .Where(u => assignedIds.Contains(u.Id))
-                                        .Select(u => $"{u.FirstName} {u.LastName}");
-
-                                    <span>@string.Join(", ", assignedNames)</span>
-                                }
-                                else
-                                {
-                                    <span>Unknown</span>
-                                }
-                            }
-                        </td>
-                        <td>@task.DueDate.ToString("MM/dd/yyyy hh:mm tt")</td>
-                        <td class="text-center">
-                            <span class="badge @(task.IsCompleted ? "bg-success" : "bg-danger")">
-                                <i class="fa @(task.IsCompleted ? "fa-check" : "fa-times")" aria-hidden="true"></i>
-                            </span>
-                        </td>
-                        <td>
-                            <button class="btn @(task.IsCompleted ? "btn-warning" : "btn-success") btn-sm"
-                                onclick="toggleTaskStatus(this, @task.Id)">
-                                Toggle Status
-                            </button>
-                            <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteConfirmationModal" 
-                                onclick="setTaskToDelete('@task.TaskName', '@task.Id')">Delete</button>
-                        </td>
-
-                    </tr>
-                }
-                else
+                @if (tasks.Any())
                 {
                     foreach (var task in tasks)
                     {
                         <tr>
                             <td>@task.TaskName</td>
-                            <td>@task.AssignedTo</td>
-                            <td>@task.DueDate.ToString("MM/dd/yyyy hh:mm tt")</td>
                             <td>
-                                <span class="badge @(task.IsCompleted ? "bg-success" : "bg-warning text-dark")">
-                                    @(task.IsCompleted ? "Completed" : "In Progress")
+                                @{
+                                    if (ViewBag.Users != null)
+                                    {
+                                        var users = (List<DormBuddy.Models.ApplicationUser>)ViewBag.Users;
+                                        var assignedIds = task.AssignedTo?.Split(',') ?? Array.Empty<string>();
+                                        var assignedNames = users
+                                            .Where(u => assignedIds.Contains(u.Id))
+                                            .Select(u => $"{u.FirstName} {u.LastName}");
+
+                                        <span>@string.Join(", ", assignedNames)</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Unknown</span>
+                                    }
+                                }
+                            </td>
+                            <td>@task.DueDate.ToString("MM/dd/yyyy hh:mm tt")</td>
+                            <td class="text-center">
+                                <span class="badge @(task.IsCompleted ? "bg-success" : "bg-danger")">
+                                    <i class="fa @(task.IsCompleted ? "fa-check" : "fa-times")" aria-hidden="true"></i>
                                 </span>
                             </td>
                             <td>
                                 <button class="btn @(task.IsCompleted ? "btn-warning" : "btn-success") btn-sm"
                                     onclick="toggleTaskStatus(this, @task.Id)">
-                                    @(task.IsCompleted ? "Mark as In-Progress" : "Mark as Completed")
+                                    Toggle Status
                                 </button>
-                                <button class="btn btn-danger btn-sm" data-toggle="modal" 
-                                    data-target="#deleteConfirmationModal" 
-                                    onclick="setTaskToDelete('@task.TaskName', '@task.Id')">
-                                    Delete
-                                </button>
+                                <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteConfirmationModal" 
+                                    onclick="setTaskToDelete('@task.TaskName', '@task.Id')">Delete</button>
                             </td>
                         </tr>
                     }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5">No tasks found.</td>
+                    </tr>
                 }
             </tbody>
         </table>

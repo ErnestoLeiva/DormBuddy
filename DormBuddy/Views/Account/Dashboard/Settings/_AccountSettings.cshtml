@@ -11,17 +11,6 @@
 
         <h2 class="mb-4">Account Settings</h2>
 
-
-
-@if (User?.Identity != null && User?.Identity.IsAuthenticated != null) {
-
-    string firstName = @Model.User?.FirstName ?? "";
-    string lastName = @Model.User?.LastName ?? "";
-    string email = @Model.User?.Email ?? "";
-
-    <div class="settings-container container mt-4">
-        <h2>Account Settings</h2>
-
         <form style="margin:30px 0px;" id="UpdateEUFLForm" asp-controller="Imgur" asp-action="UpdateEUFLInformation" method="post">
             <div class="mb-3">
                 <label for="email" class="form-label">Current Email</label>
@@ -135,7 +124,7 @@
         <button id="deleteaccount" class="btn btn-danger mt-4 w-100">Remove Account Permanently</button>
     }
 </div>
-
+}
 
 <!-- Firebase Scripts -->
 

@@ -1,4 +1,4 @@
-@inject Microsoft.Extensions.Localization.IStringLocalizerFactory LocalizerFactory
+@inject Microsoft.Extensions.Localization.IStringLocalizerFactory LocalizerFactory;
 @{
     var SharedLocalizer = LocalizerFactory.Create("SharedResource", typeof(Program).Assembly.GetName().Name ?? "");
     ViewData["Title"] = "Dashboard";
@@ -145,10 +145,7 @@
             <a href="/Home/ContactUs" class="card-button">Get Help</a>
         </div>
     </div>
-
-       
-       
-        }
+         
     </div>
 
     @if (roles.Length > 1)
@@ -204,25 +201,7 @@
     }
 
 
-    <div class="chat-container container mt-4">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between">
-                <div>
-                    <button id="globalChatBtn" class="btn btn-primary btn-sm">Global Chat</button>
-                    <button id="dormChatBtn" class="btn btn-outline-primary btn-sm">Dorm Chat</button>
-                </div>
-            </div>
-            <div class="card-body" style="height: 400px; overflow-y: auto;" id="messageArea">
-                <!-- Messages will load here -->
-            </div>
-            <div class="card-footer">
-                <div class="input-group">
-                    <textarea id="messageInput" class="form-control" placeholder="Type your message..." style="resize: none;"></textarea>
-                    <button id="sendMessageBtn" class="btn btn-primary">Send</button>
-                </div>
-            </div>
-        </div>
-    </div>
+   
 
 
 
@@ -283,16 +262,17 @@
                         </div>
                     </div>
                 </div>
-            
+            }
 
-        </div>
-        
     }
+        
+    
 
     <hr class="my-4" style="padding-bottom:200px;">
 
 
 </div>
+}
 
 
 @section Scripts {

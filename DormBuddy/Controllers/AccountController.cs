@@ -443,7 +443,7 @@ namespace DormBuddy.Controllers
         public async Task<IActionResult> Dashboard()
         {
             if (User?.Identity?.IsAuthenticated == true)
-    {
+        {
         var user = await _userManager.GetUserAsync(User);
         if (user != null)
         {
@@ -460,9 +460,6 @@ namespace DormBuddy.Controllers
             ViewBag.PendingExpenses = await _context.Expenses
                 .CountAsync(e => e.UserId == user.Id);
 
-                    ViewBag.CultureInfo = $"Current Culture: {currentCulture}, UI Culture: {currentUICulture}";
-
-                    ViewBag.NotificationAmount = (await _context.Notifications.Where(m => m.UserId == user.Id).ToListAsync()).Count;
                 }
 
             //static active until implemented
@@ -473,9 +470,9 @@ namespace DormBuddy.Controllers
 
             return View();
         }
-    }
+    
     return RedirectToAction("AccountForms");
-        }
+    }
 
         #endregion
 
@@ -699,4 +696,5 @@ public IActionResult Settings()
 
         #endregion
     }
-}   
+}
+   
