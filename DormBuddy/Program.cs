@@ -8,6 +8,7 @@ using System.Globalization;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Mvc.Razor;
 using System.Net;
+using DormBuddy.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +32,8 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
         ? CookieSecurePolicy.SameAsRequest 
         : CookieSecurePolicy.Always;
 });
+
+builder.Services.AddSignalR();
 
 builder.Services.AddSingleton<TimeZoneService>();
 builder.Services.AddSingleton<ImgurService>();
@@ -185,6 +188,8 @@ app.UseRouting();
 app.UseSession(); // UseSession must be before Authentication and Authorization
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapHub<NotificationHub>("/notificationHub");
 
 app.MapControllerRoute(
     name: "account",
