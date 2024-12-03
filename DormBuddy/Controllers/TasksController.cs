@@ -33,38 +33,7 @@ namespace DormBuddy.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            var tasks = await _dbContext.Tasks
-                .Where(t => (t.AssignedTo != null && t.AssignedTo.Contains(user.Id)) || t.UserId == user.Id)
-                .ToListAsync();
-
-            var groupId = await _dbContext.GroupMembers
-                .Where(gm => gm.UserId == user.Id)
-                .Select(gm => gm.GroupId)
-                .FirstOrDefaultAsync();
-
-
-            if (groupId == 0)
-            {
-                ViewBag.GroupMembers = new List<GroupMemberModel>();
-                ViewBag.Users = new List<ApplicationUser>();
-                TempData["error"] = "You are not part of any group. Please join or create a group to use this feature.";
-            }
-            else
-            {
-                var groupMembers = await _dbContext.GroupMembers
-                    .Where(gm => gm.GroupId == groupId)
-                    .ToListAsync();
-
-                var userIds = groupMembers.Select(gm => gm.UserId).ToList();
-                var users = await _dbContext.Users
-                    .Where(u => userIds.Contains(u.Id))
-                    .ToListAsync();
-
-                ViewBag.GroupMembers = groupMembers;
-                ViewBag.Users = users;
-            }
-
-            var newTask = new TaskModel { UserId = user.Id };
+            var (tasks, newTask) = await LoadTaskData(user);
 
             return View("~/Views/Account/Dashboard/Tasks.cshtml", Tuple.Create(tasks, newTask));
         }
@@ -131,28 +100,8 @@ namespace DormBuddy.Controllers
                 }
             }
 
-            var tasks = await _dbContext.Tasks
-                .Where(t => t.UserId == user.Id || (t.AssignedTo != null && t.AssignedTo.Contains(user.Id)))
-                .ToListAsync();
-            
-            var groupId = await _dbContext.GroupMembers
-                .Where(gm => gm.UserId == user.Id)
-                .Select(gm => gm.GroupId)
-                .FirstOrDefaultAsync();
+            var (tasks, newTask) = await LoadTaskData(user);
 
-            var groupMembers = await _dbContext.GroupMembers
-                .Where(gm => gm.GroupId == groupId)
-                .ToListAsync();
-
-            var userIds = groupMembers.Select(gm => gm.UserId).ToList();
-            var users = await _dbContext.Users
-                .Where(u => userIds.Contains(u.Id))
-                .ToListAsync();
-
-            ViewBag.GroupMembers = groupMembers;
-            ViewBag.Users = users;
-
-            var newTask = new TaskModel();
             return View("~/Views/Account/Dashboard/Tasks.cshtml", Tuple.Create(tasks, newTask));
         }
 
@@ -197,28 +146,8 @@ namespace DormBuddy.Controllers
                 }
             }
 
-            var tasks = await _dbContext.Tasks
-                .Where(t => t.UserId == user.Id || (t.AssignedTo != null && t.AssignedTo.Contains(user.Id)))
-                .ToListAsync();
-
-            var groupId = await _dbContext.GroupMembers
-                .Where(gm => gm.UserId == user.Id)
-                .Select(gm => gm.GroupId)
-                .FirstOrDefaultAsync();
-
-            var groupMembers = await _dbContext.GroupMembers
-                .Where(gm => gm.GroupId == groupId)
-                .ToListAsync();
-
-            var userIds = groupMembers.Select(gm => gm.UserId).ToList();
-            var users = await _dbContext.Users
-                .Where(u => userIds.Contains(u.Id))
-                .ToListAsync();
-
-            ViewBag.GroupMembers = groupMembers;
-            ViewBag.Users = users;
-
-            var newTask = new TaskModel { UserId = user.Id };
+            var (tasks, newTask) = await LoadTaskData(user);
+            
             return View("~/Views/Account/Dashboard/Tasks.cshtml", Tuple.Create(tasks, newTask));
         }
 
@@ -250,6 +179,45 @@ namespace DormBuddy.Controllers
                 _logger.LogError($"Error toggling task status with ID {taskId}: {ex.Message}");
                 return Json(new { success = false, message = "Error: Could not update the task." });
             }
+        }
+    
+        // load data function
+        private async Task<(List<TaskModel> tasks, TaskModel newTask)> LoadTaskData(ApplicationUser user)
+        {
+            var tasks = await _dbContext.Tasks
+                .Where(t => (t.AssignedTo != null && t.AssignedTo.Contains(user.Id)) || t.UserId == user.Id)
+                .ToListAsync();
+
+            var groupId = await _dbContext.GroupMembers
+                .Where(gm => gm.UserId == user.Id)
+                .Select(gm => gm.GroupId)
+                .FirstOrDefaultAsync();
+
+
+            if (groupId == 0)
+            {
+                ViewBag.GroupMembers = new List<GroupMemberModel>();
+                ViewBag.Users = new List<ApplicationUser>();
+                TempData["error"] = "You are not part of any group. Please join or create a group to use this feature.";
+            }
+            else
+            {
+                var groupMembers = await _dbContext.GroupMembers
+                    .Where(gm => gm.GroupId == groupId)
+                    .ToListAsync();
+
+                var userIds = groupMembers.Select(gm => gm.UserId).ToList();
+                var users = await _dbContext.Users
+                    .Where(u => userIds.Contains(u.Id))
+                    .ToListAsync();
+
+                ViewBag.GroupMembers = groupMembers;
+                ViewBag.Users = users;
+            }
+
+            var newTask = new TaskModel { UserId = user.Id };
+
+            return(tasks, newTask);
         }
     }
 }

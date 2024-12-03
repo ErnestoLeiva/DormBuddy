@@ -30,36 +30,7 @@ namespace DormBuddy.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            var expenses = await _dbContext.Expenses
-                .Where(e => e.UserId == user.Id || e.SharedWith.Contains(user.Id))
-                .ToListAsync();
-
-            var groupId = await _dbContext.GroupMembers
-                .Where(gm => gm.UserId == user.Id)
-                .Select(gm => gm.GroupId)
-                .FirstOrDefaultAsync();
-
-            if (groupId != 0)
-            {
-                var groupMembers = await _dbContext.GroupMembers
-                    .Where(gm => gm.GroupId == groupId)
-                    .ToListAsync();
-
-                var userIds = groupMembers.Select(gm => gm.UserId).ToList();
-                var users = await _dbContext.Users
-                    .Where(u => userIds.Contains(u.Id))
-                    .ToListAsync();
-
-                ViewBag.GroupMembers = groupMembers;
-                ViewBag.Users = users;
-            }
-            else
-            {
-                ViewBag.GroupMembers = new List<GroupMemberModel>();
-                ViewBag.Users = new List<ApplicationUser>();
-            }
-
-            var newExpense = new ExpenseModel { UserId = user.Id };
+            var (expenses, newExpense) = await LoadExpenseData(user);
             
             return View("~/Views/Account/Dashboard/Expenses.cshtml", Tuple.Create(expenses, newExpense));
         }
@@ -96,29 +67,9 @@ namespace DormBuddy.Controllers
                 var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
                 TempData["error"] = "Error: Invalid expense data. Details: " + string.Join("; ", errors);
             }
-
-            var expenses = await _dbContext.Expenses
-                .Where(e => e.UserId == user.Id  || e.SharedWith.Contains(user.Id))
-                .ToListAsync();
-
-            var groupId = await _dbContext.GroupMembers
-                .Where(gm => gm.UserId == user.Id)
-                .Select(gm => gm.GroupId)
-                .FirstOrDefaultAsync();
-
-            var groupMembers = await _dbContext.GroupMembers
-                .Where(gm => gm.GroupId == groupId)
-                .ToListAsync();
-
-            var userIds = groupMembers.Select(gm => gm.UserId).ToList();
-            var users = await _dbContext.Users
-                .Where(u => userIds.Contains(u.Id))
-                .ToListAsync();
-
-            ViewBag.GroupMembers = groupMembers;
-            ViewBag.Users = users;
-
-            var newExpense = new ExpenseModel { UserId = user.Id };
+            
+            var (expenses, newExpense) = await LoadExpenseData(user);
+            
             return View("~/Views/Account/Dashboard/Expenses.cshtml", Tuple.Create(expenses, newExpense));
         }
 
@@ -158,8 +109,30 @@ namespace DormBuddy.Controllers
                 }
             }
 
+            var (expenses, newExpense) = await LoadExpenseData(user);
+
+            return View("~/Views/Account/Dashboard/Expenses.cshtml", Tuple.Create(expenses, newExpense));
+        }
+
+        // POST: /Expenses/ToggleStatus
+        [HttpPost]
+        public async Task<IActionResult> ToggleStatus(int expenseId)
+        {
+            var expense = await _dbContext.Expenses.FindAsync(expenseId);
+            if (expense != null)
+            {
+                expense.isSplit = !expense.isSplit; 
+                await _dbContext.SaveChangesAsync();
+                return Json(new { success = true });
+            }
+            return Json(new { success = false, message = "Expense not found" });
+        }
+
+        // LoadDataFunction
+        private async Task<(List<ExpenseModel> expenses, ExpenseModel newExpense)> LoadExpenseData(ApplicationUser user)
+        {
             var expenses = await _dbContext.Expenses
-                .Where(e => e.UserId == user.Id)
+                .Where(e => e.UserId == user.Id  || e.SharedWith.Contains(user.Id))
                 .ToListAsync();
 
             var groupId = await _dbContext.GroupMembers
@@ -180,22 +153,8 @@ namespace DormBuddy.Controllers
             ViewBag.Users = users;
 
             var newExpense = new ExpenseModel { UserId = user.Id };
-            return View("~/Views/Account/Dashboard/Expenses.cshtml", Tuple.Create(expenses, newExpense));
-        }
 
-        // POST: /Expenses/ToggleStatus
-        [HttpPost]
-        public async Task<IActionResult> ToggleStatus(int expenseId)
-        {
-            var expense = await _dbContext.Expenses.FindAsync(expenseId);
-            if (expense != null)
-            {
-                expense.isSplit = !expense.isSplit; 
-                await _dbContext.SaveChangesAsync();
-                return Json(new { success = true });
-            }
-            return Json(new { success = false, message = "Expense not found" });
+            return (expenses, newExpense);
         }
-
     }
 }

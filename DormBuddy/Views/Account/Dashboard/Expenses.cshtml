@@ -7,9 +7,25 @@
 
     // Calculate stats
     var totalExpenses = expenses.Sum(e => e.Amount);
-    var averageExpense = expenses.Any() ? Math.Round(expenses.Average(e => e.Amount), 2) : 0;
-    var pendingPayments = expenses.Count(e => e.SharedWith.Contains(",")) * averageExpense / 2; 
-    var activeSplits = expenses.Count(e => e.SharedWith.Contains(","));
+
+    // Calculate the average expense per person
+    var totalParticipants = expenses
+        .SelectMany(e => (e.SharedWith?.Split(',') ?? new string[0]).Distinct())
+        .Distinct()
+        .Count();
+    var averageExpense = totalParticipants > 0 ? Math.Round(totalExpenses / totalParticipants, 2) : 0;
+
+    // Pending payments are the total amount of all expenses divided by the number of participants in each shared expense
+    var pendingPayments = expenses
+        .Where(e => e.SharedWith != null && !e.isSplit )
+        .Sum(e =>
+        {
+            var participantCount = e.SharedWith.Split(',').Length + 1; // Include the user in the split
+            return participantCount > 0 ? e.Amount / participantCount : 0;
+        });
+
+    // Active splits are the count of expenses that have a shared list of participants
+    var activeSplits = expenses.Count(e => e.SharedWith != null && e.SharedWith.Split(',').Length > 0);
 }
 <div class="expenses-container fade-in">
 
