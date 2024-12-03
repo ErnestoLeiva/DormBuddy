@@ -17,7 +17,7 @@ namespace DormBuddy.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.8")
+                .HasAnnotation("ProductVersion", "8.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
@@ -49,6 +49,9 @@ namespace DormBuddy.Migrations
                     b.Property<string>("FirstName")
                         .HasMaxLength(160)
                         .HasColumnType("varchar(160)");
+
+                    b.Property<DateTime?>("LastLoginDate")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("LastName")
                         .HasMaxLength(160)
@@ -85,6 +88,9 @@ namespace DormBuddy.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasMaxLength(160)
                         .HasColumnType("varchar(160)");
+
+                    b.Property<int>("TotalLogins")
+                        .HasColumnType("int");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("tinyint(1)");
@@ -131,7 +137,7 @@ namespace DormBuddy.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("DashboardChatModel");
+                    b.ToTable("DashboardChatModel", (string)null);
                 });
 
             modelBuilder.Entity("DormBuddy.Models.ExpenseModel", b =>
@@ -168,7 +174,7 @@ namespace DormBuddy.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Expenses");
+                    b.ToTable("Expenses", (string)null);
                 });
 
             modelBuilder.Entity("DormBuddy.Models.FriendsModel", b =>
@@ -195,7 +201,7 @@ namespace DormBuddy.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("FriendsModel");
+                    b.ToTable("FriendsModel", (string)null);
                 });
 
             modelBuilder.Entity("DormBuddy.Models.GroupMemberModel", b =>
@@ -261,6 +267,46 @@ namespace DormBuddy.Migrations
                     b.ToTable("Groups", (string)null);
                 });
 
+            modelBuilder.Entity("DormBuddy.Models.LogModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(160)
+                        .HasColumnType("varchar(160)");
+
+                    b.Property<string>("Details")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<string>("LogType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Logs", (string)null);
+                });
+
             modelBuilder.Entity("DormBuddy.Models.Notifications", b =>
                 {
                     b.Property<int>("Id")
@@ -287,7 +333,7 @@ namespace DormBuddy.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("DormBuddy.Models.PeerLendingModel", b =>
@@ -319,7 +365,7 @@ namespace DormBuddy.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("PeerLendings");
+                    b.ToTable("PeerLendings", (string)null);
                 });
 
             modelBuilder.Entity("DormBuddy.Models.Profile_PostsModel", b =>
@@ -350,9 +396,11 @@ namespace DormBuddy.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("TargetId");
+
                     b.HasIndex("UserId");
 
-                    b.ToTable("Profile_Posts");
+                    b.ToTable("Profile_Posts", (string)null);
                 });
 
             modelBuilder.Entity("DormBuddy.Models.TaskModel", b =>
@@ -386,7 +434,7 @@ namespace DormBuddy.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Tasks");
+                    b.ToTable("Tasks", (string)null);
                 });
 
             modelBuilder.Entity("DormBuddy.Models.UserLastUpdate", b =>
@@ -408,7 +456,7 @@ namespace DormBuddy.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserLastUpdate");
+                    b.ToTable("UserLastUpdate", (string)null);
                 });
 
             modelBuilder.Entity("DormBuddy.Models.UserProfile", b =>
@@ -431,7 +479,7 @@ namespace DormBuddy.Migrations
                         .HasMaxLength(160)
                         .HasColumnType("varchar(160)");
 
-                    b.Property<DateTime>("DateOfBirth")
+                    b.Property<DateTime?>("DateOfBirth")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("FacebookUrl")
@@ -486,7 +534,7 @@ namespace DormBuddy.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserProfiles");
+                    b.ToTable("UserProfiles", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -670,9 +718,15 @@ namespace DormBuddy.Migrations
 
             modelBuilder.Entity("DormBuddy.Models.Profile_PostsModel", b =>
                 {
+                    b.HasOne("DormBuddy.Models.ApplicationUser", "TargetUser")
+                        .WithMany()
+                        .HasForeignKey("TargetId");
+
                     b.HasOne("DormBuddy.Models.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId");
+
+                    b.Navigation("TargetUser");
 
                     b.Navigation("User");
                 });

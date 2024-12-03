@@ -14,12 +14,16 @@ namespace DormBuddy.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IReportService _reportService;
         private readonly DBContext _context;
+        private readonly LogService _logService;
 
-        public AdministrationController(UserManager<ApplicationUser> userManager, IReportService reportService, DBContext context)
+
+        public AdministrationController(UserManager<ApplicationUser> userManager, IReportService reportService, DBContext context, LogService logService)
         {
             _userManager = userManager;
             _reportService = reportService;
             _context = context;
+            _logService = logService ?? throw new ArgumentNullException(nameof(logService));
+
         }
 
         [Authorize(Roles = "Admin")]
@@ -65,10 +69,38 @@ namespace DormBuddy.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> SystemLogs()
         {
-            var logs = await _reportService.GetSystemLogs();
+             if (_logService == null)
+            {
+                throw new NullReferenceException("LogService is not initialized. Ensure it is registered in the dependency injection container.");
+            }
+
+            var logs = await _logService.GetRecentLogsAsync();
             return View("~/Views/Administration/Logs.cshtml", logs);
+       
+        }
+        public async Task AddLogAsync(string action, string username, string details, string logType = "Info")
+        {
+            var log = new LogModel
+            {
+                Timestamp = DateTime.UtcNow,
+                Action = action,
+                Username = username,
+                Details = details,
+                LogType = logType
+            };
+
+            await _context.Logs.AddAsync(log);
+            await _context.SaveChangesAsync();
         }
 
+        public async Task<List<LogModel>> GetRecentLogsAsync()
+        {
+            return await _context.Logs
+                .OrderByDescending(l => l.Timestamp)
+                .Take(50)
+                .ToListAsync();
+        }
+    
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public IActionResult UpdateSystemSettings(string setting1, bool setting2)

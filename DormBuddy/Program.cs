@@ -41,6 +41,7 @@ builder.Services.AddScoped<UserLastUpdateActionFilter>();
 builder.Services.AddScoped<NavBarInfoService>();
 builder.Services.AddScoped<TimeZoneService>();
 builder.Services.AddScoped<IReportService, ActivityReportService>();
+builder.Services.AddScoped<LogService>();
 
 
 builder.Services.AddCors(options => {

@@ -1,30 +1,27 @@
 @model List<DormBuddy.Models.LogModel>
 
-<h2>System Logs</h2>
-
-@if (Model == null || !Model.Any())
-{
-    <p>No logs available.</p>
-}
-else
-{
-    <table>
-        <thead>
+<table>
+    <thead>
+        <tr>
+            <th>Timestamp</th>
+            <th>Action</th>
+            <th>Username</th>
+            <th>Details</th>
+            <th>Log Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var log in Model)
+        {
             <tr>
-                <th>Timestamp</th>
-                <th>Log Type</th>
-                <th>Description</th>
+                <td>@log.Timestamp</td>
+                <td>@log.Action</td>
+                <td>@log.Username</td>
+                <td>@log.Details</td>
+                <td>@log.LogType</td>
+                <td>@log.Description</td>
             </tr>
-        </thead>
-        <tbody>
-            @foreach (var log in Model)
-            {
-                <tr>
-                    <td>@log.Timestamp</td>
-                    <td>@log.LogType</td>
-                    <td>@log.Description</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+        }
+    </tbody>
+</table>

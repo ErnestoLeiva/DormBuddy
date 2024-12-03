@@ -7,7 +7,9 @@ namespace DormBuddy.Models
         public string Action { get; set; }
         public string Username { get; set; }
         public string Details { get; set; }
-        public string LogType { get; set; } // Instead of "Level"
-        public string Description { get; set; } 
+        public string LogType { get; set; } = "Info"; 
+        public string? Description { get; set; } 
+
+
     }
 }

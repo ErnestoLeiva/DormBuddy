@@ -76,6 +76,16 @@ namespace DormBuddy.Models
                     }
                 }
             }
+            // Configuration for LogModel
+            builder.Entity<LogModel>(entity =>
+            {
+                entity.ToTable("Logs");
+                entity.Property(l => l.Action).HasMaxLength(255).IsRequired();
+                entity.Property(l => l.Username).HasMaxLength(100);
+                entity.Property(l => l.LogType).HasMaxLength(50);
+                entity.Property(l => l.Details).HasMaxLength(500);
+                entity.Property(l => l.Timestamp).IsRequired();
+            });
 
             builder.Entity<GroupModel>(entity =>
             {
