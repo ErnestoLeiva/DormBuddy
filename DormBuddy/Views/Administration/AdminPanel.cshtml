@@ -2,104 +2,107 @@
     ViewData["Title"] = "Admin Panel";
 }
 
-<!-- Return to Dashboard Button -->
-<div class="mb-4">
-    <a href="/Account/Dashboard" class="btn btn-outline-primary">
-        <i class="fa fa-chevron-left"></i> Return to Dashboard
-    </a>
-</div>
-
-<!-- ADMIN PANEL HEADER -->
-<div class="text-center mb-4">
-    <h1 class="display-4">Admin Panel</h1>
-    <p>Welcome, <b>@ViewBag.Username</b>! Manage the platform and users effectively.</p>
-</div>
-
-<!-- ADMIN PANEL MAIN OPTIONS -->
-<div class="container">
-    <div class="row">
-        <!-- User Management -->
-        <div class="col-md-4">
-            <div class="card text-center mb-4">
-                <div class="card-header bg-primary text-white">
-                    <i class="fas fa-users fa-lg"></i>
-                    User Management
-                </div>
-                <div class="card-body">
-                    <p>View, update, or delete user accounts and assign roles.</p>
-                    <a href="/Administration/ManageUsers" class="btn btn-primary">Manage Users</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Content Moderation -->
-        <div class="col-md-4">
-            <div class="card text-center mb-4">
-                <div class="card-header bg-warning text-white">
-                    <i class="fas fa-edit fa-lg"></i>
-                    Content Moderation
-                </div>
-                <div class="card-body">
-                    <p>Approve, remove, or edit user-generated content on the platform.</p>
-                    <a href="/Administration/ModeratorPanel" class="btn btn-warning">Go to Moderator Panel</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- System Settings -->
-        <div class="col-md-4">
-            <div class="card text-center mb-4">
-                <div class="card-header bg-danger text-white">
-                    <i class="fas fa-cogs fa-lg"></i>
-                    System Settings
-                </div>
-                <div class="card-body">
-                    <p>Adjust platform settings and configuration for all users.</p>
-                    <a href="/Administration/SystemSettings" class="btn btn-danger">System Settings</a>
-                </div>
-            </div>
-        </div>
+<!-- Add a div with the class 'admin-panel-background' to apply the background -->
+<div class="admin-panel-background">
+    <!-- Return to Dashboard Button -->
+    <div class="mb-4">
+        <a href="/Account/Dashboard" class="btn btn-outline-primary">
+            <i class="fa fa-chevron-left"></i> Return to Dashboard
+        </a>
     </div>
 
-    <div class="row">
-        <!-- Reports and Analytics -->
-        <div class="col-md-4">
-            <div class="card text-center mb-4">
-                <div class="card-header bg-success text-white">
-                    <i class="fas fa-chart-line fa-lg"></i>
-                    Reports & Analytics
+    <!-- ADMIN PANEL HEADER -->
+    <div class="text-center mb-4">
+        <h1 class="display-4">Admin Panel</h1>
+        <p>Welcome, <b>@ViewBag.Username</b>! Manage the platform and users effectively.</p>
+    </div>
+
+    <!-- ADMIN PANEL MAIN OPTIONS -->
+    <div class="container">
+        <div class="row">
+            <!-- User Management -->
+            <div class="col-md-4">
+                <div class="card text-center mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <i class="fas fa-users fa-lg"></i>
+                        User Management
+                    </div>
+                    <div class="card-body">
+                        <p>View, update, or delete user accounts and assign roles.</p>
+                        <a href="/Administration/ManageUsers" class="btn btn-primary">Manage Users</a>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <p>View usage statistics, activity logs, and reports on platform health.</p>
-                    <a href="/Administration/Reports" class="btn btn-success">View Reports</a>
+            </div>
+
+            <!-- Content Moderation -->
+            <div class="col-md-4">
+                <div class="card text-center mb-4">
+                    <div class="card-header bg-warning text-white">
+                        <i class="fas fa-edit fa-lg"></i>
+                        Content Moderation
+                    </div>
+                    <div class="card-body">
+                        <p>Approve, remove, or edit user-generated content on the platform.</p>
+                        <a href="/Administration/ModeratorPanel" class="btn btn-warning">Go to Moderator Panel</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Settings -->
+            <div class="col-md-4">
+                <div class="card text-center mb-4">
+                    <div class="card-header bg-danger text-white">
+                        <i class="fas fa-cogs fa-lg"></i>
+                        System Settings
+                    </div>
+                    <div class="card-body">
+                        <p>Adjust platform settings and configuration for all users.</p>
+                        <a href="/Administration/SystemSettings" class="btn btn-danger">System Settings</a>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- System Logs -->
-        <div class="col-md-4">
-            <div class="card text-center mb-4">
-                <div class="card-header bg-secondary text-white">
-                    <i class="fas fa-file-alt fa-lg"></i>
-                    System Logs
-                </div>
-                <div class="card-body">
-                    <p>Access detailed logs for all system events and user activities.</p>
-                    <a href="/Administration/SystemLogs" class="btn btn-secondary">View Logs</a>
+        <div class="row">
+            <!-- Reports and Analytics -->
+            <div class="col-md-4">
+                <div class="card text-center mb-4">
+                    <div class="card-header bg-success text-white">
+                        <i class="fas fa-chart-line fa-lg"></i>
+                        Reports & Analytics
+                    </div>
+                    <div class="card-body">
+                        <p>View usage statistics, activity logs, and reports on platform health.</p>
+                        <a href="/Administration/Reports" class="btn btn-success">View Reports</a>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Manage Roles -->
-        <div class="col-md-4">
-            <div class="card text-center mb-4">
-                <div class="card-header bg-info text-white">
-                    <i class="fas fa-user-shield fa-lg"></i>
-                    Role Management
+            <!-- System Logs -->
+            <div class="col-md-4">
+                <div class="card text-center mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <i class="fas fa-file-alt fa-lg"></i>
+                        System Logs
+                    </div>
+                    <div class="card-body">
+                        <p>Access detailed logs for all system events and user activities.</p>
+                        <a href="/Administration/SystemLogs" class="btn btn-secondary">View Logs</a>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <p>Assign, update, or revoke roles for users.</p>
-                    <a href="/Administration/ManageRoles" class="btn btn-info">Manage Roles</a>
+            </div>
+
+            <!-- Manage Roles -->
+            <div class="col-md-4">
+                <div class="card text-center mb-4">
+                    <div class="card-header bg-info text-white">
+                        <i class="fas fa-user-shield fa-lg"></i>
+                        Role Management
+                    </div>
+                    <div class="card-body">
+                        <p>Assign, update, or revoke roles for users.</p>
+                        <a href="/Administration/ManageRoles" class="btn btn-info">Manage Roles</a>
+                    </div>
                 </div>
             </div>
         </div>
