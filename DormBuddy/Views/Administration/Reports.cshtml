@@ -1,5 +1,36 @@
-<h2>Monthly Reports</h2>
-<div>
-    <a href="/Admin/MonthlyReportView" class="btn btn-primary">View Report</a>
-    <a href="/Admin/ExportMonthlyReport" class="btn btn-secondary">Download Report</a>
-</div>
+@model IEnumerable<UserActivityReport>
+
+<h1>Monthly Activity Reports</h1>
+
+@if (!Model.Any())
+{
+    <p>No activity reports found.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Total Logins</th>
+                <th>Last Login Date</th>
+                <th>Groups Joined</th>
+                <th>Tasks Created</th>
+                <th>Expenses Added</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var report in Model)
+            {
+                <tr>
+                    <td>@report.FullName</td>
+                    <td>@report.TotalLogins</td>
+                    <td>@report.LastLoginDate?.ToString("yyyy-MM-dd")</td>
+                    <td>@report.GroupsJoined</td>
+                    <td>@report.TasksCreated</td>
+                    <td>@report.ExpensesAdded</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

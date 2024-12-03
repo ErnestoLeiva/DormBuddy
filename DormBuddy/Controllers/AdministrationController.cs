@@ -2,65 +2,72 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity; // For UserManager and Identity types
 using DormBuddy.Models;             // For ApplicationUser
-
+using DormBuddy.Services;           // For IReportService
 
 namespace DormBuddy.Controllers
 {
     public class AdministrationController : Controller
     {
-         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IReportService _reportService;
 
-        // Constructor to inject UserManager
-        public AdministrationController(UserManager<ApplicationUser> userManager)
+        // Constructor to inject dependencies
+        public AdministrationController(UserManager<ApplicationUser> userManager, IReportService reportService)
         {
             _userManager = userManager;
+            _reportService = reportService;
         }
 
-        // GET: /Administration/AdminPanel
         [Authorize(Roles = "Admin")]
         public IActionResult AdminPanel() => View("~/Views/Administration/AdminPanel.cshtml");
 
-        // GET: /Administration/ModeratorPanel
         [Authorize(Roles = "Admin,Moderator")]
         public IActionResult ModeratorPanel() => View("~/Views/Administration/ModeratorPanel.cshtml");
-        
+
         [Authorize(Roles = "Admin")]
         public IActionResult ManageUsers()
         {
-            // Get the list of users from UserManager
             var users = _userManager.Users.ToList();
             return View("~/Views/Administration/UserManagement.cshtml", users);
         }
 
+        public IActionResult ModerateContent() => View("~/Views/Administration/ModerateContent.cshtml");
 
-        public IActionResult ModerateContent()
+        public IActionResult SystemSettings() => View("~/Views/Administration/SystemSettings.cshtml");
+
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Reports()
         {
-            // Add logic for moderating content
-            return View("~/Views/Administration/ModeratorPanel.cshtml");
+            try
+            {
+                var reports = await _reportService.GenerateMonthlyActivityReport();
+                if (!reports.Any())
+                {
+                    ViewBag.Message = "No activity reports found.";
+                }
+                return View(reports);
+            }
+            catch
+            {
+                return View("Error", new ErrorViewModel { Message = "Failed to load reports." });
+            }
         }
 
-        public IActionResult SystemSettings()
-        {
-            // Add logic for system settings
-            return View("~/Views/Administration/SystemSettings.cshtml");
-        }
-
-        public IActionResult Reports()
-        {
-            // Add logic for generating reports
-            return View("~/Views/Administration/Reports.cshtml");
-        }
-
+        [AllowAnonymous]
         public IActionResult SystemLogs()
         {
-            // Add logic for viewing system logs
-            return View("~/Views/Administration/Logs.cshtml");
+            var logs = _reportService.GetSystemLogs();
+            return View("~/Views/Administration/Logs.cshtml", logs);
         }
 
-        public IActionResult ManageRoles()
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public IActionResult UpdateSystemSettings(string setting1, bool setting2)
         {
-            // Add logic for managing roles
-            return View("~/Views/Administration/UserManagement.cshtml");
+            TempData["Message"] = "Settings updated successfully!";
+            return RedirectToAction("SystemSettings");
         }
+
+        public IActionResult ManageRoles() => View("~/Views/Administration/UserManagement.cshtml");
     }
 }

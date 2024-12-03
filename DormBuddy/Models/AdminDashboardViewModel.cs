@@ -9,4 +9,6 @@ namespace DormBuddy.ViewModels
         public List<LogModel> Logs { get; set; }
         public List<ApplicationUser> Users { get; set; }
     }
+
+
 }
