@@ -128,6 +128,48 @@ namespace DormBuddy.Controllers
             return Json(new { success = false, message = "Expense not found" });
         }
 
+        // GET: /Expenses/GetExpenseStats
+        [HttpGet]
+        public async Task<IActionResult> GetExpenseStats()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return Json(new { success = false, message = "User not found" });
+            }
+
+            var expenses = await _dbContext.Expenses
+                .Where(e => e.UserId == user.Id)
+                .ToListAsync();
+
+            var totalExpenses = expenses.Sum(e => e.Amount);
+            var totalParticipants = expenses
+                .SelectMany(e => (e.SharedWith?.Split(',') ?? new string[0]).Distinct())
+                .Distinct()
+                .Count();
+            var averageExpense = totalParticipants > 0 ? Math.Round(totalExpenses / totalParticipants, 2) : 0;
+            var pendingPayments = expenses
+                .Where(e => e.SharedWith != null && !e.isSplit)
+                .Sum(e =>
+                {
+                    var participantCount = e.SharedWith.Split(',').Length + 1;
+                    return participantCount > 0 ? e.Amount / participantCount : 0;
+                });
+            var activeSplits = expenses.Count(e => e.SharedWith != null && e.SharedWith.Split(',').Length > 0);
+
+            return Json(new
+            {
+                success = true,
+                stats = new
+                {
+                    TotalExpenses = totalExpenses.ToString("C"),
+                    AverageExpense = averageExpense.ToString("C"),
+                    PendingPayments = pendingPayments.ToString("C"),
+                    ActiveSplits = activeSplits
+                }
+            });
+        }
+
         // LoadDataFunction
         private async Task<(List<ExpenseModel> expenses, ExpenseModel newExpense)> LoadExpenseData(ApplicationUser user)
         {

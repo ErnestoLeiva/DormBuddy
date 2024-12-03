@@ -25,6 +25,7 @@ namespace DormBuddy.Controllers
         }
 
         // GET: /Tasks/Index
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -147,7 +148,7 @@ namespace DormBuddy.Controllers
             }
 
             var (tasks, newTask) = await LoadTaskData(user);
-            
+
             return View("~/Views/Account/Dashboard/Tasks.cshtml", Tuple.Create(tasks, newTask));
         }
 
@@ -179,6 +180,32 @@ namespace DormBuddy.Controllers
                 _logger.LogError($"Error toggling task status with ID {taskId}: {ex.Message}");
                 return Json(new { success = false, message = "Error: Could not update the task." });
             }
+            
+        }
+
+        // GET: /Tasks/GetTaskStats
+        [HttpGet]
+        public async Task<IActionResult> GetTaskStats()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var tasks = await _dbContext.Tasks
+                .Where(t => t.UserId == user.Id || (t.AssignedTo != null && t.AssignedTo.Contains(user.Id)))
+                .ToListAsync();
+
+            var stats = new
+            {
+                TotalTasks = tasks.Count,
+                IncompleteTasks = tasks.Count(t => !t.IsCompleted),
+                OverdueTasks = tasks.Count(t => !t.IsCompleted && t.DueDate < DateTime.Now),
+                DueTodayTasks = tasks.Count(t => !t.IsCompleted && t.DueDate.Date == DateTime.Today)
+            };
+
+            return Json(stats);
         }
     
         // load data function

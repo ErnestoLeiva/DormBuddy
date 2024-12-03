@@ -110,6 +110,38 @@ namespace DormBuddy.Controllers
             return Json(new { success = false, message = "Error: Loan not found." });
         }
 
+        // GET: /PeerLending/GetLendingStats
+        [HttpGet]
+        public async Task<IActionResult> GetLendingStats()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return Json(new { success = false, message = "User not logged in." });
+            }
+
+            var loans = await _dbContext.PeerLendings
+                .Where(l => l.UserId == user.Id)
+                .ToListAsync();
+
+            var totalLent = loans.Any() ? loans.Sum(l => l.Amount) : 0m;
+            var activeLoans = loans.Count(l => !l.IsRepaid);
+            var overdueLoans = loans.Count(l => !l.IsRepaid && l.DueDate < DateTime.Now);
+            var dueSoonLoans = loans.Count(l => !l.IsRepaid && l.DueDate > DateTime.Now && l.DueDate <= DateTime.Now.AddDays(3));
+
+            return Json(new
+            {
+                success = true,
+                stats = new
+                {
+                    TotalLent = totalLent.ToString("C"),
+                    ActiveLoans = activeLoans,
+                    OverdueLoans = overdueLoans,
+                    DueSoonLoans = dueSoonLoans
+                }
+            });
+        }
+
         // LoadDataFunction
         private async Task<(List<PeerLendingModel> loans, PeerLendingModel newLoan)> LoadPeerLendingData(ApplicationUser user)
         {

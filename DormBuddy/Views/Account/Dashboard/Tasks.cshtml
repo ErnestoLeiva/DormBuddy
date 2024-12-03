@@ -18,6 +18,7 @@
         <h1 class="display-4">Task Management</h1>
         <p>Manage your dorm-related tasks and track progress.</p>
     </div>
+    
     <!-- Stats Cards -->
     <div class="stats-container">
         <div class="stat-card stat-all">
@@ -302,6 +303,8 @@
                             button.classList.remove('btn-success');
                             button.classList.add('btn-warning');
                         }
+
+                        updateTaskStats()
                     } else {
                         alert('Failed to update task status: ' + response.message);
                     }
@@ -309,6 +312,21 @@
                 error: function(xhr, status, error) {
                     console.error('Error:', status, error);
                     alert('Error while updating task status.');
+                }
+            });
+        }
+        function updateTaskStats() {
+            $.ajax({
+                url: '/Tasks/GetTaskStats',
+                type: 'GET',
+                success: function(stats) {
+                    document.querySelector('.stat-all .stat-number').textContent = stats.totalTasks;
+                    document.querySelector('.stat-incomplete .stat-number').textContent = stats.incompleteTasks;
+                    document.querySelector('.stat-overdue .stat-number').textContent = stats.overdueTasks;
+                    document.querySelector('.stat-due-today .stat-number').textContent = stats.dueTodayTasks;
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error fetching stats:', status, error);
                 }
             });
         }

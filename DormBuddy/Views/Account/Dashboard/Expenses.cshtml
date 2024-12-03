@@ -7,24 +7,18 @@
 
     // Calculate stats
     var totalExpenses = expenses.Sum(e => e.Amount);
-
-    // Calculate the average expense per person
     var totalParticipants = expenses
         .SelectMany(e => (e.SharedWith?.Split(',') ?? new string[0]).Distinct())
         .Distinct()
         .Count();
     var averageExpense = totalParticipants > 0 ? Math.Round(totalExpenses / totalParticipants, 2) : 0;
-
-    // Pending payments are the total amount of all expenses divided by the number of participants in each shared expense
     var pendingPayments = expenses
         .Where(e => e.SharedWith != null && !e.isSplit )
         .Sum(e =>
         {
-            var participantCount = e.SharedWith.Split(',').Length + 1; // Include the user in the split
+            var participantCount = e.SharedWith.Split(',').Length + 1;
             return participantCount > 0 ? e.Amount / participantCount : 0;
         });
-
-    // Active splits are the count of expenses that have a shared list of participants
     var activeSplits = expenses.Count(e => e.SharedWith != null && e.SharedWith.Split(',').Length > 0);
 }
 <div class="expenses-container fade-in">
@@ -290,6 +284,9 @@
                             button.classList.remove('btn-success');
                             button.classList.add('btn-warning');
                         }
+                        
+                        fetchExpenseStats()
+
                     } else {
                         alert('Failed to update expense status: ' + response.message);
                     }
@@ -297,6 +294,27 @@
                 error: function(xhr, status, error) {
                     console.error('Error:', status, error);
                     alert('Error while updating expense status.');
+                }
+            });
+        }
+
+        function fetchExpenseStats() {
+            $.ajax({
+                url: '/Expenses/GetExpenseStats',
+                method: 'GET',
+                success: function (response) {
+                    if (response.success) {
+                        const stats = response.stats;
+                        document.querySelector(".stat-total .stat-number").innerText = stats.totalExpenses;
+                        document.querySelector(".stat-share .stat-number").innerText = stats.averageExpense;
+                        document.querySelector(".stat-pending .stat-number").innerText = stats.pendingPayments;
+                        document.querySelector(".stat-splits .stat-number").innerText = stats.activeSplits;
+                    } else {
+                        console.error("Error fetching Expense stats:", response.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error:", error);
                 }
             });
         }

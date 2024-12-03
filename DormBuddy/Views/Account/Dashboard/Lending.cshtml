@@ -310,6 +310,9 @@
                             button.classList.remove('btn-success');
                             button.classList.add('btn-warning');
                         }
+                        
+                        loadLendingStats()
+
                     } else {
                         alert(response.message);
                     }
@@ -317,6 +320,40 @@
                 error: function(xhr, status, error) {
                     console.error('Error:', error);
                     alert('An error occurred while updating the loan status.');
+                }
+            });
+        }
+        
+        function loadLendingStats() {
+            $.ajax({
+                url: '/PeerLending/GetLendingStats',
+                type: 'GET',
+                success: function (response) {
+                    if (response.success) {
+                        const stats = response.stats;
+                        $(".stat-card").each(function () {
+                            const label = $(this).find("p").text().trim();
+                            switch (label) {
+                                case "Total Lent":
+                                    $(this).find("h3").text(stats.totalLent);
+                                    break;
+                                case "Active Loans":
+                                    $(this).find("h3").text(stats.activeLoans);
+                                    break;
+                                case "Overdue":
+                                    $(this).find("h3").text(stats.overdueLoans);
+                                    break;
+                                case "Due Soon":
+                                    $(this).find("h3").text(stats.dueSoonLoans);
+                                    break;
+                            }
+                        });
+                    } else {
+                        console.error("Failed to load lending stats:", response.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error fetching lending stats:", error);
                 }
             });
         }
