@@ -152,7 +152,7 @@ namespace DormBuddy.Controllers
                 .Where(e => e.SharedWith != null && !e.isSplit)
                 .Sum(e =>
                 {
-                    var participantCount = e.SharedWith.Split(',').Length + 1;
+                    var participantCount = e.SharedWith.Split(',').Length;
                     return participantCount > 0 ? e.Amount / participantCount : 0;
                 });
             var activeSplits = expenses.Count(e => e.SharedWith != null && e.SharedWith.Split(',').Length > 0);
