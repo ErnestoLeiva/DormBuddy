@@ -1,36 +1,28 @@
 @model IEnumerable<UserActivityReport>
 
-<h1>Monthly Activity Reports</h1>
+<h1>Monthly Reports</h1>
 
 @if (!Model.Any())
 {
-    <p>No activity reports found.</p>
+    <p>No reports available.</p>
 }
 else
 {
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>User</th>
-                <th>Total Logins</th>
-                <th>Last Login Date</th>
-                <th>Groups Joined</th>
-                <th>Tasks Created</th>
-                <th>Expenses Added</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var report in Model)
-            {
-                <tr>
-                    <td>@report.FullName</td>
-                    <td>@report.TotalLogins</td>
-                    <td>@report.LastLoginDate?.ToString("yyyy-MM-dd")</td>
-                    <td>@report.GroupsJoined</td>
-                    <td>@report.TasksCreated</td>
-                    <td>@report.ExpensesAdded</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <ul>
+        @foreach (var report in Model)
+        {
+            <li>
+                @report.FullName - Last Login: 
+                @(report.LastLoginDate.HasValue ? report.LastLoginDate.Value.ToShortDateString() : "Never")
+            </li>
+        }
+    </ul>
 }
+
+
+<!-- Return to Dashboard Button -->
+<div class="mb-4">
+    <a href="/Account/Dashboard" class="btn btn-outline-primary">
+        <i class="fa fa-chevron-left"></i> Return to Dashboard
+    </a>
+</div>

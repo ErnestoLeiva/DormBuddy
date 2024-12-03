@@ -1,8 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Identity; // For UserManager and Identity types
-using DormBuddy.Models;             // For ApplicationUser
-using DormBuddy.Services;           // For IReportService
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using DormBuddy.Models;
+using DormBuddy.Services;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace DormBuddy.Controllers
 {
@@ -10,12 +13,13 @@ namespace DormBuddy.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IReportService _reportService;
+        private readonly DBContext _context;
 
-        // Constructor to inject dependencies
-        public AdministrationController(UserManager<ApplicationUser> userManager, IReportService reportService)
+        public AdministrationController(UserManager<ApplicationUser> userManager, IReportService reportService, DBContext context)
         {
             _userManager = userManager;
             _reportService = reportService;
+            _context = context;
         }
 
         [Authorize(Roles = "Admin")]
@@ -45,18 +49,23 @@ namespace DormBuddy.Controllers
                 {
                     ViewBag.Message = "No activity reports found.";
                 }
-                return View(reports);
+                return View("~/Views/Administration/Reports.cshtml", reports);
             }
             catch
             {
-                return View("Error", new ErrorViewModel { Message = "Failed to load reports." });
+                var errorModel = new ErrorViewModel
+                {
+                    Message = "Failed to load reports.",
+                    RequestId = HttpContext.TraceIdentifier
+                };
+                return View("Error", errorModel);
             }
         }
 
         [AllowAnonymous]
-        public IActionResult SystemLogs()
+        public async Task<IActionResult> SystemLogs()
         {
-            var logs = _reportService.GetSystemLogs();
+            var logs = await _reportService.GetSystemLogs();
             return View("~/Views/Administration/Logs.cshtml", logs);
         }
 
@@ -71,3 +80,34 @@ namespace DormBuddy.Controllers
         public IActionResult ManageRoles() => View("~/Views/Administration/UserManagement.cshtml");
     }
 }
+
+/*
+public async Task<List<UserActivityReport>> GenerateMonthlyActivityReport()
+        {
+            try
+            {
+                var users = await _context.ApplicationUsers.AsNoTracking().ToListAsync();
+
+                return users.Select(user => new UserActivityReport
+                {
+                    UserId = user.Id,
+                    FullName = $"{user.FirstName ?? ""} {user.LastName ?? ""}".Trim(),
+                    TotalLogins = user.TotalLogins,
+                    LastLoginDate = user.LastLoginDate,
+                    GroupsJoined = _context.Groups.Count(g =>
+                        g.Members.Any(m => m.Id.ToString() == user.Id)),
+                    TasksCreated = _context.Tasks.Count(t =>
+                        t.AssignedTo == user.UserName),
+                    ExpensesAdded = _context.Expenses.Count(e =>
+                        e.UserId.ToString() == user.Id)
+                }).ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in GenerateMonthlyActivityReport: {ex.Message}");
+                throw;
+            }
+        }
+
+
+*/
