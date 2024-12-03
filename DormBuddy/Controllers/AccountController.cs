@@ -474,27 +474,23 @@ namespace DormBuddy.Controllers
 
                 var allowedPages = new List<string> { "AccountSettings", "GeneralSettings", "PrivacySettings", "ProfileSettings" };
 
-        // Validate the 'page' parameter
-        if (!string.IsNullOrEmpty(loadPage) && !allowedPages.Contains(loadPage))
-        {
-            // Redirect to a default page or return a friendly error message if invalid
-            return RedirectToAction(nameof(Settings), new { page = "GeneralSettings" });
+                // Check if the 'page' is a valid value from the list
+                if (!allowedPages.Contains(loadPage) && !string.IsNullOrEmpty(loadPage))
+                {
+                    return BadRequest("Invalid page parameter.");
+                }
+
+                ViewBag.LoadPage = loadPage;
+                return View("~/Views/Account/Dashboard/Settings.cshtml");
+            } else {
+                return RedirectToAction("AccountForms");
+            }
         }
 
-        // Pass the page to the view
-        ViewBag.LoadPage = string.IsNullOrEmpty(loadPage) ? "GeneralSettings" : loadPage;
-        return View("~/Views/Account/Dashboard/Settings.cshtml");
-    }
 
-    // Redirect unauthenticated users to the account forms
-    return RedirectToAction("AccountForms");
-}
-
-
-
-public async Task<IActionResult> Profile()
+        public async Task<IActionResult> Profile()
         {
-         try
+            try
             {
                 // Ensure the user is authenticated
                 if (User?.Identity?.IsAuthenticated != true)
@@ -563,8 +559,7 @@ public async Task<IActionResult> Profile()
             }
         }
 
-
-        public async Task<IActionResult> LoadSettings(string settingsPage, string errorMessage = "")
+        public async Task<IActionResult> LoadSettings(string settingsPage)
         {
 
             var profile = await GetUserInformation();
