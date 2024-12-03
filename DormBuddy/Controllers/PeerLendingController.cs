@@ -54,16 +54,12 @@ namespace DormBuddy.Controllers
 
                 ViewBag.GroupMembers = groupMembers;
                 ViewBag.Users = users;
-
-                Console.WriteLine($"Group found. GroupId: {groupId}, Members: {groupMembers.Count}, Users: {users.Count}");
             }
             else
             {
                 ViewBag.GroupMembers = new List<GroupMemberModel>();
                 ViewBag.Users = new List<ApplicationUser>();
                 TempData["error"] = "You are not part of any group. Please join or create a group to use this feature.";
-
-                Console.WriteLine($"No group found for user: {user.Id}");
             }
 
             var newLoan = new PeerLendingModel { UserId = user.Id };
@@ -140,16 +136,12 @@ namespace DormBuddy.Controllers
 
                 ViewBag.GroupMembers = groupMembers;
                 ViewBag.Users = users;
-
-                Console.WriteLine($"Group found. GroupId: {groupId}, Members: {groupMembers.Count}, Users: {users.Count}");
             }
             else
             {
                 ViewBag.GroupMembers = new List<GroupMemberModel>();
                 ViewBag.Users = new List<ApplicationUser>();
                 TempData["error"] = "You are not part of any group. Please join or create a group to use this feature.";
-
-                Console.WriteLine($"No group found for user: {user.Id}");
             }
 
             var newLoan = new PeerLendingModel { UserId = user.Id };
@@ -211,16 +203,12 @@ namespace DormBuddy.Controllers
 
                 ViewBag.GroupMembers = groupMembers;
                 ViewBag.Users = users;
-
-                Console.WriteLine($"Group found. GroupId: {groupId}, Members: {groupMembers.Count}, Users: {users.Count}");
             }
             else
             {
                 ViewBag.GroupMembers = new List<GroupMemberModel>();
                 ViewBag.Users = new List<ApplicationUser>();
                 TempData["error"] = "You are not part of any group. Please join or create a group to use this feature.";
-
-                Console.WriteLine($"No group found for user: {user.Id}");
             }
 
             var newLoan = new PeerLendingModel { UserId = user.Id };
