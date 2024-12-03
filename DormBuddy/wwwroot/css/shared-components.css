@@ -1,7 +1,8 @@
 /* Base Container Styles */
 .tasks-container,
 .expenses-container,
-.lending-container {
+.lending-container,
+.groups-container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 1rem;
@@ -11,7 +12,8 @@
 /* Header Styles */
 .tasks-header,
 .expenses-header,
-.lending-header {
+.lending-header,
+.groups-header {
     text-align: center;
     margin-bottom: 2rem;
     padding-top: 3rem;
@@ -19,7 +21,8 @@
 
 .tasks-header h1,
 .expenses-header h1,
-.lending-header h1 {
+.lending-header h1,
+.groups-header h1 {
     font-size: 2.5rem;
     font-weight: 700;
     color: #2d3748;
@@ -27,7 +30,8 @@
 
 .tasks-header p,
 .expenses-header p,
-.lending-header p {
+.lending-header p,
+.groups-header p {
     font-size: 1rem;
     color: #718096;
 }
@@ -82,7 +86,8 @@
 /* Form Sections */
 .add-task-section,
 .add-expense-section,
-.add-loan-section {
+.add-loan-section
+.add-group-section {
     background: white;
     border-radius: 12px;
     padding: 2rem;
