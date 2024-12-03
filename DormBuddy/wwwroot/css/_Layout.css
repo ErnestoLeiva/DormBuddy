@@ -292,6 +292,7 @@ button.accept-policy {
   color: #4e95d1 !important;
 }
 
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 =======
 .dropdown-avatar img {
@@ -341,3 +342,11 @@ button.accept-policy {
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
+=======
+select.form-control {
+  height: 38px;
+  padding: 5px 10px;
+  font-size: 14px;
+  line-height: normal;
+}
+>>>>>>> b6c2d9b008722d40372ed010c2b5f2dcd17e9b32

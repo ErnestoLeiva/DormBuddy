@@ -3,213 +3,231 @@
 @{
     ViewData["Title"] = "Manage Groups";
     var users = ViewBag.Users as List<DormBuddy.Models.ApplicationUser>;
-    var groups = Model.Item1; // All groups 
-    var userGroup = Model.Item2; // Current user's group
+    var groups = Model.Item1;
+    var userGroup = Model.Item2;
 }
 
-<!-- Return to Dashboard Button -->
-<div class="mb-4">
-    <a href="/Account/Dashboard" class="btn btn-outline-primary">
-        <i class="fa fa-chevron-left"></i> Return to Dashboard
-    </a>
-</div>
-
-<!-- Header -->
-<div class="text-center mb-4">
-    <h1><i class="fas fa-users fa-lg"></i></h1>
-    <h1 class="display-4">Manage Groups</h1>
-    <p>Create or join a group to collaborate with your dormmates.</p>
-</div>
-
-<!-- Display success message if it exists -->
-@if (TempData["message"] != null)
-{
-    <div class="alert alert-success">
-        @TempData["message"]
-    </div>
-}
-
-<!-- Display error message if it exists -->
-@if (TempData["error"] != null)
-{
-    <div class="alert alert-danger">
-        @TempData["error"]
-    </div>
-}
-
-<!-- User's Current Group -->
-@if (userGroup != null)
-{
-    <hr class="my-4">
-    <h4>Your Group Information</h4>
-    <div class="table-responsive">
-        <table class="table table-striped table-bordered">
-            <thead class="thead-dark">
-                <tr>
-                    <th>Group Name</th>
-                    <th>Total Members</th>
-                    <th>Created By</th>
-                    <th>Invitation Code</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>@userGroup?.Group?.Name</td>
-                    <td>@userGroup?.Group?.TotalMembers / @userGroup?.Group?.MaxMembers</td>
-                    <td>
-                        @if (users != null)
-                        {
-                            var createdByUser = users.FirstOrDefault(u => u.Id == userGroup?.Group?.CreatedByUserId);
-                            var createdByName = createdByUser != null ? $"{createdByUser.FirstName} {createdByUser.LastName}" : "Unknown";
-                            @createdByName
-                        }
-                    </td>
-                    <td>@userGroup?.Group?.InvitationCode</td>
-                    <td>
-                        <!-- Only non-admins see this -->
-                        @if ((bool)(!userGroup?.IsAdmin ?? false))
-                        {
-                            <form method="post" asp-action="LeaveGroup" asp-controller="Groups" class="d-inline">
-                                <input type="hidden" name="groupId" value="@userGroup?.GroupId" />
-                                <button type="submit" class="btn btn-danger btn-sm">Leave Group</button>
-                            </form>
-                        }
-                        else
-                        {
-                            <span class="text-muted">Admin cannot leave the group</span>
-                        }
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+<div class="groups-container fade-in">
+    <!-- Header -->
+    <div class="groups-header text-center mb-4">
+        <h1><i class="fas fa-users"></i></h1>
+        <h1 class="display-4">Manage Groups</h1>
+        <p>Create or join a group to collaborate with your dormmates.</p>
     </div>
 
-    <!-- Additional Features for Admins -->
-    @if (userGroup?.IsAdmin ?? false)
+    <!-- Display success message if it exists -->
+    @if (TempData["message"] != null)
     {
-        <h4 class="mt-5">(Admin) - Group Members</h4>
-        <div class="table-responsive">
-            <table class="table table-striped table-bordered">
-                <thead class="thead-dark">
+        <div class="alert alert-success">
+            @TempData["message"]
+        </div>
+    }
+    <!-- Display error message if it exists -->
+    @if (TempData["error"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["error"]
+        </div>
+    }
+
+    @if (userGroup != null)
+    {
+        <div class="stats-container">
+            <div class="stat-card stat-total-members">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>@userGroup.Group.TotalMembers</h3>
+                    <p>Total Members</p>
+                </div>
+            </div>
+
+            <div class="stat-card stat-available-spots">
+                <div class="stat-icon">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>@(userGroup.Group.MaxMembers - userGroup.Group.TotalMembers)</h3>
+                    <p>Available Spots</p>
+                </div>
+            </div>
+
+            <div class="stat-card stat-admin">
+                <div class="stat-icon">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>@(userGroup.IsAdmin ? "Yes" : "No")</h3>
+                    <p>Admin Status</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <h4 class="px-4 pt-4">Your Group Information</h4>
+            <table class="table">
+                <thead>
                     <tr>
-                        <th>Member Name</th>
-                        <th>Email</th>
+                        <th>Group Name</th>
+                        <th>Total Members</th>
+                        <th>Created By</th>
+                        <th>Invitation Code</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @if (userGroup?.Group?.Members != null) {
-                        foreach (var member in userGroup.Group.Members)
-                        {
-                            var memberUser = users?.FirstOrDefault(u => u.Id == member.UserId);
-                            if (memberUser != null)
+                    <tr>
+                        <td>@userGroup?.Group?.Name</td>
+                        <td>@userGroup?.Group?.TotalMembers / @userGroup?.Group?.MaxMembers</td>
+                        <td>
+                            @if (users != null)
                             {
-                                <tr>
-                                    <td><a href="/Account/profile?username=@memberUser.UserName">@($"{memberUser.FirstName} {memberUser.LastName}")</a></td>
-                                    <td>@memberUser.Email</td>
-                                    <td>
-                                        <!-- Prevent Admin from Being Kicked -->
-                                        @if (member.UserId != userGroup?.Group?.CreatedByUserId)
-                                        {
-                                            <form method="post" asp-action="KickMember" asp-controller="Groups" class="d-inline">
-                                                <input type="hidden" name="groupId" value="@userGroup?.Group?.Id" />
-                                                <input type="hidden" name="userId" value="@member.UserId" />
-                                                <button type="button" class="btn btn-warning btn-sm" 
-                                                        data-toggle="modal" 
-                                                        data-target="#confirmKickModal" 
-                                                        data-member-name="@($"{memberUser.FirstName} {memberUser.LastName}")"
-                                                        data-group-id="@userGroup?.Group?.Id" 
-                                                        data-user-id="@member.UserId">
-                                                    Kick
-                                                </button>
-                                            </form>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted">Cannot kick the admin</span>
-                                        }
-                                    </td>
-                                </tr>
+                                var createdByUser = users.FirstOrDefault(u => u.Id == userGroup?.Group?.CreatedByUserId);
+                                var createdByName = createdByUser != null ? $"{createdByUser.FirstName} {createdByUser.LastName}" : "Unknown";
+                                @createdByName
                             }
-                        }
-                    }
+                        </td>
+                        <td>@userGroup?.Group?.InvitationCode</td>
+                        <td>
+                            @if ((bool)(!userGroup?.IsAdmin ?? false))
+                            {
+                                <form method="post" asp-action="LeaveGroup" asp-controller="Groups" class="d-inline">
+                                    <input type="hidden" name="groupId" value="@userGroup?.GroupId" />
+                                    <button type="submit" class="btn btn-danger btn-sm">Leave Group</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Admin cannot leave the group</span>
+                            }
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
 
-        <form method="post" asp-action="DeleteGroup" asp-controller="Groups">
-            <input type="hidden" name="groupId" value="@userGroup?.Group?.Id" />
-            <button type="submit" class="btn btn-danger mt-3">Delete Group</button>
-        </form>
+        @if (userGroup?.IsAdmin ?? false)
+        {
+            <div class="table-container">
+                <h4 class="px-4 pt-4">(Admin) - Group Members</h4>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Member Name</th>
+                            <th>Email</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (userGroup?.Group?.Members != null)
+                        {
+                            foreach (var member in userGroup.Group.Members)
+                            {
+                                var memberUser = users?.FirstOrDefault(u => u.Id == member.UserId);
+                                if (memberUser != null)
+                                {
+                                    <tr>
+                                        <td><a href="/Account/profile?username=@memberUser.UserName">@($"{memberUser.FirstName} {memberUser.LastName}")</a></td>
+                                        <td>@memberUser.Email</td>
+                                        <td>
+                                            @if (member.UserId != userGroup?.Group?.CreatedByUserId)
+                                            {
+                                                <button class="btn btn-warning btn-sm" 
+                                                    data-toggle="modal" 
+                                                    data-target="#confirmKickModal" 
+                                                    data-member-name="@($"{memberUser.FirstName} {memberUser.LastName}")"
+                                                    data-group-id="@userGroup?.Group?.Id" 
+                                                    data-user-id="@member.UserId">
+                                                    Kick
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Cannot kick the admin</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <form method="post" asp-action="DeleteGroup" asp-controller="Groups">
+                <input type="hidden" name="groupId" value="@userGroup?.Group?.Id" />
+                <button type="submit" class="btn btn-danger mt-3">Delete Group</button>
+            </form>
+        }
+        else
+        {
+            <div class="table-container">
+                <h4 class="px-4 pt-4">Group Members</h4>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Member Name</th>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (userGroup?.Group?.Members != null)
+                        {
+                            foreach (var member in userGroup.Group.Members)
+                            {
+                                var memberUser = users?.FirstOrDefault(u => u.Id == member.UserId);
+                                if (memberUser != null)
+                                {
+                                    <tr>
+                                        <td><a href="/Account/profile?username=@memberUser.UserName">@($"{memberUser.FirstName} {memberUser.LastName}")</a></td>
+                                        <td>@memberUser.Email</td>
+                                    </tr>
+                                }
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
     }
     else
     {
-        <h4 class="mt-5">Group Members</h4>
-        <div class="table-responsive">
-            <table class="table table-striped table-bordered">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>Member Name</th>
-                        <th>Email</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (userGroup?.Group?.Members != null) 
-                    {
-                    foreach (var member in userGroup.Group.Members)
-                        {
-                            var memberUser = users?.FirstOrDefault(u => u.Id == member.UserId);
-                            if (memberUser != null)
-                            {
-                                <tr>
-                                    <td><a href="/Account/profile?username=@memberUser.UserName">@($"{memberUser.FirstName} {memberUser.LastName}")</a></td>
-                                    <td>@memberUser.Email</td>
-                                </tr>
-                            }
-                        }
-                    }
-                </tbody>
-            </table>
+        <div class="alert alert-warning">
+        You are not currently in any group.
+        </div>
+
+        <div class="add-expense-section">
+            <div class="mb-4">
+                <h4>Join a Group</h4>
+                <form method="post" asp-action="JoinGroup" asp-controller="Groups">
+                    <div class="form-group">
+                        <label for="invitationCode">Invitation Code</label>
+                        <input type="text" class="form-control" id="invitationCode" name="invitationCode" placeholder="Enter invitation code" required />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Join Group</button>
+                </form>
+            </div>
+
+            <hr>
+
+            <div>
+                <h4>Create a New Group</h4>
+                <form method="post" asp-action="CreateGroup" asp-controller="Groups">
+                    <div class="form-group">
+                        <label for="groupName">Group Name</label>
+                        <input type="text" class="form-control" id="groupName" name="Name" placeholder="Enter group name" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="maxMembers">Maximum Members</label>
+                        <input type="number" class="form-control" id="maxMembers" name="MaxMembers" min="2" max="4" value="4" required />
+                    </div>
+                    <button type="submit" class="btn btn-success">Create Group</button>
+                </form>
+            </div>
         </div>
     }
-}
-else
-{
-    <div class="alert alert-warning">
-        You are not currently in any group.
-    </div>
-
-    <div class="row">
-        <!-- Join Group Section -->
-        <div class="col-md-6">
-            <h4>Join a Group</h4>
-            <form method="post" asp-action="JoinGroup" asp-controller="Groups">
-                <div class="form-group">
-                    <label for="invitationCode">Invitation Code</label>
-                    <input type="text" class="form-control" id="invitationCode" name="invitationCode" placeholder="Enter invitation code" required />
-                </div>
-                <button type="submit" class="btn btn-primary">Join Group</button>
-            </form>
-        </div>
-
-        <!-- Create Group Section -->
-        <div class="col-md-6">
-            <h4>Create a New Group</h4>
-            <form method="post" asp-action="CreateGroup" asp-controller="Groups">
-                <div class="form-group">
-                    <label for="groupName">Group Name</label>
-                    <input type="text" class="form-control" id="groupName" name="Name" placeholder="Enter group name" required />
-                </div>
-                <div class="form-group">
-                    <label for="maxMembers">Maximum Members</label>
-                    <input type="number" class="form-control" id="maxMembers" name="MaxMembers" min="2" max="4" value="4" required />
-                </div>
-                <button type="submit" class="btn btn-success">Create Group</button>
-            </form>
-        </div>
-    </div>
-}
+</div>
 
 <!-- Kick-Member Confirmation Modal -->
 <div class="modal fade" id="confirmKickModal" tabindex="-1" role="dialog" aria-labelledby="confirmKickModalLabel" aria-hidden="true">
@@ -238,7 +256,6 @@ else
 
 @section Scripts {
     <script>
-        // Confirm Kick Modal and Handling
         $(document).ready(function () {
             $('#confirmKickModal').on('show.bs.modal', function (event) {
                 var button = $(event.relatedTarget);
@@ -250,6 +267,10 @@ else
                 modal.find('#memberName').text(memberName);
                 modal.find('#modalGroupId').val(groupId);
                 modal.find('#modalUserId').val(userId);
+            });
+
+            $('#confirmKickModal').on('show.bs.modal', function () {
+                $(this).appendTo('body');
             });
         });
     </script>

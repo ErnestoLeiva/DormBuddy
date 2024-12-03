@@ -28,6 +28,7 @@
     <link rel="stylesheet" href="~/css/settings.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/profile.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/lending.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/groups.css" asp-append-version="true" />
     
     <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -51,13 +52,17 @@
                     <span>Task Management</span>
                 </a>
 
-                <a href="/Account/Expenses" class="sidebar-item">
+                <a href="/Expenses/Index" class="sidebar-item">
                     <i class="fas fa-money-bill-wave"></i>
                     <span>Expense Splitting</span>
                 </a>
-                <a href="/Account/Lending" class="sidebar-item">
+                <a href="/PeerLending/Index" class="sidebar-item">
                     <i class="fas fa-handshake"></i>
                     <span>Peer Lending</span>
+                </a>
+                <a href="/Groups/Index" class="sidebar-item">
+                    <i class="fas fa-users"></i>
+                    <span>Manage Groups</span>
                 </a>
                 <a href="/Account/Settings" class="sidebar-item">
                     <i class="fas fa-user-cog"></i>
@@ -136,10 +141,16 @@
                                         </button>
 
                                         <div class="dropdown-menu dropdown-menu-right text-left">
-                                            <a class="dropdown-item fas fa-user" asp-controller="Account" asp-action="Profile"> Profile</a>
-                                            <a class="dropdown-item fas fa-cog" asp-controller="Account" asp-action="Settings"> Settings</a>
+                                            <a class="dropdown-item" asp-controller="Account" asp-action="Profile">
+                                                <i class="fas fa-user"></i> Profile
+                                            </a>
+                                            <a class="dropdown-item" asp-controller="Account" asp-action="Settings">
+                                                <i class="fas fa-cog"></i> Settings
+                                            </a>
                                             <div class="line-divider"></div>
-                                            <a class="dropdown-item fas fa-sign-out-alt" asp-controller="Account" asp-action="Logout"> Sign Out</a>
+                                            <a class="dropdown-item" asp-controller="Account" asp-action="Logout">
+                                                <i class="fas fa-sign-out-alt"></i> Sign Out
+                                            </a>
                                         </div>
                                     </div>
                                 }

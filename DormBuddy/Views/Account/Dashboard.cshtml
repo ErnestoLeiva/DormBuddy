@@ -23,131 +23,6 @@
         <img src="~/images/pencil-icon.png" class="pencil-icon" id="pencil" alt="pencil" />
     </div>
     <p id="eventDetails"></p>
-</div>
-
-    <div class="dashboard-grid">
-    <!-- Task Management -->
-    <div class="dashboard-card video-card">
-        <div class="video-wrapper">
-            <video class="card-video" muted loop>
-                <source src="~/images/TaskManagement.mp4" type="video/mp4">
-                Your browser does not support the video tag.
-            </video>
-        </div>
-        <div class="card-title-wrapper">
-            <h3 class="card-title">
-                Task Management
-                <i class="fas fa-tasks card-icon"></i>
-            </h3>
-        </div>
-        <div class="card-content">
-            <p class="card-description">Manage your dorm-related tasks and track progress.</p>
-            <a href="/Tasks/Index" class="card-button">View Tasks</a>
-        </div>
-    </div>
-
-    <!-- Expense Splitting -->
-    <div class="dashboard-card video-card">
-        <div class="video-wrapper">
-            <video class="card-video" muted loop>
-                <source src="~/images/expenses.mp4" type="video/mp4">
-                Your browser does not support the video tag.
-            </video>
-        </div>
-        <div class="card-title-wrapper">
-            <h3 class="card-title">
-                Expense Splitting
-                <i class="fas fa-money-bill-wave card-icon"></i>
-            </h3>
-        </div>
-        <div class="card-content">
-            <p class="card-description">Track shared expenses and manage balance with your dormmates.</p>
-            <a href="/Expenses/Index" class="card-button">View Expenses</a>
-        </div>
-    </div>
-
-    <!-- Peer-to-Peer Lending -->
-    <div class="dashboard-card video-card">
-        <div class="video-wrapper">
-            <video class="card-video" muted loop>
-                <source src="~/images/lendings.mp4" type="video/mp4">
-                Your browser does not support the video tag.
-            </video>
-        </div>
-        <div class="card-title-wrapper">
-            <h3 class="card-title">
-                Peer-to-Peer Lending
-                <i class="fas fa-handshake card-icon"></i>
-            </h3>
-        </div>
-        <div class="card-content">
-            <p class="card-description">Manage loans and transactions with your dormmates.</p>
-            <a href="/Account/Lending" class="card-button">View Lending</a>
-        </div>
-    </div>
-
-    <!-- Account Settings -->
-    <div class="dashboard-card video-card">
-        <div class="video-wrapper">
-            <video class="card-video" muted loop>
-                <source src="~/images/settings.mp4" type="video/mp4">
-                Your browser does not support the video tag.
-            </video>
-        </div>
-        <div class="card-title-wrapper">
-            <h3 class="card-title">
-                Account Settings
-                <i class="fas fa-user-cog card-icon"></i>
-            </h3>
-        </div>
-        <div class="card-content">
-            <p class="card-description">Update your account information and preferences.</p>
-            <a href="/Account/Settings" class="card-button">Manage Account</a>
-        </div>
-    </div>
-
-    <!-- Notifications -->
-    <div class="dashboard-card notifications-card video-card">
-        <div class="video-wrapper">
-            <video class="card-video" muted loop>
-                <source src="~/images/notifications.mp4" type="video/mp4">
-                Your browser does not support the video tag.
-            </video>
-        </div>
-        <div class="card-title-wrapper">
-            <h3 class="card-title">
-                Notifications
-                <i class="fas fa-bell card-icon"></i>
-            </h3>
-        </div>
-        <div class="card-content">
-            <p class="card-description">Check new notifications from your dormmates.</p>
-            <a href="/Account/Notifications" class="card-button">View Notifications</a>
-        </div>
-    </div>
-
-    <!-- Help & Support -->
-    <div class="dashboard-card video-card">
-        <div class="video-wrapper">
-            <video class="card-video" muted loop>
-                <source src="~/images/helping.mp4" type="video/mp4">
-                Your browser does not support the video tag.
-            </video>
-        </div>
-        <div class="card-title-wrapper">
-            <h3 class="card-title">
-                Help & Support
-                <i class="fas fa-question-circle card-icon"></i>
-            </h3>
-        </div>
-        <div class="card-content">
-            <p class="card-description">Need assistance? Reach out for help with any issues.</p>
-            <a href="/Home/ContactUs" class="card-button">Get Help</a>
-        </div>
-    </div>
-         
-    </div>
-
     @if (roles.Length > 1)
     {
         var roleLabel = "Roles";
@@ -175,7 +50,149 @@
             }
         }]</p>
     }
+</div>
 
+    <div class="dashboard-grid">
+        <!-- Task Management -->
+        <div class="dashboard-card video-card">
+            <div class="video-wrapper">
+                <video class="card-video" muted loop>
+                    <source src="~/images/TaskManagement.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            <div class="card-title-wrapper">
+                <h3 class="card-title">
+                    Task Management
+                    <i class="fas fa-tasks card-icon"></i>
+                </h3>
+            </div>
+            <div class="card-content">
+                <p class="card-description">Manage your dorm-related tasks and track progress.</p>
+                <a href="/Tasks/Index" class="card-button">View Tasks</a>
+            </div>
+        </div>
+
+        <!-- Expense Splitting -->
+        <div class="dashboard-card video-card">
+            <div class="video-wrapper">
+                <video class="card-video" muted loop>
+                    <source src="~/images/expenses.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            <div class="card-title-wrapper">
+                <h3 class="card-title">
+                    Expense Splitting
+                    <i class="fas fa-money-bill-wave card-icon"></i>
+                </h3>
+            </div>
+            <div class="card-content">
+                <p class="card-description">Track shared expenses and manage balance with your dormmates.</p>
+                <a href="/Expenses/Index" class="card-button">View Expenses</a>
+            </div>
+        </div>
+
+        <!-- Peer-to-Peer Lending -->
+        <div class="dashboard-card video-card">
+            <div class="video-wrapper">
+                <video class="card-video" muted loop>
+                    <source src="~/images/lendings.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            <div class="card-title-wrapper">
+                <h3 class="card-title">
+                    Peer-to-Peer Lending
+                    <i class="fas fa-handshake card-icon"></i>
+                </h3>
+            </div>
+            <div class="card-content">
+                <p class="card-description">Manage loans and transactions with your dormmates.</p>
+                <a href="/PeerLending/Index" class="card-button">View Lending</a>
+            </div>
+        </div>
+
+        <!-- Account Settings -->
+        <div class="dashboard-card video-card">
+            <div class="video-wrapper">
+                <video class="card-video" muted loop>
+                    <source src="~/images/settings.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            <div class="card-title-wrapper">
+                <h3 class="card-title">
+                    Account Settings
+                    <i class="fas fa-user-cog card-icon"></i>
+                </h3>
+            </div>
+            <div class="card-content">
+                <p class="card-description">Update your account information and preferences.</p>
+                <a href="/Account/Settings" class="card-button">Manage Account</a>
+            </div>
+        </div>
+
+        <!-- Notifications -->
+        <div class="dashboard-card notifications-card video-card">
+            <div class="video-wrapper">
+                <video class="card-video" muted loop>
+                    <source src="~/images/notifications.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            <div class="card-title-wrapper">
+                <h3 class="card-title">
+                    Notifications
+                    <i class="fas fa-bell card-icon"></i>
+                </h3>
+            </div>
+            <div class="card-content">
+                <p class="card-description">Check new notifications from your dormmates.</p>
+                <a href="/Notifications/Index" class="card-button">View Notifications</a>
+            </div>
+        </div>
+
+        <!-- Help & Support -->
+        <div class="dashboard-card video-card">
+            <div class="video-wrapper">
+                <video class="card-video" muted loop>
+                    <source src="~/images/helping.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            <div class="card-title-wrapper">
+                <h3 class="card-title">
+                    Help & Support
+                    <i class="fas fa-question-circle card-icon"></i>
+                </h3>
+            </div>
+            <div class="card-content">
+                <p class="card-description">Need assistance? Reach out for help with any issues.</p>
+                <a href="/Home/ContactUs" class="card-button">Get Help</a>
+            </div>
+        </div>
+        
+        <!-- Groups System -->
+        <div class="dashboard-card video-card centered-tile">
+            <div class="video-wrapper">
+                <video class="card-video" muted loop>
+                    <source src="~/images/groups.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            <div class="card-title-wrapper">
+                <h3 class="card-title">
+                    Groups System
+                    <i class="fas fa-users card-icon"></i>
+                </h3>
+            </div>
+            <div class="card-content">
+                <p class="card-description">Organize and collaborate with your dormmates effectively using the Groups System.</p>
+                <a href="/Groups/Index" class="card-button">Manage Groups</a>
+            </div>
+        </div>
+    </div>
 
 <hr class="my-4">
 
@@ -235,7 +252,8 @@
     @if (ViewBag.UserRoles.Contains("Admin") || ViewBag.UserRoles.Contains("Moderator"))
     {
         <div class="row">
-            @if (ViewBag.UserRoles.Contains("Admin")) {
+            @if (ViewBag.UserRoles.Contains("Admin"))
+            {
                 <div class="col-md-4 offset-md-4">
                     <div class="card text-center mb-4">
                         <div class="card-header bg-purple text-white">
@@ -249,7 +267,8 @@
                     </div>
                 </div>
             }
-            else if (!ViewBag.UserRoles.Contains("Admin") && ViewBag.UserRoles.Contains("Moderator")){
+            else if (ViewBag.UserRoles.Contains("Moderator"))
+            {
                 <div class="col-md-4 offset-md-4">
                     <div class="card text-center mb-4">
                         <div class="card-header bg-purple text-white">
@@ -263,8 +282,9 @@
                     </div>
                 </div>
             }
-
+        </div>
     }
+
         
     
 
@@ -277,7 +297,7 @@
 
 @section Scripts {
     <script>
-     // Welcome animation script
+        // Welcome animation script
         document.addEventListener('DOMContentLoaded', function () {
             const welcomeOverlay = document.querySelector('.welcome-overlay');
             const dashboardContainer = document.querySelector('.dashboard-container');
@@ -347,95 +367,93 @@
 
             let lastId = -1;
             function loadMessages() {
-    $.ajax({
-        url: '/api/Imgur/GetDashboardMessages',
-        type: 'GET',
-        contentType: 'application/json',
-        data: {
-            type: chatType
-        },
-        success: function(messages) {
-            var messageArea = $('#messageArea');
-            messages.value.r.forEach(msg => {
-                const messageHtml = `
-                    <div class="message-postit">
-                        <strong><a href='profile?username=${msg.user.userName}' target='_blank'>${msg.user.userName}</a></strong>
-                        <p>${msg.message}</p>
-                        <small class="text-muted">${msg.sent_at}</small>
-                    </div>`;
-                
-                if (msg.id > lastId) {
-                    messageArea.append(messageHtml);
-                    lastId = msg.id;
-                }
-            });
+                $.ajax({
+                    url: '/api/Imgur/GetDashboardMessages',
+                    type: 'GET',
+                    contentType: 'application/json',
+                    data: {
+                        type: chatType
+                    },
+                    success: function(messages) {
+                        var messageArea = $('#messageArea');
+                        messages.value.r.forEach(msg => {
+                            const messageHtml = `
+                                <div class="message-postit">
+                                    <strong><a href='profile?username=${msg.user.userName}' target='_blank'>${msg.user.userName}</a></strong>
+                                    <p>${msg.message}</p>
+                                    <small class="text-muted">${msg.sent_at}</small>
+                                </div>`;
+                            
+                            if (msg.id > lastId) {
+                                messageArea.append(messageHtml);
+                                lastId = msg.id;
+                            }
+                        });
 
-            messageArea.scrollTop(messageArea[0].scrollHeight);
-        },
-        error: function(xhr, status, error) {
-            console.log('Error:', error);
-        }
-    });
-}
+                        messageArea.scrollTop(messageArea[0].scrollHeight);
+                    },
+                    error: function(xhr, status, error) {
+                        console.log('Error:', error);
+                    }
+                });
+            }
         });
         
-    // pencil writing animation  
-    document.addEventListener('DOMContentLoaded', function() {
-    const welcomeText = document.getElementById('welcomeText');
-    const pencil = document.getElementById('pencil');
-    const container = document.querySelector('.writing-container');
-    const hasSeenAnimation = sessionStorage.getItem('hasSeenWelcomeAnimation');
-    
-    const username = '@(ViewBag.Username)';
-    welcomeText.innerHTML = '';
-    
-    const startDelay = !hasSeenAnimation ? 3000 : 400;
-    
-    setTimeout(() => {
-        container.style.opacity = '1';
-        pencil.style.opacity = '1';
-        
-        const text = `Welcome ${username}!`;
-        const chars = text.split('');
-        const totalChars = chars.length;
-        
-        chars.forEach((char, i) => {
-            const span = document.createElement('span');
-            if (char === ' ') {
-                span.innerHTML = '&nbsp;';
-                span.style.marginRight = '10px';
-            } else {
-                span.textContent = char;
-            }
-            welcomeText.appendChild(span);
+        // pencil writing animation  
+        document.addEventListener('DOMContentLoaded', function() {
+            const welcomeText = document.getElementById('welcomeText');
+            const pencil = document.getElementById('pencil');
+            const container = document.querySelector('.writing-container');
+            const hasSeenAnimation = sessionStorage.getItem('hasSeenWelcomeAnimation');
             
-            if (i === 0) {
-                const firstRect = span.getBoundingClientRect();
-                pencil.style.left = (firstRect.left - 25) + 'px';
-                pencil.style.top = (firstRect.top - 35) + 'px';
-            }
+            const username = '@(ViewBag.Username)';
+            welcomeText.innerHTML = '';
+            
+            const startDelay = !hasSeenAnimation ? 3000 : 400;
             
             setTimeout(() => {
-                span.style.opacity = '1';
+                container.style.opacity = '1';
+                pencil.style.opacity = '1';
                 
-                const rect = span.getBoundingClientRect();
-                if (char !== ' ') {
-                    pencil.style.left = (rect.left - 15) + 'px';
-                    pencil.style.top = (rect.top - 35) + 'px';
-                }
+                const text = `Welcome ${username}!`;
+                const chars = text.split('');
+                const totalChars = chars.length;
                 
-                
-                if (i === totalChars - 1) {
-                    pencil.style.left = rect.right + 'px';
+                chars.forEach((char, i) => {
+                    const span = document.createElement('span');
+                    if (char === ' ') {
+                        span.innerHTML = '&nbsp;';
+                        span.style.marginRight = '10px';
+                    } else {
+                        span.textContent = char;
+                    }
+                    welcomeText.appendChild(span);
+                    
+                    if (i === 0) {
+                        const firstRect = span.getBoundingClientRect();
+                        pencil.style.left = (firstRect.left - 25) + 'px';
+                        pencil.style.top = (firstRect.top - 35) + 'px';
+                    }
+                    
                     setTimeout(() => {
-                        pencil.style.opacity = '0';
-                    }, 200); 
-                }
-            }, i * 100);
+                        span.style.opacity = '1';
+                        
+                        const rect = span.getBoundingClientRect();
+                        if (char !== ' ') {
+                            pencil.style.left = (rect.left - 15) + 'px';
+                            pencil.style.top = (rect.top - 35) + 'px';
+                        }
+                        
+                        
+                        if (i === totalChars - 1) {
+                            pencil.style.left = rect.right + 'px';
+                            setTimeout(() => {
+                                pencil.style.opacity = '0';
+                            }, 200); 
+                        }
+                    }, i * 100);
+                });
+            }, startDelay);
         });
-    }, startDelay);
-});
-    
     </script>
-     
 }

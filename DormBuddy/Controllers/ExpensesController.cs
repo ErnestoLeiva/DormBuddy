@@ -2,8 +2,6 @@ using DormBuddy.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -23,44 +21,103 @@ namespace DormBuddy.Controllers
             _userManager = userManager;
         }
 
+        // GET: /Expenses/Index
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(User);
-            if (user != null)
+            if (user == null)
             {
-                var expenses = await _dbContext.Expenses
-                    .Where(e => e.UserId == user.Id)
-                    .ToListAsync();
-
-                var newExpense = new ExpenseModel { UserId = user.Id };
-                return View("~/Views/Account/Dashboard/Expenses.cshtml", Tuple.Create(expenses, newExpense));
+                return RedirectToAction("Login", "Account");
             }
 
-            return RedirectToAction("Login", "Account");
+            var expenses = await _dbContext.Expenses
+                .Where(e => e.UserId == user.Id || e.SharedWith.Contains(user.Id))
+                .ToListAsync();
+
+            var groupId = await _dbContext.GroupMembers
+                .Where(gm => gm.UserId == user.Id)
+                .Select(gm => gm.GroupId)
+                .FirstOrDefaultAsync();
+
+            if (groupId != 0)
+            {
+                var groupMembers = await _dbContext.GroupMembers
+                    .Where(gm => gm.GroupId == groupId)
+                    .ToListAsync();
+
+                var userIds = groupMembers.Select(gm => gm.UserId).ToList();
+                var users = await _dbContext.Users
+                    .Where(u => userIds.Contains(u.Id))
+                    .ToListAsync();
+
+                ViewBag.GroupMembers = groupMembers;
+                ViewBag.Users = users;
+            }
+            else
+            {
+                ViewBag.GroupMembers = new List<GroupMemberModel>();
+                ViewBag.Users = new List<ApplicationUser>();
+            }
+
+            var newExpense = new ExpenseModel { UserId = user.Id };
+            
+            return View("~/Views/Account/Dashboard/Expenses.cshtml", Tuple.Create(expenses, newExpense));
         }
 
         // POST: /Expenses/AddExpense
         [HttpPost]
-        public async Task<IActionResult> AddExpense(ExpenseModel model)
+        public async Task<IActionResult> AddExpense(ExpenseModel model, string[] AssignedUserIds)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return RedirectToAction("Login", "Account");
 
             model.UserId = user.Id;
+            ModelState.Remove(nameof(ExpenseModel.UserId));
             model.isSplit = false;
+
+            if (AssignedUserIds != null && AssignedUserIds.Any())
+            {
+                model.SharedWith = string.Join(",", AssignedUserIds);
+                ModelState.Remove(nameof(ExpenseModel.SharedWith));
+            }
+            else
+            {
+                ModelState.AddModelError(nameof(ExpenseModel.SharedWith), "At least one user must be assigned.");
+            }
 
             if (ModelState.IsValid)
             {
                 _dbContext.Expenses.Add(model);
                 await _dbContext.SaveChangesAsync();
-                TempData["message"] = $"Expense \"{model.ExpenseName}\" added successfully!";
+                TempData["message"] = $"Expense <b>{model.ExpenseName}</b> added successfully!";
             }
             else
             {
-                TempData["error"] = "Error: Invalid expense data.";
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+                TempData["error"] = "Error: Invalid expense data. Details: " + string.Join("; ", errors);
             }
 
-            var expenses = await _dbContext.Expenses.Where(e => e.UserId == user.Id).ToListAsync();
+            var expenses = await _dbContext.Expenses
+                .Where(e => e.UserId == user.Id  || e.SharedWith.Contains(user.Id))
+                .ToListAsync();
+
+            var groupId = await _dbContext.GroupMembers
+                .Where(gm => gm.UserId == user.Id)
+                .Select(gm => gm.GroupId)
+                .FirstOrDefaultAsync();
+
+            var groupMembers = await _dbContext.GroupMembers
+                .Where(gm => gm.GroupId == groupId)
+                .ToListAsync();
+
+            var userIds = groupMembers.Select(gm => gm.UserId).ToList();
+            var users = await _dbContext.Users
+                .Where(u => userIds.Contains(u.Id))
+                .ToListAsync();
+
+            ViewBag.GroupMembers = groupMembers;
+            ViewBag.Users = users;
+
             var newExpense = new ExpenseModel { UserId = user.Id };
             return View("~/Views/Account/Dashboard/Expenses.cshtml", Tuple.Create(expenses, newExpense));
         }
@@ -82,12 +139,12 @@ namespace DormBuddy.Controllers
                 try
                 {
                     var expense = await _dbContext.Expenses.FindAsync(expenseId);
-                    if (expense != null && expense.UserId == user.Id)
+                    if (expense != null && expense.UserId == user.Id  || expense.SharedWith.Contains(user.Id))
                     {
                         var expenseName = expense.ExpenseName;
                         _dbContext.Expenses.Remove(expense);
                         await _dbContext.SaveChangesAsync();
-                        TempData["message"] = $"Expense \"{expenseName}\" deleted successfully!";
+                        TempData["message"] = $"Expense <b>{expenseName}</b> deleted successfully!";
                     }
                     else
                     {
@@ -101,7 +158,27 @@ namespace DormBuddy.Controllers
                 }
             }
 
-            var expenses = await _dbContext.Expenses.Where(e => e.UserId == user.Id).ToListAsync();
+            var expenses = await _dbContext.Expenses
+                .Where(e => e.UserId == user.Id)
+                .ToListAsync();
+
+            var groupId = await _dbContext.GroupMembers
+                .Where(gm => gm.UserId == user.Id)
+                .Select(gm => gm.GroupId)
+                .FirstOrDefaultAsync();
+
+            var groupMembers = await _dbContext.GroupMembers
+                .Where(gm => gm.GroupId == groupId)
+                .ToListAsync();
+
+            var userIds = groupMembers.Select(gm => gm.UserId).ToList();
+            var users = await _dbContext.Users
+                .Where(u => userIds.Contains(u.Id))
+                .ToListAsync();
+
+            ViewBag.GroupMembers = groupMembers;
+            ViewBag.Users = users;
+
             var newExpense = new ExpenseModel { UserId = user.Id };
             return View("~/Views/Account/Dashboard/Expenses.cshtml", Tuple.Create(expenses, newExpense));
         }

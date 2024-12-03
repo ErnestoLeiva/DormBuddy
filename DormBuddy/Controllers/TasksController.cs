@@ -24,8 +24,6 @@ namespace DormBuddy.Controllers
             _dbContext = dbContext;
         }
 
-        #region TASKS
-
         // GET: /Tasks/Index
         public async Task<IActionResult> Index()
         {
@@ -109,7 +107,7 @@ namespace DormBuddy.Controllers
                         _dbContext.Tasks.Add(model);
                         await _dbContext.SaveChangesAsync();
 
-                        TempData["message"] = $"Task \"{model.TaskName}\" added successfully!";
+                        TempData["message"] = $"Task <b>{model.TaskName}</b> added successfully!";
                     }
                     else
                     {
@@ -185,7 +183,7 @@ namespace DormBuddy.Controllers
                         var taskname = task.TaskName;
                         _dbContext.Tasks.Remove(task);
                         await _dbContext.SaveChangesAsync();
-                        TempData["message"] = $"Task \"{taskname}\" deleted successfully!";
+                        TempData["message"] = $"Task <b>{taskname}</b> deleted successfully!";
                     }
                     else
                     {
@@ -253,7 +251,5 @@ namespace DormBuddy.Controllers
                 return Json(new { success = false, message = "Error: Could not update the task." });
             }
         }
-
-        #endregion
     }
 }

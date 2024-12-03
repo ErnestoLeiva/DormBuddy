@@ -66,13 +66,13 @@
             @if (TempData["message"] != null)
             {
                 <div class="alert alert-success">
-                    @TempData["message"]
+                    @Html.Raw(TempData["message"])
                 </div>
             }
             @if (TempData["error"] != null)
             {
                 <div class="alert alert-danger">
-                    @TempData["error"]
+                    @Html.Raw(TempData["error"])
                 </div>
             }
 
@@ -99,10 +99,34 @@
                     
                     <div class="form-group">
                         <label for="sharedWith">Shared With</label>
-                        <input type="text" class="form-control" id="sharedWith" name="SharedWith" placeholder="Enter names (comma-separated)" required />
+                        <div id="sharedWith">
+                            @if (ViewBag.GroupMembers != null && ViewBag.Users != null && ((List<DormBuddy.Models.GroupMemberModel>)ViewBag.GroupMembers).Any())
+                            {
+                                var groupMembers = (List<DormBuddy.Models.GroupMemberModel>)ViewBag.GroupMembers;
+                                var users = (List<DormBuddy.Models.ApplicationUser>)ViewBag.Users;
+
+                                foreach (var member in groupMembers)
+                                {
+                                    var user = users.FirstOrDefault(u => u.Id == member.UserId);
+                                    if (user != null)
+                                    {
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="AssignedUserIds" id="user_@user.Id" value="@user.Id" />
+                                            <label class="form-check-label" for="user_@user.Id">@($"{user.FirstName} {user.LastName}")</label>
+                                        </div>
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                <div class="alert alert-warning">
+                                    <strong>Notice:</strong> You are not part of any group. Please <a href="/Groups/Index">join or create</a> a group to use this feature.
+                                </div>
+                            }
+                        </div>
                     </div>
                     
-                    <input type="hidden" id="date" name="Date" value="@DateTime.Now" />
+                    <input type="hidden" id="date" name="Date" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss")" />
                     
                     <button type="submit" class="btn btn-primary">Add Expense</button>
                 </form>
@@ -134,7 +158,24 @@
                                 <tr>
                                     <td>@expense.ExpenseName</td>
                                     <td class="amount-cell" data-amount="@expense.Amount">@expense.Amount</td>
-                                    <td>@expense.SharedWith</td>
+                                    <td>
+                                        @{
+                                            if (ViewBag.Users != null)
+                                            {
+                                                var users = (List<DormBuddy.Models.ApplicationUser>)ViewBag.Users;
+                                                var assignedIds = expense.SharedWith?.Split(',') ?? Array.Empty<string>();
+                                                var assignedNames = users
+                                                    .Where(u => assignedIds.Contains(u.Id))
+                                                    .Select(u => $"{u.FirstName} {u.LastName}");
+
+                                                <span>@string.Join(", ", assignedNames)</span>
+                                            }
+                                            else
+                                            {
+                                                <span>Unknown</span>
+                                            }
+                                        }
+                                    </td>
                                     <td class="text-center">
                                         <span class="badge @(expense.isSplit ? "bg-success" : "bg-danger")">
                                             <i class="fa @(expense.isSplit ? "fa-check" : "fa-times")" aria-hidden="true"></i>
@@ -260,6 +301,13 @@
             if (!decimalPattern.test(value)) {
                 event.target.value = parseFloat(value).toFixed(2);
             }
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            $('#deleteConfirmationModal').on('show.bs.modal', function () {
+                $(this).appendTo('body');
+            });
         });
     </script>
 }
