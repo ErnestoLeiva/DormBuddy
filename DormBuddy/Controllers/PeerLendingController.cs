@@ -32,47 +32,7 @@ namespace DormBuddy.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            var loans = await _dbContext.PeerLendings
-                .Where(l => l.UserId == user.Id || l.BorrowerId == user.Id)
-                .ToListAsync();
-
-            var groupId = await _dbContext.GroupMembers
-                .Where(gm => gm.UserId == user.Id)
-                .Select(gm => gm.GroupId)
-                .FirstOrDefaultAsync();
-
-            if (groupId != 0)
-            {
-                var groupMembers = await _dbContext.GroupMembers
-                    .Where(gm => gm.GroupId == groupId)
-                    .ToListAsync();
-
-                var userIds = groupMembers.Select(gm => gm.UserId).ToList();
-                var users = await _dbContext.Users
-                    .Where(u => userIds.Contains(u.Id))
-                    .ToListAsync();
-
-                ViewBag.GroupMembers = groupMembers;
-                ViewBag.Users = users;
-            }
-            else
-            {
-                ViewBag.GroupMembers = new List<GroupMemberModel>();
-                ViewBag.Users = new List<ApplicationUser>();
-                TempData["error"] = "You are not part of any group. Please join or create a group to use this feature.";
-            }
-
-            var newLoan = new PeerLendingModel { UserId = user.Id };
-
-            // Calculate stats
-            ViewData["TotalLent"] = loans.Any() ? loans.Sum(l => l.Amount) : 0m;
-            ViewData["ActiveLoans"] = loans.Count(l => !l.IsRepaid);
-            ViewData["OverdueLoans"] = loans.Count(l => !l.IsRepaid && l.DueDate < DateTime.Now);
-            ViewData["DueSoonLoans"] = loans.Count(l => !l.IsRepaid && 
-                l.DueDate > DateTime.Now && 
-                l.DueDate <= DateTime.Now.AddDays(3));
-
-            // Return view with debug information if needed
+            var (loans, newLoan) = await LoadPeerLendingData(user);
             return View("~/Views/Account/Dashboard/Lending.cshtml", Tuple.Create(loans, newLoan));
         }
 
@@ -96,17 +56,11 @@ namespace DormBuddy.Controllers
 
                     _dbContext.PeerLendings.Add(model);
                     await _dbContext.SaveChangesAsync();
-
-                    var lenderName = $"{user.FirstName} {user.LastName}";
-                    var borrower = await _dbContext.Users.FindAsync(model.BorrowerId);
-                    var borrowerName = borrower != null ? $"{borrower.FirstName} {borrower.LastName}" : "Unknown";
-
-                    TempData["message"] = $"Loan from <b>{lenderName}</b> for <b>{borrowerName}</b> created successfully!";
+                    TempData["message"] = $"Loan for borrower \"{model.BorrowerId}\" added successfully!";
                 }
                 else
                 {
                     TempData["error"] = "Invalid date or time format.";
-                    ModelState.AddModelError("DueDate", "Invalid date or time format.");
                 }
             }
             else
@@ -114,46 +68,7 @@ namespace DormBuddy.Controllers
                 TempData["error"] = "Invalid loan data.";
             }
 
-            var loans = await _dbContext.PeerLendings
-                .Where(l => l.UserId == user.Id || l.BorrowerId == user.Id)
-                .ToListAsync();
-
-            var groupId = await _dbContext.GroupMembers
-                .Where(gm => gm.UserId == user.Id)
-                .Select(gm => gm.GroupId)
-                .FirstOrDefaultAsync();
-
-            if (groupId != 0)
-            {
-                var groupMembers = await _dbContext.GroupMembers
-                    .Where(gm => gm.GroupId == groupId)
-                    .ToListAsync();
-
-                var userIds = groupMembers.Select(gm => gm.UserId).ToList();
-                var users = await _dbContext.Users
-                    .Where(u => userIds.Contains(u.Id))
-                    .ToListAsync();
-
-                ViewBag.GroupMembers = groupMembers;
-                ViewBag.Users = users;
-            }
-            else
-            {
-                ViewBag.GroupMembers = new List<GroupMemberModel>();
-                ViewBag.Users = new List<ApplicationUser>();
-                TempData["error"] = "You are not part of any group. Please join or create a group to use this feature.";
-            }
-
-            var newLoan = new PeerLendingModel { UserId = user.Id };
-
-            // Calculate stats
-            ViewData["TotalLent"] = loans.Any() ? loans.Sum(l => l.Amount) : 0m;
-            ViewData["ActiveLoans"] = loans.Count(l => !l.IsRepaid);
-            ViewData["OverdueLoans"] = loans.Count(l => !l.IsRepaid && l.DueDate < DateTime.Now);
-            ViewData["DueSoonLoans"] = loans.Count(l => !l.IsRepaid && 
-                l.DueDate > DateTime.Now && 
-                l.DueDate <= DateTime.Now.AddDays(3));
-
+            var (loans, newLoan) = await LoadPeerLendingData(user);
             return View("~/Views/Account/Dashboard/Lending.cshtml", Tuple.Create(loans, newLoan));
         }
 
@@ -168,59 +83,16 @@ namespace DormBuddy.Controllers
             var loan = await _dbContext.PeerLendings.FindAsync(loanId);
             if (loan != null)
             {
-                var lenderName = $"{user.FirstName} {user.LastName}";
-                var borrower = await _dbContext.Users.FindAsync(loan.BorrowerId);
-                var borrowerName = borrower != null ? $"{borrower.FirstName} {borrower.LastName}" : "Unknown";
-
                 _dbContext.PeerLendings.Remove(loan);
                 await _dbContext.SaveChangesAsync();
-                TempData["message"] = $"Loan from <b>{lenderName}</b> for <b>{borrowerName}</b> deleted successfully!";
+                TempData["message"] = $"Loan deleted successfully!";
             }
             else
             {
                 TempData["error"] = "Error: Loan not found.";
             }
 
-            var loans = await _dbContext.PeerLendings
-                .Where(l => l.UserId == user.Id || l.BorrowerId == user.Id)
-                .ToListAsync();
-
-            var groupId = await _dbContext.GroupMembers
-                .Where(gm => gm.UserId == user.Id)
-                .Select(gm => gm.GroupId)
-                .FirstOrDefaultAsync();
-
-            if (groupId != 0)
-            {
-                var groupMembers = await _dbContext.GroupMembers
-                    .Where(gm => gm.GroupId == groupId)
-                    .ToListAsync();
-
-                var userIds = groupMembers.Select(gm => gm.UserId).ToList();
-                var users = await _dbContext.Users
-                    .Where(u => userIds.Contains(u.Id))
-                    .ToListAsync();
-
-                ViewBag.GroupMembers = groupMembers;
-                ViewBag.Users = users;
-            }
-            else
-            {
-                ViewBag.GroupMembers = new List<GroupMemberModel>();
-                ViewBag.Users = new List<ApplicationUser>();
-                TempData["error"] = "You are not part of any group. Please join or create a group to use this feature.";
-            }
-
-            var newLoan = new PeerLendingModel { UserId = user.Id };
-
-            // Calculate stats
-            ViewData["TotalLent"] = loans.Any() ? loans.Sum(l => l.Amount) : 0m;
-            ViewData["ActiveLoans"] = loans.Count(l => !l.IsRepaid);
-            ViewData["OverdueLoans"] = loans.Count(l => !l.IsRepaid && l.DueDate < DateTime.Now);
-            ViewData["DueSoonLoans"] = loans.Count(l => !l.IsRepaid && 
-                l.DueDate > DateTime.Now && 
-                l.DueDate <= DateTime.Now.AddDays(3));
-
+            var (loans, newLoan) = await LoadPeerLendingData(user);
             return View("~/Views/Account/Dashboard/Lending.cshtml", Tuple.Create(loans, newLoan));
         }
 
@@ -236,6 +108,49 @@ namespace DormBuddy.Controllers
                 return Json(new { success = true, message = "Loan status updated!" });
             }
             return Json(new { success = false, message = "Error: Loan not found." });
+        }
+
+        // LoadDataFunction
+        private async Task<(List<PeerLendingModel> loans, PeerLendingModel newLoan)> LoadPeerLendingData(ApplicationUser user)
+        {
+            var loans = await _dbContext.PeerLendings
+                .Where(l => l.UserId == user.Id || l.BorrowerId == user.Id)
+                .ToListAsync();
+
+            var groupId = await _dbContext.GroupMembers
+                .Where(gm => gm.UserId == user.Id)
+                .Select(gm => gm.GroupId)
+                .FirstOrDefaultAsync();
+
+            if (groupId != 0)
+            {
+                var groupMembers = await _dbContext.GroupMembers
+                    .Where(gm => gm.GroupId == groupId)
+                    .ToListAsync();
+
+                var userIds = groupMembers.Select(gm => gm.UserId).ToList();
+                var users = await _dbContext.Users
+                    .Where(u => userIds.Contains(u.Id))
+                    .ToListAsync();
+
+                ViewBag.GroupMembers = groupMembers;
+                ViewBag.Users = users;
+            }
+            else
+            {
+                ViewBag.GroupMembers = new List<GroupMemberModel>();
+                ViewBag.Users = new List<ApplicationUser>();
+                TempData["error"] = "You are not part of any group. Please join or create a group to use this feature.";
+            }
+
+            ViewData["TotalLent"] = loans.Any() ? loans.Sum(l => l.Amount) : 0m;
+            ViewData["ActiveLoans"] = loans.Count(l => !l.IsRepaid);
+            ViewData["OverdueLoans"] = loans.Count(l => !l.IsRepaid && l.DueDate < DateTime.Now);
+            ViewData["DueSoonLoans"] = loans.Count(l => !l.IsRepaid && l.DueDate > DateTime.Now && l.DueDate <= DateTime.Now.AddDays(3));
+
+            var newLoan = new PeerLendingModel { UserId = user.Id };
+
+            return (loans, newLoan);
         }
     }
 }
