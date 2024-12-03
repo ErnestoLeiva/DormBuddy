@@ -71,6 +71,12 @@ body {
     padding: 1rem;
 }
 
+
+.centered-tile {
+    grid-column: 2;
+}
+
+
 /* Dashboard Cards */
 .dashboard-card {
     background: white;

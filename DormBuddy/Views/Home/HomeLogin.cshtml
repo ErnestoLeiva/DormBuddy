@@ -4,50 +4,42 @@
 }
 
 <!-- Link to the specific homeLogin.css file -->
-<link rel="stylesheet" href="~/css/homeLogin.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/homepage.css" asp-append-version="true" />
 
-<div class="home">
-    <div class="content">
-        <h2>DormBuddy: Dorming Made Easy</h2>
-        <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. 
-            Quas mollitia cupiditate totam vero cumque cum facilis tempora 
-            nostrum aspernatur ipsa optio maxime in at omnis, quasi pariatur 
-            itaque dolorem. Quasi.</p>
+<section id="section1">
+
+    <div class="content" id="content1">
+        <h1>DormBuddy: Dorming Made Easy</h1>
+        <p>A comprehensive, multi-functional platform designed to enhance the college dormitory experience.</p>
         <a href="#">Get Started</a>
+
     </div>
 
-    <div class="wrapper-login">
-        <h2>User Login</h2>
+</section>
 
-        <!-- Error message display using TempData -->
-        @if (TempData["ErrorMessage"] != null)
-        {
-            <div class="alert alert-danger" role="alert">
-                @TempData["ErrorMessage"]
-            </div>
-        }
+<!-- FEATURES -->
 
-        <form asp-controller="Account" asp-action="Login">
-            <div class="input-box">
-                <span class="icon"><ion-icon name="person"></ion-icon></span>
-                <input type="text" placeholder="Username/Email" name="username" required />
-            </div>
-            <div class="input-box position-relative">
-                <span class="icon"><ion-icon name="lock-closed"></ion-icon></span>
-                <input type="password" class="form-control" id="password" placeholder="Enter your password" name="password" required />
-                <span class="position-absolute" id="togglePassword" style="right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;">
-                    <i class="fa fa-eye"></i>
-                </span>
-            </div>
-            <div class="remember-forgot">
-                <label><input type="checkbox" /> Remember me</label>
-                <a asp-controller="Account" asp-action="ForgotPassword">Forgot password?</a>
-            </div>
-            <button type="submit" class="btn">Login</button>
-            <div class="register-link">
-                <p>Not a user? <a asp-controller="Account" asp-action="Register">Sign up</a></p>
-            </div>
-        </form>
+<section id="section2">
+    <h1>Features</h1>
+    <p>Simplify Dorm Living: Borrow, Budget, and Balance with Ease!</p>
+
+    <div id="row">
+        <div id="feature-col">
+            <h3>P2P Lending</h3>
+            <p> You can lend or borrow money directly from each other within the platform. This peer-to-peer (P2P) lending feature facilitates 
+                quick and easy financial transactions among roommates or dormmates, eliminating the need for traditional financial institutions</p>
+        </div>
+        <div id="feature-col">
+            <h3>Expense Splitter</h3>
+            <p>Designed to simplify the process of dividing shared expenses among friends or roommates, you can track who owes what, set reminders 
+                for payments, and maintain a clear record of all transactions, ensuring transparency and reducing conflicts</p>
+        </div>
+        <div id="feature-col">
+            <h3>Task Management</h3>
+            <p>You can assign and track the completion of various chores and responsibilities. This feature helps maintain order 
+                and ensures that all shared tasks are completed efficiently.</p>
+        </div>
+
     </div>
 </section>
 

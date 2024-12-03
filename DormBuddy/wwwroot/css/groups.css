@@ -1,0 +1,75 @@
+.groups-header h1:first-child {
+    position: relative;
+    height: 2em;
+}
+
+/* Hide original icon */
+.groups-header h1:first-child i.fas.fa-users {
+    opacity: 0;
+}
+
+
+.groups-header h1:first-child::before,
+.groups-header h1:first-child::after {
+    content: "\f0c0";  
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* First copy starts from left */
+.groups-header h1:first-child::before {
+    animation: slideFromLeft 1s forwards;
+}
+
+/* Second copy starts from right */
+.groups-header h1:first-child::after {
+    animation: slideFromRight 1s forwards;
+}
+
+@keyframes slideFromLeft {
+    0% {
+        opacity: 0;
+        transform: translate(-150%, -50%);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+@keyframes slideFromRight {
+    0% {
+        opacity: 0;
+        transform: translate(50%, -50%);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+/* Stat Card Colors */
+.stat-total-members {
+    background: #ecfdf5;  
+}
+.stat-total-members .stat-icon {
+    background: #10b981;  
+}
+
+.stat-available-spots {
+    background: #e6fffa;  
+}
+.stat-available-spots .stat-icon {
+    background: #38b2ac;
+}
+
+.stat-admin {
+    background: #fff5f5;  
+}
+.stat-admin .stat-icon {
+    background: #f56565;
+}

@@ -9,12 +9,7 @@
 
 @*IF LOGGED IN, allow user to go back to dashboard...*@
 @if (User?.Identity != null && User.Identity.IsAuthenticated) {
-    <!-- Return to Dashboard Button -->
-    <div class="mb-4">
-        <a href="/Account/Dashboard" class="btn btn-outline-primary">
-            <i class="fa fa-chevron-left"></i> Return to Dashboard
-        </a>
-    </div>
+   
 }
 
 <div class="text-center mb-4">

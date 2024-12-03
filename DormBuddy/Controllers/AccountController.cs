@@ -109,55 +109,47 @@ namespace DormBuddy.Controllers
 
             var result = await _signInManager.PasswordSignInAsync(user, password, false, false);
 
-            if (result.Succeeded) {
+            if (result.Succeeded)
+            {
+                // Reset failed login attempts
                 await _userManager.ResetAccessFailedCountAsync(user);
 
-                var profile = await GetUserInformation(username);
+                // Update LastLoginDate and TotalLogins
+                user.LastLoginDate = DateTime.UtcNow;
+                user.TotalLogins += 1;
 
-                if (profile == null) {
-                    return BadRequest("User profile could not be found on login");
-                }
+                _context.Update(user); // Mark the user entity as updated
+                await _context.SaveChangesAsync(); // Save all changes
 
+                // Sign in the user
                 await _signInManager.SignInAsync(user, rememberMe);
 
-                profile.LastLogin = DateTime.UtcNow;
-
-                await _context.SaveChangesAsync();
-
-
-                /*
-                _context.Add(new Notifications {
-                    UserId = profile.UserId,
-                    MessageType = 1, // FOR REGULAR MESSAGE
-                    CreatedAt = DateTime.UtcNow,
-                    Message = profile?.User?.UserName + "..... WELCOME!"
-                });
-                */
-
                 return RedirectToAction("Dashboard");
-
-            } else {
-                if (result.IsLockedOut) {
-                    // send message of time left and return
+            }
+            else
+            {
+                if (result.IsLockedOut)
+                {
+                    // Send lockout information
                     var lockoutTime = await _userManager.GetLockoutEndDateAsync(user);
                     var timeRemaining = lockoutTime.Value - DateTimeOffset.Now;
-                    ViewBag.ErrorMessage = "Account is locked out!\nRemaining: " + timeRemaining.Minutes + " minutes, " + timeRemaining.Seconds + " seconds.";
+                    ViewBag.ErrorMessage = $"Account is locked out!\nRemaining: {timeRemaining.Minutes} minutes, {timeRemaining.Seconds} seconds.";
                     return View("AccountForms");
                 }
 
-                await _userManager.AccessFailedAsync(user);
+                await _userManager.AccessFailedAsync(user); // Increment failed login attempts
 
                 var failed = await _userManager.GetAccessFailedCountAsync(user);
                 var max = _userManager.Options.Lockout.MaxFailedAccessAttempts;
-
                 var remaining = max - failed;
 
-                ViewBag.ErrorMessage = "Invalid credentials, try again!\nRemaining attempts: " + remaining;
+                ViewBag.ErrorMessage = $"Invalid credentials, try again!\nRemaining attempts: {remaining}";
             }
 
-            
             return View("AccountForms");
         }
+
+
 
         #endregion
 
@@ -194,7 +186,7 @@ namespace DormBuddy.Controllers
                 _context.UserLastUpdate.Add(instance);
             }
 
-            return instance ?? new UserLastUpdate();
+            return instance;
         }
 
         #region SIGN UP
@@ -454,8 +446,6 @@ namespace DormBuddy.Controllers
                     var currentUICulture = CultureInfo.CurrentUICulture.Name;
 
                     ViewBag.CultureInfo = $"Current Culture: {currentCulture}, UI Culture: {currentUICulture}";
-
-                    ViewBag.NotificationAmount = (await _context.Notifications.Where(m => m.UserId == user.Id).ToListAsync()).Count;
                 }
 
                 return View();
@@ -474,17 +464,15 @@ namespace DormBuddy.Controllers
 
         public IActionResult Lending() => User?.Identity?.IsAuthenticated == true ? View("~/Views/Account/Dashboard/Lending.cshtml") : RedirectToAction("AccountForms");
 
-        //public IActionResult Notifications() => User?.Identity?.IsAuthenticated == true ? View("~/Views/Account/Dashboard/Notifications.cshtml", new List<Notifications>()) : RedirectToAction("AccountForms");
+        public IActionResult Notifications() => User?.Identity?.IsAuthenticated == true ? View("~/Views/Account/Dashboard/Notifications.cshtml") : RedirectToAction("AccountForms");
 
-public IActionResult Settings()
-{
-    if (User?.Identity?.IsAuthenticated == true)
-    {
-        // Retrieve 'page' query parameter, default to empty string if not provided
-        string loadPage = Request.Query["page"].ToString();
 
-        // Define allowed pages
-        var allowedPages = new HashSet<string> { "AccountSettings", "GeneralSettings", "PrivacySettings", "ProfileSettings" };
+        public IActionResult Settings() {
+            if (User?.Identity?.IsAuthenticated == true) {
+
+                string loadPage = Request.Query["page"].ToString() ?? "";
+
+                var allowedPages = new List<string> { "AccountSettings", "GeneralSettings", "PrivacySettings", "ProfileSettings" };
 
         // Validate the 'page' parameter
         if (!string.IsNullOrEmpty(loadPage) && !allowedPages.Contains(loadPage))
@@ -503,6 +491,7 @@ public IActionResult Settings()
 }
 
 
+
 public async Task<IActionResult> Profile()
         {
          try
@@ -515,7 +504,7 @@ public async Task<IActionResult> Profile()
 
                 // Get the username from query parameter or fallback to User.Identity.Name
                 string get_username = Request.Query["username"].ToString() ?? "";
-                get_username = string.IsNullOrEmpty(get_username) ? User?.Identity?.Name ?? string.Empty : get_username;
+                get_username = string.IsNullOrEmpty(get_username) ? User?.Identity?.Name : get_username;
 
                 // If username is still null or empty, redirect to the dashboard
                 if (string.IsNullOrEmpty(get_username))
@@ -537,12 +526,6 @@ public async Task<IActionResult> Profile()
                     return RedirectToAction("Dashboard");
                 }
 
-                var bannerImage = _configuration["Profile:Default_BannerImage"];
-                if (string.IsNullOrEmpty(profile.BannerImageUrl))
-                {
-                    profile.BannerImageUrl = bannerImage;
-                }
-
                 var profileImage = _configuration["Profile:Default_ProfileImage"];
                 if (string.IsNullOrEmpty(profile.ProfileImageUrl))
                 {
@@ -554,39 +537,21 @@ public async Task<IActionResult> Profile()
 
                 // Profile Online Status Check
                 ViewData["profile_online_status"] = "Offline";
-                var getLastUpdate = await getUserLastUpdate(u);
-
+                var getLastUpdate = await getUserLastUpdate(profile.User);
                 if (getLastUpdate?.LastUpdate is DateTime lastUpdate &&
                     (DateTime.UtcNow - lastUpdate).TotalSeconds < 300)
                 {
                     ViewData["profile_online_status"] = "Online";
                 }
 
-                if (u.UserName != User?.Identity?.Name) {
-                    var fstatus = await FriendshipStatus(u);
+                if (profile.User.UserName != User?.Identity?.Name) {
+                    var fstatus = await FriendshipStatus(profile.User);
                     ViewData["FriendshipStatus"] = fstatus;
                 }
 
                 ViewData["FriendCount"] = await GetFriendCount(get_username);
 
                 ViewData["Friends"] = await GetAllFriends(get_username);
-
-                // posts //
-
-                List<Profile_PostsModel> posts = await _context.Profile_Posts.Where(p => p.TargetId == u.Id && p.Reply_Id == -1).OrderByDescending(p => p.CreatedAt).Include(p => p.TargetUser).ToListAsync();
-                List<Profile_PostsModel> posts_reply = await _context.Profile_Posts.Where(p => p.TargetId == u.Id && p.Reply_Id != -1).Include(p => p.TargetUser).ToListAsync();
-
-                if (posts == null) {
-                    posts = new List<Profile_PostsModel>();
-                }
-
-                if (posts_reply == null) {
-                    posts_reply = new List<Profile_PostsModel>();
-                }
-
-                ViewData["CurrentTimeZone"] = Request.Cookies["UserTimeZone"] ?? "UTC";
-                ViewData["Posts"] = posts;
-                ViewData["Posts_Reply"] = posts_reply;
 
                 return View("~/Views/Account/Dashboard/Profile.cshtml", profile);
             }
@@ -597,7 +562,6 @@ public async Task<IActionResult> Profile()
                 return View("Error");  // Show a generic error page or message
             }
         }
-
 
 
         public async Task<IActionResult> LoadSettings(string settingsPage, string errorMessage = "")
@@ -614,10 +578,6 @@ public async Task<IActionResult> Profile()
                 case "GeneralSettings":
                     return PartialView("Dashboard/Settings/_GeneralSettings");
                 case "AccountSettings":
-                    if (!string.IsNullOrEmpty(errorMessage)) {
-                        ViewBag.ErrorMessage = errorMessage;
-                    }
-                    
                     return PartialView("Dashboard/Settings/_AccountSettings", profile);
                 case "PrivacySettings":
                     return PartialView("Dashboard/Settings/_PrivacySettings", profile);
@@ -685,5 +645,6 @@ public async Task<IActionResult> Profile()
 
 
         #endregion
+
     }
 }   

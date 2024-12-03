@@ -1,8 +1,347 @@
+@model Tuple<List<DormBuddy.Models.ExpenseModel>, DormBuddy.Models.ExpenseModel>
+
 @{
     ViewData["Title"] = "Expense Splitting";
-}
+    var expenses = Model?.Item1 ?? new List<DormBuddy.Models.ExpenseModel>();
+    var newExpense = Model?.Item2 ?? new DormBuddy.Models.ExpenseModel();
 
-<div class="text-center mb-4">
-    <h1 class="display-4">Expense Splitting</h1>
-    <p>Track shared expenses and manage balance with dormmates.</p>
+    // Calculate stats
+    var totalExpenses = expenses.Sum(e => e.Amount);
+    var totalParticipants = expenses
+        .SelectMany(e => (e.SharedWith?.Split(',') ?? new string[0]).Distinct())
+        .Distinct()
+        .Count();
+    var averageExpense = totalParticipants > 0 ? Math.Round(totalExpenses / totalParticipants, 2) : 0;
+    var pendingPayments = expenses
+        .Where(e => e.SharedWith != null && !e.isSplit )
+        .Sum(e =>
+        {
+            var participantCount = e.SharedWith.Split(',').Length;
+            return participantCount > 0 ? e.Amount / participantCount : 0;
+        });
+    var activeSplits = expenses.Count(e => e.SharedWith != null && e.SharedWith.Split(',').Length > 0 && !e.isSplit);
+}
+<div class="expenses-container fade-in">
+
+    <div class="expenses-header text-center mb-4">
+        <h1><i class="fas fa-money-bill-wave"></i></h1>
+        <h1 class="display-4">Expense Splitting</h1>
+        <p>track shared expenses and manage balance with dormmates.</p>
+    </div>
+    
+        <div class="stats-container">
+            <div class="stat-card stat-total">
+                <div class="stat-icon">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-number">@totalExpenses.ToString("C")</h3>
+                    <p class="stat-label">Total Expenses</p>
+                </div>
+            </div>
+
+            <div class="stat-card stat-share">
+                <div class="stat-icon">
+                    <i class="fas fa-wallet"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-number">@averageExpense.ToString("C")</h3>
+                    <p class="stat-label">Average per Person</p>
+                </div>
+            </div>
+
+            <div class="stat-card stat-pending">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-number">@pendingPayments.ToString("C")</h3>
+                    <p class="stat-label">Pending Payments</p>
+                </div>
+            </div>
+
+            <div class="stat-card stat-splits">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-number">@activeSplits</h3>
+                    <p class="stat-label">Active Splits</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="expenses-main">
+            <!-- Messages Section -->
+            @if (TempData["message"] != null)
+            {
+                <div class="alert alert-success">
+                    @Html.Raw(TempData["message"])
+                </div>
+            }
+            @if (TempData["error"] != null)
+            {
+                <div class="alert alert-danger">
+                    @Html.Raw(TempData["error"])
+                </div>
+            }
+
+            <!-- Add Expense Form -->
+            <div class="add-expense-section">
+                <h4>Add New Expense</h4>
+                <form method="post" asp-action="AddExpense" asp-controller="Expenses">
+                    <input type="hidden" id="UserId" name="UserId" value="@newExpense.UserId" />
+                    
+                    <div class="form-group">
+                        <label for="expenseName">Expense Name</label>
+                        <input type="text" class="form-control" id="expenseName" name="ExpenseName" placeholder="Enter expense name" required />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="amount">Amount</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">$</span>
+                            </div>
+                            <input type="number" step="0.01" min="0.01" class="form-control" id="amount" name="Amount" placeholder="0.00" required />
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="sharedWith">Shared With</label>
+                        <div id="sharedWith">
+                            @if (ViewBag.GroupMembers != null && ViewBag.Users != null && ((List<DormBuddy.Models.GroupMemberModel>)ViewBag.GroupMembers).Any())
+                            {
+                                var groupMembers = (List<DormBuddy.Models.GroupMemberModel>)ViewBag.GroupMembers;
+                                var users = (List<DormBuddy.Models.ApplicationUser>)ViewBag.Users;
+
+                                foreach (var member in groupMembers)
+                                {
+                                    var user = users.FirstOrDefault(u => u.Id == member.UserId);
+                                    if (user != null)
+                                    {
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="AssignedUserIds" id="user_@user.Id" value="@user.Id" />
+                                            <label class="form-check-label" for="user_@user.Id">@($"{user.FirstName} {user.LastName}")</label>
+                                        </div>
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                <div class="alert alert-warning">
+                                    <strong>Notice:</strong> You are not part of any group. Please <a href="/Groups/Index">join or create</a> a group to use this feature.
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" id="date" name="Date" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss")" />
+                    
+                    <button type="submit" class="btn btn-primary">Add Expense</button>
+                </form>
+            </div>
+
+            <!-- Expense Table -->
+            <div class="table-container">
+                <table class="table" id="expenseTable">
+                    <thead>
+                        <tr>
+                            <th>Expense Name</th>
+                            <th>Amount</th>
+                            <th>Shared With</th>
+                            <th>Split?</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="expenseTableBody">
+                        @if (!expenses.Any())
+                        {
+                            <tr id="noExpensesMessage">
+                                <td colspan="5" class="text-center">No current expenses...</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var expense in expenses)
+                            {
+                                <tr>
+                                    <td>@expense.ExpenseName</td>
+                                    <td class="amount-cell" data-amount="@expense.Amount">@expense.Amount</td>
+                                    <td>
+                                        @{
+                                            if (ViewBag.Users != null)
+                                            {
+                                                var users = (List<DormBuddy.Models.ApplicationUser>)ViewBag.Users;
+                                                var assignedIds = expense.SharedWith?.Split(',') ?? Array.Empty<string>();
+                                                var assignedNames = users
+                                                    .Where(u => assignedIds.Contains(u.Id))
+                                                    .Select(u => $"{u.FirstName} {u.LastName}");
+
+                                                <span>@string.Join(", ", assignedNames)</span>
+                                            }
+                                            else
+                                            {
+                                                <span>Unknown</span>
+                                            }
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge @(expense.isSplit ? "bg-success" : "bg-danger")">
+                                            <i class="fa @(expense.isSplit ? "fa-check" : "fa-times")" aria-hidden="true"></i>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn @(expense.isSplit ? "btn-warning" : "btn-success") btn-sm"
+                                            onclick="toggleExpenseStatus(this, @expense.Id)">
+                                            Toggle Status
+                                        </button>
+                                        <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteConfirmationModal" 
+                                            onclick="setExpenseToDelete('@expense.ExpenseName', '@expense.Id')">Delete</button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+<!-- Bootstrap Modal for Confirming Expense Deletion -->
+<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteConfirmationModalLabel">Confirm Deletion</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete expense "<strong id="expenseToDeleteName"></strong>"?
+            </div>
+            <div class="modal-footer">
+                <form method="post" asp-action="DeleteExpense">
+                    <input type="hidden" name="expenseId" id="expenseToDeleteId" />
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
+
+@section Scripts {
+    <script>
+        window.onload = function() {
+            setDateToNow();
+        }
+
+        // Set the date used in the database to the current LOCAL users time
+        function setDateToNow() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = (now.getMonth() + 1).toString().padStart(2, '0');
+            const day = now.getDate().toString().padStart(2, '0');
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
+            
+            const localDateTime = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+            document.getElementById('date').value = localDateTime;
+        }
+
+        // Used for confirmation pop-up Bootstrap Modal
+        function setExpenseToDelete(expenseName, expenseId) {
+            document.getElementById('expenseToDeleteName').innerText = expenseName;
+            document.getElementById('expenseToDeleteId').value = expenseId;
+        }
+        
+        function toggleExpenseStatus(button, expenseId) {
+            console.log("Expense ID to toggle: " + expenseId);
+
+            const row = button.closest('tr');
+            const statusCell = row.cells[3];
+            const isSplit = statusCell.querySelector('i').classList.contains('fa-check'); // Check current status
+
+            $.ajax({
+                url: '/Expenses/ToggleStatus',
+                type: 'POST',
+                data: {
+                    expenseId: expenseId
+                },
+                success: function(response) {
+                    console.log(response);
+                    if (response.success) {
+                        if (isSplit) {
+                            statusCell.innerHTML = '<span class="badge bg-danger"><i class="fa fa-times" aria-hidden="true"></i></span>';
+                            button.classList.remove('btn-warning');
+                            button.classList.add('btn-success');
+                        } else {
+                            statusCell.innerHTML = '<span class="badge bg-success"><i class="fa fa-check" aria-hidden="true"></i></span>';
+                            button.classList.remove('btn-success');
+                            button.classList.add('btn-warning');
+                        }
+                        
+                        fetchExpenseStats()
+
+                    } else {
+                        alert('Failed to update expense status: ' + response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', status, error);
+                    alert('Error while updating expense status.');
+                }
+            });
+        }
+
+        function fetchExpenseStats() {
+            $.ajax({
+                url: '/Expenses/GetExpenseStats',
+                method: 'GET',
+                success: function (response) {
+                    if (response.success) {
+                        const stats = response.stats;
+                        document.querySelector(".stat-total .stat-number").innerText = stats.totalExpenses;
+                        document.querySelector(".stat-share .stat-number").innerText = stats.averageExpense;
+                        document.querySelector(".stat-pending .stat-number").innerText = stats.pendingPayments;
+                        document.querySelector(".stat-splits .stat-number").innerText = stats.activeSplits;
+                    } else {
+                        console.error("Error fetching Expense stats:", response.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error:", error);
+                }
+            });
+        }
+
+        // Format currency dynamically based on user's locale
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelectorAll(".amount-cell").forEach(function(cell) {
+                const amount = parseFloat(cell.getAttribute("data-amount"));
+                if (!isNaN(amount)) {
+                    cell.innerText = new Intl.NumberFormat(navigator.language, { style: "currency", currency: "USD" }).format(amount);
+                }
+            });
+        });
+
+        document.getElementById("amount").addEventListener("input", function (event) {
+            const value = event.target.value;
+            const decimalPattern = /^\d+(\.\d{0,2})?$/;
+            if (!decimalPattern.test(value)) {
+                event.target.value = parseFloat(value).toFixed(2);
+            }
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            $('#deleteConfirmationModal').on('show.bs.modal', function () {
+                $(this).appendTo('body');
+            });
+        });
+    </script>
+}
