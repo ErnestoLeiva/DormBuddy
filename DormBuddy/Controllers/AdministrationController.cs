@@ -15,22 +15,42 @@ namespace DormBuddy.Controllers
         private readonly IReportService _reportService;
         private readonly DBContext _context;
         private readonly LogService _logService;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
 
-        public AdministrationController(UserManager<ApplicationUser> userManager, IReportService reportService, DBContext context, LogService logService)
+
+        public AdministrationController(UserManager<ApplicationUser> userManager, IReportService reportService, DBContext context, LogService logService, RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _reportService = reportService;
             _context = context;
             _logService = logService ?? throw new ArgumentNullException(nameof(logService));
+            _roleManager = roleManager;
 
         }
 
         [Authorize(Roles = "Admin")]
         public IActionResult AdminPanel() => View("~/Views/Administration/AdminPanel.cshtml");
 
+       // GET: /Administration/ModeratorDashboard
         [Authorize(Roles = "Admin,Moderator")]
-        public IActionResult ModeratorPanel() => View("~/Views/Administration/ModeratorPanel.cshtml");
+        public async Task<IActionResult> ModeratorPanel()
+        {
+            if (User?.Identity?.IsAuthenticated == true)
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user != null)
+                {
+                    ViewBag.Username = $"{user.FirstName} {user.LastName}";
+                }
+                return View("~/Views/Administration/ModeratorPanel.cshtml"); // Ensure the view exists at this path
+            }
+            else
+            {
+                return RedirectToAction("AccessDenied");
+            }
+        }
+
 
         [Authorize(Roles = "Admin")]
         public IActionResult ManageUsers()
@@ -38,8 +58,6 @@ namespace DormBuddy.Controllers
             var users = _userManager.Users.ToList();
             return View("~/Views/Administration/UserManagement.cshtml", users);
         }
-
-        public IActionResult ModerateContent() => View("~/Views/Administration/ModerateContent.cshtml");
 
         public IActionResult SystemSettings() => View("~/Views/Administration/SystemSettings.cshtml");
 
@@ -66,19 +84,20 @@ namespace DormBuddy.Controllers
             }
         }
 
-        [AllowAnonymous]
+       [AllowAnonymous]
         public async Task<IActionResult> SystemLogs()
         {
-             if (_logService == null)
+            // Fetch logs using LogService
+            var logs = await _logService.GetRecentLogsAsync();
+            
+            if (logs == null || !logs.Any())
             {
-                throw new NullReferenceException("LogService is not initialized. Ensure it is registered in the dependency injection container.");
+                ViewBag.Message = "No logs available.";
             }
 
-            var logs = await _logService.GetRecentLogsAsync();
             return View("~/Views/Administration/Logs.cshtml", logs);
-       
         }
-        public async Task AddLogAsync(string action, string username, string details, string logType = "Info")
+        public async Task AddLogAsync(string action, string username, string details, string logType = "Info", string description = "No description")
         {
             var log = new LogModel
             {
@@ -86,7 +105,9 @@ namespace DormBuddy.Controllers
                 Action = action,
                 Username = username,
                 Details = details,
-                LogType = logType
+                LogType = logType,
+                Description = description 
+
             };
 
             await _context.Logs.AddAsync(log);
@@ -108,38 +129,18 @@ namespace DormBuddy.Controllers
             TempData["Message"] = "Settings updated successfully!";
             return RedirectToAction("SystemSettings");
         }
+        
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ManageRoles()
+        {
+            var roles = await _roleManager.Roles.ToListAsync();
+            if (roles == null || !roles.Any())
+            {
+                ViewBag.Message = "No roles available.";
+            }
+            return View("ManageRoles", roles);
+        }
 
-        public IActionResult ManageRoles() => View("~/Views/Administration/UserManagement.cshtml");
     }
 }
 
-/*
-public async Task<List<UserActivityReport>> GenerateMonthlyActivityReport()
-        {
-            try
-            {
-                var users = await _context.ApplicationUsers.AsNoTracking().ToListAsync();
-
-                return users.Select(user => new UserActivityReport
-                {
-                    UserId = user.Id,
-                    FullName = $"{user.FirstName ?? ""} {user.LastName ?? ""}".Trim(),
-                    TotalLogins = user.TotalLogins,
-                    LastLoginDate = user.LastLoginDate,
-                    GroupsJoined = _context.Groups.Count(g =>
-                        g.Members.Any(m => m.Id.ToString() == user.Id)),
-                    TasksCreated = _context.Tasks.Count(t =>
-                        t.AssignedTo == user.UserName),
-                    ExpensesAdded = _context.Expenses.Count(e =>
-                        e.UserId.ToString() == user.Id)
-                }).ToList();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error in GenerateMonthlyActivityReport: {ex.Message}");
-                throw;
-            }
-        }
-
-
-*/

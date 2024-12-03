@@ -24,7 +24,9 @@ namespace DormBuddy.Services
                 Action = action,
                 Username = username,
                 Details = details,
-                LogType = logType
+                LogType = logType,
+                Description = description
+
             };
 
             await _context.Logs.AddAsync(log);
@@ -43,7 +45,8 @@ namespace DormBuddy.Services
                     Action = l.Action,
                     Username = l.Username,
                     Details = l.Details,
-                    LogType = l.LogType
+                    LogType = l.LogType,
+                    Description = l.Description
                 })
                 .OrderByDescending(l => l.Timestamp)
                 .ToListAsync();

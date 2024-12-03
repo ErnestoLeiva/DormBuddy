@@ -12,15 +12,24 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var log in Model)
+        @if (Model != null && Model.Any())
+        {
+            @foreach (var log in Model)
+            {
+                <tr>
+                    <td>@log.Timestamp</td>
+                    <td>@log.Action</td>
+                    <td>@log.Username</td>
+                    <td>@log.Details</td>
+                    <td>@(string.IsNullOrEmpty(log.LogType) ? "N/A" : log.LogType)</td>
+                    <td>@(string.IsNullOrEmpty(log.Description) ? "N/A" : log.Description)</td>
+                </tr>
+            }
+        }
+        else
         {
             <tr>
-                <td>@log.Timestamp</td>
-                <td>@log.Action</td>
-                <td>@log.Username</td>
-                <td>@log.Details</td>
-                <td>@log.LogType</td>
-                <td>@log.Description</td>
+                <td colspan="6">No logs available.</td>
             </tr>
         }
     </tbody>

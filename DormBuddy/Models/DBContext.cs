@@ -13,8 +13,10 @@ namespace DormBuddy.Models
         public string? LastName { get; set; }
 
         public bool RememberMe { get; set; }
-        public int TotalLogins { get; set; } // Example type
+        public int TotalLogins { get; set; } 
         public DateTime? LastLoginDate { get; set; }
+
+        public bool IsAdmin { get; set; }
 
     }
 

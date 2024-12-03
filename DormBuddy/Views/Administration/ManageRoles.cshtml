@@ -1,0 +1,38 @@
+@model IEnumerable<Microsoft.AspNetCore.Identity.IdentityRole>
+
+<h1>Manage Roles</h1>
+
+@if (Model == null || !Model.Any())
+{
+    <p>No roles available.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Role Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var role in Model)
+            {
+                <tr>
+                    <td>@role.Name</td>
+                    <td>
+                        <!-- Add Edit/Delete buttons or links here for each role -->
+                        <a href="#">Edit</a> | <a href="#">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<!-- Return to Dashboard Button -->
+<div class="mb-4">
+    <a href="/Account/Dashboard" class="btn btn-outline-primary">
+        <i class="fa fa-chevron-left"></i> Return to Dashboard
+    </a>
+</div>
