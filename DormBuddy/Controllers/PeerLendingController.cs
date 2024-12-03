@@ -126,7 +126,7 @@ namespace DormBuddy.Controllers
 
             var totalLent = loans.Any() ? loans.Sum(l => l.Amount) : 0m;
             var activeLoans = loans.Count(l => !l.IsRepaid);
-            var overdueLoans = loans.Count(l => !l.IsRepaid && l.DueDate < DateTime.Now);
+            var pendingLoanPayments = loans.Where(l => !l.IsRepaid).Sum(l => l.Amount);
             var dueSoonLoans = loans.Count(l => !l.IsRepaid && l.DueDate > DateTime.Now && l.DueDate <= DateTime.Now.AddDays(3));
 
             return Json(new
@@ -136,7 +136,7 @@ namespace DormBuddy.Controllers
                 {
                     TotalLent = totalLent.ToString("C"),
                     ActiveLoans = activeLoans,
-                    OverdueLoans = overdueLoans,
+                    PendingLoanPayments = pendingLoanPayments.ToString("C"),
                     DueSoonLoans = dueSoonLoans
                 }
             });
@@ -177,7 +177,7 @@ namespace DormBuddy.Controllers
 
             ViewData["TotalLent"] = loans.Any() ? loans.Sum(l => l.Amount) : 0m;
             ViewData["ActiveLoans"] = loans.Count(l => !l.IsRepaid);
-            ViewData["OverdueLoans"] = loans.Count(l => !l.IsRepaid && l.DueDate < DateTime.Now);
+            ViewData["PendingLoanPayments"] = loans.Where(l => !l.IsRepaid).Sum(l => l.Amount).ToString("C");
             ViewData["DueSoonLoans"] = loans.Count(l => !l.IsRepaid && l.DueDate > DateTime.Now && l.DueDate <= DateTime.Now.AddDays(3));
 
             var newLoan = new PeerLendingModel { UserId = user.Id };

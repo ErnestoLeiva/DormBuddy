@@ -36,13 +36,13 @@
             </div>
         </div>
 
-        <div class="stat-card">
-            <div class="stat-icon" style="background: #f44336;">
-                <i class="fas fa-exclamation-circle"></i>
-            </div>
-            <div class="stat-info">
-                <h3>@(ViewData["OverdueLoans"] ?? 0)</h3>
-                <p>Overdue</p>
+        <div class="stat-card stat-pending">
+                <div class="stat-icon"  style="background: #f44336;">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>@(ViewData["pendingLoanPayments"] ?? 0)</h3>
+                <p>Total Unpaid</p>
             </div>
         </div>
 
@@ -340,8 +340,8 @@
                                 case "Active Loans":
                                     $(this).find("h3").text(stats.activeLoans);
                                     break;
-                                case "Overdue":
-                                    $(this).find("h3").text(stats.overdueLoans);
+                                case "Total Unpaid":
+                                    $(this).find("h3").text(stats.pendingLoanPayments);
                                     break;
                                 case "Due Soon":
                                     $(this).find("h3").text(stats.dueSoonLoans);
