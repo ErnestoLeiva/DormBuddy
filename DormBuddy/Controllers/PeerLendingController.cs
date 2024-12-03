@@ -56,7 +56,12 @@ namespace DormBuddy.Controllers
 
                     _dbContext.PeerLendings.Add(model);
                     await _dbContext.SaveChangesAsync();
-                    TempData["message"] = $"Loan for borrower \"{model.BorrowerId}\" added successfully!";
+                    
+                    var lenderName = $"{user.FirstName} {user.LastName}";
+                    var borrower = await _dbContext.Users.FindAsync(model.BorrowerId);
+                    var borrowerName = borrower != null ? $"{borrower.FirstName} {borrower.LastName}" : "Unknown";
+
+                    TempData["message"] = $"Loan from <b>{lenderName}</b> for <b>{borrowerName}</b> created successfully!";
                 }
                 else
                 {
