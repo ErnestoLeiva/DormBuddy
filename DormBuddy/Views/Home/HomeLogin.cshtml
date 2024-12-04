@@ -1,10 +1,12 @@
 @{
     ViewData["Title"] = "Home Page";
-    Layout = "~/Views/Shared/_HomePageLayout.cshtml";
+    //Layout = "~/Views/Shared/_HomePageLayout.cshtml";
 }
 
 <!-- Link to the specific homeLogin.css file -->
-<link rel="stylesheet" href="~/css/homepage.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/homeLogin.css" asp-append-version="true" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" rel="stylesheet">
+
 
 <section id="section1">
 
@@ -20,21 +22,26 @@
 <!-- FEATURES -->
 
 <section id="section2">
+    
+    <i class="fas fa-rocket fa-4x"></i>
     <h1>Features</h1>
     <p>Simplify Dorm Living: Borrow, Budget, and Balance with Ease!</p>
 
     <div id="row">
         <div id="feature-col">
+            <i class="fas fa-handshake fa-3x"></i>
             <h3>P2P Lending</h3>
             <p> You can lend or borrow money directly from each other within the platform. This peer-to-peer (P2P) lending feature facilitates 
                 quick and easy financial transactions among roommates or dormmates, eliminating the need for traditional financial institutions</p>
         </div>
         <div id="feature-col">
+            <i class="fas fa-money-bill-wave fa-3x"></i>
             <h3>Expense Splitter</h3>
             <p>Designed to simplify the process of dividing shared expenses among friends or roommates, you can track who owes what, set reminders 
                 for payments, and maintain a clear record of all transactions, ensuring transparency and reducing conflicts</p>
         </div>
         <div id="feature-col">
+            <i class="fas fa-tasks fa-3x"></i>
             <h3>Task Management</h3>
             <p>You can assign and track the completion of various chores and responsibilities. This feature helps maintain order 
                 and ensures that all shared tasks are completed efficiently.</p>

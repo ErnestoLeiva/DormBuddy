@@ -34,6 +34,16 @@ namespace DormBuddy.Controllers
             return View();
         }
 
+        public async Task<IActionResult> Home()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user != null)
+            {
+                return RedirectToAction("Dashboard", "Account");
+            }
+            return RedirectToAction("HomeLogin", "Home");
+        }
+
         public async Task<IActionResult> HomeLogin()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -45,6 +55,11 @@ namespace DormBuddy.Controllers
         }
 
         public IActionResult Privacy()
+        {
+            return View();
+        }
+
+        public IActionResult Community()
         {
             return View();
         }
