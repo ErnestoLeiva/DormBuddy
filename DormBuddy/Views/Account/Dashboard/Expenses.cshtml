@@ -233,6 +233,30 @@
     </div>
 </div>
 
+<!-- Loading Animation -->
+<div id="loadingSpinner" class="loading-spinner" style="display: none;">
+    <div class="spinner-border text-primary" role="status">
+        <span class="sr-only">Loading...</span>
+    </div>
+</div>
+
+<!-- CSS for the Loading Animation -->
+<style>
+    .loading-spinner {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1050;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(161, 161, 161, 0.397);
+        width: 100%;
+        height: 100%;
+    }
+</style>
+
 @section Scripts {
     <script>
         window.onload = function() {
@@ -259,12 +283,24 @@
             document.getElementById('expenseToDeleteId').value = expenseId;
         }
         
+        // Show loading spinner
+        function showLoadingSpinner() {
+            document.getElementById('loadingSpinner').style.display = 'flex';
+        }
+
+        // Hide loading spinner
+        function hideLoadingSpinner() {
+            document.getElementById('loadingSpinner').style.display = 'none';
+        }
+
         function toggleExpenseStatus(button, expenseId) {
             console.log("Expense ID to toggle: " + expenseId);
 
             const row = button.closest('tr');
             const statusCell = row.cells[3];
-            const isSplit = statusCell.querySelector('i').classList.contains('fa-check'); // Check current status
+            const isSplit = statusCell.querySelector('i').classList.contains('fa-check');
+
+            showLoadingSpinner();
 
             $.ajax({
                 url: '/Expenses/ToggleStatus',
@@ -285,7 +321,7 @@
                             button.classList.add('btn-warning');
                         }
                         
-                        fetchExpenseStats()
+                        fetchExpenseStats();
 
                     } else {
                         alert('Failed to update expense status: ' + response.message);
@@ -294,6 +330,7 @@
                 error: function(xhr, status, error) {
                     console.error('Error:', status, error);
                     alert('Error while updating expense status.');
+                    hideLoadingSpinner();
                 }
             });
         }
@@ -315,6 +352,10 @@
                 },
                 error: function (xhr, status, error) {
                     console.error("Error:", error);
+                    hideLoadingSpinner();
+                },
+                complete: function () {
+                    hideLoadingSpinner();
                 }
             });
         }
