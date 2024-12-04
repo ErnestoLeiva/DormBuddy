@@ -29,184 +29,184 @@
         <p>track shared expenses and manage balance with dormmates.</p>
     </div>
     
-        <div class="stats-container">
-            <div class="stat-card stat-total">
-                <div class="stat-icon">
-                    <i class="fas fa-dollar-sign"></i>
-                </div>
-                <div class="stat-content">
-                    <h3 class="stat-number">@totalExpenses.ToString("C")</h3>
-                    <p class="stat-label">Total Expenses</p>
-                </div>
+    <div class="stats-container">
+        <div class="stat-card stat-total">
+            <div class="stat-icon">
+                <i class="fas fa-dollar-sign"></i>
             </div>
-
-            <div class="stat-card stat-share">
-                <div class="stat-icon">
-                    <i class="fas fa-wallet"></i>
-                </div>
-                <div class="stat-content">
-                    <h3 class="stat-number">@averageExpense.ToString("C")</h3>
-                    <p class="stat-label">Average per Person</p>
-                </div>
-            </div>
-
-            <div class="stat-card stat-pending">
-                <div class="stat-icon">
-                    <i class="fas fa-clock"></i>
-                </div>
-                <div class="stat-content">
-                    <h3 class="stat-number">@pendingPayments.ToString("C")</h3>
-                    <p class="stat-label">Pending Payments</p>
-                </div>
-            </div>
-
-            <div class="stat-card stat-splits">
-                <div class="stat-icon">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div class="stat-content">
-                    <h3 class="stat-number">@activeSplits</h3>
-                    <p class="stat-label">Active Splits</p>
-                </div>
+            <div class="stat-content">
+                <h3 class="stat-number">@totalExpenses.ToString("C")</h3>
+                <p class="stat-label">Total Expenses</p>
             </div>
         </div>
 
-        <div class="expenses-main">
-            <!-- Messages Section -->
-            @if (TempData["message"] != null)
-            {
-                <div class="alert alert-success">
-                    @Html.Raw(TempData["message"])
-                </div>
-            }
-            @if (TempData["error"] != null)
-            {
-                <div class="alert alert-danger">
-                    @Html.Raw(TempData["error"])
-                </div>
-            }
-
-            <!-- Add Expense Form -->
-            <div class="add-expense-section">
-                <h4>Add New Expense</h4>
-                <form method="post" asp-action="AddExpense" asp-controller="Expenses">
-                    <input type="hidden" id="UserId" name="UserId" value="@newExpense.UserId" />
-                    
-                    <div class="form-group">
-                        <label for="expenseName">Expense Name</label>
-                        <input type="text" class="form-control" id="expenseName" name="ExpenseName" placeholder="Enter expense name" required />
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="amount">Amount</label>
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text">$</span>
-                            </div>
-                            <input type="number" step="0.01" min="0.01" class="form-control" id="amount" name="Amount" placeholder="0.00" required />
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="sharedWith">Shared With</label>
-                        <div id="sharedWith">
-                            @if (ViewBag.GroupMembers != null && ViewBag.Users != null && ((List<DormBuddy.Models.GroupMemberModel>)ViewBag.GroupMembers).Any())
-                            {
-                                var groupMembers = (List<DormBuddy.Models.GroupMemberModel>)ViewBag.GroupMembers;
-                                var users = (List<DormBuddy.Models.ApplicationUser>)ViewBag.Users;
-
-                                foreach (var member in groupMembers)
-                                {
-                                    var user = users.FirstOrDefault(u => u.Id == member.UserId);
-                                    if (user != null)
-                                    {
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="AssignedUserIds" id="user_@user.Id" value="@user.Id" />
-                                            <label class="form-check-label" for="user_@user.Id">@($"{user.FirstName} {user.LastName}")</label>
-                                        </div>
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                <div class="alert alert-warning">
-                                    <strong>Notice:</strong> You are not part of any group. Please <a href="/Groups/Index">join or create</a> a group to use this feature.
-                                </div>
-                            }
-                        </div>
-                    </div>
-                    
-                    <input type="hidden" id="date" name="Date" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss")" />
-                    
-                    <button type="submit" class="btn btn-primary">Add Expense</button>
-                </form>
+        <div class="stat-card stat-share">
+            <div class="stat-icon">
+                <i class="fas fa-wallet"></i>
             </div>
+            <div class="stat-content">
+                <h3 class="stat-number">@averageExpense.ToString("C")</h3>
+                <p class="stat-label">Average per Person</p>
+            </div>
+        </div>
 
-            <!-- Expense Table -->
-            <div class="table-container">
-                <table class="table" id="expenseTable">
-                    <thead>
-                        <tr>
-                            <th>Expense Name</th>
-                            <th>Amount</th>
-                            <th>Shared With</th>
-                            <th>Split?</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="expenseTableBody">
-                        @if (!expenses.Any())
-                        {
-                            <tr id="noExpensesMessage">
-                                <td colspan="5" class="text-center">No current expenses...</td>
-                            </tr>
-                        }
-                        else
-                        {
-                            foreach (var expense in expenses)
-                            {
-                                <tr>
-                                    <td>@expense.ExpenseName</td>
-                                    <td class="amount-cell" data-amount="@expense.Amount">@expense.Amount</td>
-                                    <td>
-                                        @{
-                                            if (ViewBag.Users != null)
-                                            {
-                                                var users = (List<DormBuddy.Models.ApplicationUser>)ViewBag.Users;
-                                                var assignedIds = expense.SharedWith?.Split(',') ?? Array.Empty<string>();
-                                                var assignedNames = users
-                                                    .Where(u => assignedIds.Contains(u.Id))
-                                                    .Select(u => $"{u.FirstName} {u.LastName}");
+        <div class="stat-card stat-pending">
+            <div class="stat-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-number">@pendingPayments.ToString("C")</h3>
+                <p class="stat-label">Pending Payments</p>
+            </div>
+        </div>
 
-                                                <span>@string.Join(", ", assignedNames)</span>
-                                            }
-                                            else
-                                            {
-                                                <span>Unknown</span>
-                                            }
-                                        }
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="badge @(expense.isSplit ? "bg-success" : "bg-danger")">
-                                            <i class="fa @(expense.isSplit ? "fa-check" : "fa-times")" aria-hidden="true"></i>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <button class="btn @(expense.isSplit ? "btn-warning" : "btn-success") btn-sm"
-                                            onclick="toggleExpenseStatus(this, @expense.Id)">
-                                            Toggle Status
-                                        </button>
-                                        <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteConfirmationModal" 
-                                            onclick="setExpenseToDelete('@expense.ExpenseName', '@expense.Id')">Delete</button>
-                                    </td>
-                                </tr>
-                            }
-                        }
-                    </tbody>
-                </table>
+        <div class="stat-card stat-splits">
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-number">@activeSplits</h3>
+                <p class="stat-label">Active Splits</p>
             </div>
         </div>
     </div>
+
+    <div class="expenses-main">
+        <!-- Messages Section -->
+        @if (TempData["message"] != null)
+        {
+            <div class="alert alert-success">
+                @Html.Raw(TempData["message"])
+            </div>
+        }
+        @if (TempData["error"] != null)
+        {
+            <div class="alert alert-danger">
+                @Html.Raw(TempData["error"])
+            </div>
+        }
+
+        <!-- Add Expense Form -->
+        <div class="add-expense-section">
+            <h4>Add New Expense</h4>
+            <form method="post" asp-action="AddExpense" asp-controller="Expenses">
+                <input type="hidden" id="UserId" name="UserId" value="@newExpense.UserId" />
+                
+                <div class="form-group">
+                    <label for="expenseName">Expense Name</label>
+                    <input type="text" class="form-control" id="expenseName" name="ExpenseName" placeholder="Enter expense name" required />
+                </div>
+                
+                <div class="form-group">
+                    <label for="amount">Amount</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">$</span>
+                        </div>
+                        <input type="number" step="0.01" min="0.01" class="form-control" id="amount" name="Amount" placeholder="0.00" required />
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="sharedWith">Shared With</label>
+                    <div id="sharedWith">
+                        @if (ViewBag.GroupMembers != null && ViewBag.Users != null && ((List<DormBuddy.Models.GroupMemberModel>)ViewBag.GroupMembers).Any())
+                        {
+                            var groupMembers = (List<DormBuddy.Models.GroupMemberModel>)ViewBag.GroupMembers;
+                            var users = (List<DormBuddy.Models.ApplicationUser>)ViewBag.Users;
+
+                            foreach (var member in groupMembers)
+                            {
+                                var user = users.FirstOrDefault(u => u.Id == member.UserId);
+                                if (user != null)
+                                {
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="AssignedUserIds" id="user_@user.Id" value="@user.Id" />
+                                        <label class="form-check-label" for="user_@user.Id">@($"{user.FirstName} {user.LastName}")</label>
+                                    </div>
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <div class="alert alert-warning">
+                                <strong>Notice:</strong> You are not part of any group. Please <a href="/Groups/Index">join or create</a> a group to use this feature.
+                            </div>
+                        }
+                    </div>
+                </div>
+                
+                <input type="hidden" id="date" name="Date" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss")" />
+                
+                <button type="submit" class="btn btn-primary">Add Expense</button>
+            </form>
+        </div>
+
+        <!-- Expense Table -->
+        <div class="table-container">
+            <table class="table" id="expenseTable">
+                <thead>
+                    <tr>
+                        <th>Expense Name</th>
+                        <th>Amount</th>
+                        <th>Shared With</th>
+                        <th>Split?</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="expenseTableBody">
+                    @if (!expenses.Any())
+                    {
+                        <tr id="noExpensesMessage">
+                            <td colspan="5" class="text-center">No current expenses...</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var expense in expenses)
+                        {
+                            <tr>
+                                <td>@expense.ExpenseName</td>
+                                <td class="amount-cell" data-amount="@expense.Amount">@expense.Amount</td>
+                                <td>
+                                    @{
+                                        if (ViewBag.Users != null)
+                                        {
+                                            var users = (List<DormBuddy.Models.ApplicationUser>)ViewBag.Users;
+                                            var assignedIds = expense.SharedWith?.Split(',') ?? Array.Empty<string>();
+                                            var assignedNames = users
+                                                .Where(u => assignedIds.Contains(u.Id))
+                                                .Select(u => $"{u.FirstName} {u.LastName}");
+
+                                            <span>@string.Join(", ", assignedNames)</span>
+                                        }
+                                        else
+                                        {
+                                            <span>Unknown</span>
+                                        }
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge @(expense.isSplit ? "bg-success" : "bg-danger")">
+                                        <i class="fa @(expense.isSplit ? "fa-check" : "fa-times")" aria-hidden="true"></i>
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn @(expense.isSplit ? "btn-warning" : "btn-success") btn-sm"
+                                        onclick="toggleExpenseStatus(this, @expense.Id)">
+                                        Toggle Status
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteConfirmationModal" 
+                                        onclick="setExpenseToDelete('@expense.ExpenseName', '@expense.Id')">Delete</button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
 
 <!-- Bootstrap Modal for Confirming Expense Deletion -->

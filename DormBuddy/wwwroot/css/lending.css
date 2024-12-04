@@ -36,7 +36,6 @@
     100% { transform: rotate(0deg) translateY(0); }
 }
 
-/* trigger handshake animation */
 .shake-once {
     display: inline-block;
     animation: handshake 2s ease-in-out; 
@@ -48,4 +47,39 @@ select.form-control {
     padding: 5px 10px;
     font-size: 14px;
     line-height: normal;
+}
+
+.add-loan-section {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin: 20px 0;
+}
+
+.add-loan-section .form-group {
+    margin-bottom: 15px;
+}
+
+.add-loan-section h4 {
+    margin-bottom: 20px;
+    font-weight: bold;
+    color: #333;
+}
+
+.add-loan-section .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    padding: 10px 20px;
+    font-size: 16px;
+}
+
+.table-container {
+    margin-top: 30px;
+    padding: 20px;
+    border: 1px solid #e0e0e0;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
