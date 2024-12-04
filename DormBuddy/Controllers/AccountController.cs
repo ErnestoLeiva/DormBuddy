@@ -440,7 +440,7 @@ namespace DormBuddy.Controllers
                 if (user != null)
                 {
                     ViewBag.Username = $"{user.FirstName} {user.LastName}";
-                    ViewBag.UserRoles = string.Join(", ", await _userManager.GetRolesAsync(user));
+                    ViewBag.UserRoles = await _userManager.GetRolesAsync(user);
 
                     var currentCulture = CultureInfo.CurrentCulture.Name;
                     var currentUICulture = CultureInfo.CurrentUICulture.Name;
