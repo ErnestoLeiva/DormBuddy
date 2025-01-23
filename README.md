@@ -40,7 +40,11 @@ DormBuddy is designed to simplify the lives of students living in dormitories by
 </div>
 
 ## 🚀 Usage
-$${\color{red}Instructions \space on \space how \space to \space use \space the \space platform \space will \space go \space here. \space This \space section \space can \space include \space screenshots \space and \space descriptions \space of \space key \space functionalities.}$$
+<div align="center"><h3>🎥 Video showing how to use DormBuddy</h3>
+  <a href="https://www.youtube.com/watch?v=-I5-7vud2zM&authuser=0" target="_blank">
+    <img src="https://img.youtube.com/vi/-I5-7vud2zM/0.jpg" alt="How to clone repo in Visual Studio Code" />
+  </a>
+</div>
 
 ## 🤝 Contributing
 - If you would like to contribute to DormBuddy, please fork the repository and create a pull request with your changes. For major changes, please open an issue first to discuss what you would like to improve.
